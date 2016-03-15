@@ -1,0 +1,85 @@
+<?php echo $this->getController('admin/layout/header_part'); ?>
+
+<?php 
+$self = $this;
+
+$cols = \Base\Config::getGroupForm('facebook', $this->_);
+$demo_user_id = \Base\Config::get('demo_user_id');
+if($demo_user_id && $demo_user_id == \User\User::getUserData()->id) {
+	$cols = array_map(function($row) {
+		if($row['type'] == 'Text')
+			$row['value'] = '************';
+		return $row;
+	}, $cols);
+}
+$cols = array_map(function($row) {
+	if(in_array($row['name'], ['facebook_key','facebook_pass']))
+		$row['required'] = false;
+	return $row;
+}, $cols);
+
+echo $this->widget('widget.form.phparray', [
+	'head' => [ 'title' => $this->_('Facebook Settings') ],
+	'columns' => $cols,
+	'onSave' => function($values, $widget) use($self) {
+		$menuTable = new \Base\Menu();
+		$menuTable->getAdapter()->beginTransaction();
+		
+		try
+		{
+
+			$menu = $menuTable->fetchRow([ 'widget = ?' => 'facebook.widget.oauth' ]);
+
+			if($menu)
+			{
+				$menu->status = $values['facebook_status'];
+				$menu->save();
+			}
+
+            $facebook = null;
+            if($menu->status) {
+                $facebook = new \Facebook\Helper\Me([
+                    'app_id' => $values['facebook_key'],
+                    'app_secret' => $values['facebook_pass']
+                ]);
+            }
+
+			if($menu->status && $facebook ? ($app = $facebook->get($values['facebook_key'], $facebook->getApp()->getAccessToken())) : TRUE)
+			{
+				if(\Base\Config::updateGroup('facebook', $values))
+				{
+					$menuTable->getAdapter()->commit();
+					return TRUE;
+				} else
+				{
+					$widget->errors = \Base\Config::getErrors();
+				}
+			}
+			else
+			{
+				$widget->errors = $self->_('Facebook application with this id not found');
+			}
+		}
+		catch (\Exception $e)
+		{
+			$widget->errors = $e->getMessage();
+			
+			$menuTable->getAdapter()->rollBack();
+			return FALSE;
+		}
+	}
+]);
+
+?>
+
+<script>
+    $('#facebook_form-facebook_status select').change(function() {
+        var value = $(this).val();
+        $('#facebook_form-facebook_key, #facebook_form-facebook_pass').each(function() {
+            $(this).closest('tr').find('td:first img')[value==='1' ? 'show' : 'hide']();
+            $('input',this)[value==='1' ? 'attr' : 'removeAttr']('required', true);
+        });
+    }).change();
+</script>
+
+<?php echo $this->getController('admin/layout/footer_part'); ?>

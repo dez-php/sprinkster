@@ -1,0 +1,119 @@
+<?php echo $this->getController('admin/layout/header_part'); ?>
+
+<?php 
+$self = $this;
+echo $this->widget('widget.grid.db', array(
+	'head' => array(
+		'title' => $this->_('View All Subscriptions'),
+	),
+	'atributes' => 'class="display"',
+	'dataProvider' => new \Paymentgateway\OrderManager(),
+	'checkbox' => true,
+	'columns' => array(
+		array(
+			'atributes' => 'class="left input-number" style="width:20px;"',
+			'name' => 'id',
+			'label' => '#'
+		),
+/*		array(
+			'atributes' => 'class="left"',
+			'name' => 'number',
+			'label' => $this->_('Number')
+		),*/
+		array(
+			'atributes' => 'class="left"',
+			'name' => 'module',
+			'label' => $this->_('Package'),
+			'value' => function($data) use($self) {
+				return $data->getRoute()->getTitle();
+			},
+			'filter' => function() {
+				$col = new \Cart\Helper\Modulselect(array());
+				return $col->filter('filter[module]');
+			}
+		),
+/*		array(
+			'atributes' => 'class="left"',
+			'name' => 'user_id',
+			'value' => function($data) use($self) { return '<a href="'.$self->url(array('module'=>'user','query'=>'filter[id]='.$data->id),'admin_module',false,false).'">'.$data->getUserFullname().'</a>'; },
+			'label' => $this->_('User')
+		),*/
+		array(
+			'atributes' => 'class="left"',
+			'name' => 'firstname',
+			'label' => $this->_('First name')
+		),
+		array(
+			'atributes' => 'class="left"',
+			'name' => 'lastname',
+			'label' => $this->_('Last name')
+		),
+		array(
+			'atributes' => 'class="left"',
+			'name' => 'email',
+			'label' => $this->_('E-mail')
+		),
+		array(
+			'atributes' => 'class="left" style="width:60px;"',
+			'name' => 'total',
+			'value' => function($data) use($self) { return \Currency\Helper\Format::format($data->amount, $data->currency, 1); },
+			'label' => $this->_('Total'),
+			'filter' => false
+		),
+		array(
+			'atributes' => 'class="left" style="width:100px;"',
+			'name' => 'status_id',
+			'virtual' => array('title' => 'Paymentgateway\OrderStatusDescription'),
+			'label' => $this->_('Status'),
+			'filter' => function() {
+				$col = new \Cart\Helper\Statusselect(array());
+				return $col->filter('filter[status_id]');
+			}
+		),
+		array(
+			'atributes' => 'class="left" style="width:120px;"',
+			'name' => 'created_at',
+			'label' => $this->_('Date added')
+		),
+		array(
+			'atributes' => 'class="left" style="width:120px;"',
+			'name' => 'expire',
+			'label' => $this->_('Expire Date'),
+			'value' => function($data) {
+				return $data->getRoute()->getDueDate();
+			},
+			'filter' => false
+		),
+// 		array(
+// 			'atributes' => 'class="left" style="width:120px;"',
+// 			'name' => 'provider_code',
+// 			'label' => $this->_('Payment provider'),
+// 			'value' => function($data) use($self) {
+// 				if($data->provider_code == 'FREE')
+// 					return $self->_('Free order');
+// 				$provider = $data->getProvider();
+// 				return $provider ? $provider->getName() : null;
+// 			},
+// 			'filter' => function() {
+// 				$col = new \Cart\Helper\Providerselect(array());
+// 				return $col->filter('filter[provider_code]');
+// 			}
+// 		),
+	),
+	'filter' => array(
+		'status_id' => $this->getRequest()->getQuery('filter[status_id]') ? ($this->getRequest()->getQuery('filter[status_id]')=='null'?NULL:($this->getRequest()->getQuery('filter[status_id]')=='*'?'>0':$this->getRequest()->getQuery('filter[status_id]'))) : '>0',
+		//'handler_code' => \Paymentgateway\Payment::SUBSCRIPTION,
+		'parent_id' => null,
+		'system' => 1
+	),
+	'add_new' => false,
+	'onDelete' => function($elements, $dbGrid) use($self) {
+		foreach ($elements AS $element) {
+			$element->getRoute()->removeAction();
+		}
+	}
+));
+
+?>
+
+<?php echo $this->getController('admin/layout/footer_part'); ?>

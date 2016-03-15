@@ -1,0 +1,123 @@
+<?php $empty_text = isset($this->options['text-empty']) ? $this->options['text-empty'] : $this->_('No interests!');?>
+<?php if($interests->count()) { ?>
+<?php $self_data = \User\User::getUserData(); ?>
+<div class="container container-boxes margin-top-50 event-masonry-holder responsive-masonry">
+	<?php $total_users = $interests->count();?>
+	<?php $gridBoxes = \Base\PermissionMenu::getMenu('GridBoxes');?>
+	<?php foreach($interests AS $r => $interest) { ?>
+	<?php 
+		$pins = $interest->Limit(20)->Order('id DESC')->Pins()->Limit(8)->Pins();
+	?>
+	
+	<?php 
+	if($gridBoxes) {
+		foreach ($gridBoxes AS $widget) {
+			if (!$widget->is_widget)
+				continue;
+			$config = array();
+			if ($widget->config) {
+				$config = unserialize($widget->config);
+			}
+			$config['instance'] = $widget;
+			$config['interest'] = $interest;
+			$config['module'] = $this->options['module'];
+			$config['module_controller'] = $this->options['module_controller'];
+			$config['fromRow'] = $this->options['fromRow'];
+			$config['toRow'] = $this->options['toRow'];
+			$config['row'] = $r;
+			if(!$widget->disabled($interest, $config))
+				echo $this->widget($widget->widget, $config);
+	
+		}
+	}
+	?>
+	
+	<div class="box box-3 event-box">
+		<div class="head clearfix">
+			<div class="data">
+				<h3 class="title-5 color-5"><a href="<?php echo $this->url(array('query'=>$interest->query),'interest');?>" class="color-5"><?php echo $interest->title;?></a></h3>
+				<p class="text-2 color-3"><span class="event-followers-interest-<?php echo $interest->id;?>"><?php echo $interest->CountFollows() ?></span> <?php echo $this->_('Followers') ?></p>
+			</div>
+			<p class="fu-button">
+				<?php echo $this->widget('interest.widget.followbutton', [
+					'interest_id' => $interest->id,
+					'following' => $self_data->id ? $interest->IsFollow() : null,
+					'title' => $interest->title
+				]);?>
+			</p>
+		</div>
+		<div class="body">
+			<ul class="thumbs clearfix">
+				<?php for($i=0; $i<8; $i++) { ?>
+				<?php 
+				if($pins->offsetExists($i)) {
+					$image = \Pin\Helper\Image::getImage('small', $pins[$i]);
+				} else {
+					$image = \Pin\Helper\Image::noImage('small');
+				} ?>
+				<li><a href="<?php echo $this->url(array('query'=>$interest->query),'interest');?>"><img src="assets/images/grey.gif" data-original="<?php echo $image->image;?>" width="78" height="78" alt="<?php echo $interest->title;?>"></a></li>
+				<?php } ?>
+			</ul>
+		</div>
+	</div>
+	
+	<?php } ?>
+</div>
+
+<?php if($limit == $total_users) { ?>
+<div class="no-results">
+	<div class="container">
+		<p><a class="widget-paginator" href="<?php echo $this->getRequest()->getBaseUrl();?>?widget=interest.widget.grid&<?php echo $query;?>""><?php echo $this->_('Next page');?></a></p>	
+	</div>
+</div>
+<?php } else { ?>
+<div class="no-results">
+	<div class="container">
+		<p class="notification notification-color-3 tcenter margin-top-20"><?php echo $this->_('No more interests!');?></p>	
+	</div>
+</div>
+<?php } ?>
+<?php if(!$from_widget) {  ?>
+<script type="text/javascript" src="assets/js/jquery.infinitescroll.min.js"></script>
+<script type="text/javascript" src="assets/js/masonry.pkgd.min.js"></script>
+<script type="text/javascript">
+	$('.event-masonry-holder').bind('append', function(){ 
+		$(this).find('img').LazyLoad();
+	});
+	$('.event-masonry-holder').masonry({
+		columnWidth: 403,
+		gutter: 10,
+		itemSelector: '.event-box',
+		isFitWidth: true,
+		transitionDuration: 0,
+		isOriginLeft: <?php echo self::getModule('Language')->isRtl() ? 'false' : 'true';?>
+	}).infscroll({
+		url: function(){ return $('.widget-paginator').attr('href'); },
+		offset: 200,//Math.ceil(Math.max($(window).height()*2,($(document).height()/2))),
+		loadingAppendTo: $('.event-masonry-holder'),
+		onSuccess: function(response){
+			var section = $(response);
+			var elements = section.find('.event-masonry');
+			var paginator = section.find('.widget-paginator');
+			if(paginator.size()) {
+				$('.widget-paginator').replaceWith(paginator);
+			}
+			if(elements.size()) {
+				$('.event-masonry-holder').append(elements).masonry( 'appended', elements ).callbackAfter(function(){
+					elements.find('img').LazyLoad();
+				});
+			} else {
+				$('.event-masonry-holder').infscroll('destroy');
+			}
+		}
+	});
+</script>
+<?php } ?>
+
+<?php } else { ?>
+<div class="no-results">
+	<div class="container">
+		<p class="notification notification-color-3 tcenter"><?php echo $empty_text;?></p>	
+	</div>
+</div>
+<?php } ?>

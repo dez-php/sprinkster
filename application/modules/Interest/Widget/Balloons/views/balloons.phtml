@@ -1,0 +1,34 @@
+<?php if($interests && $interests->count()): ?>
+<div class="thumbs-scroller event-thumbs-scroller">
+<ul class="list-35 clearfix">
+<?php foreach($interests as $interest): $pins = (new \Interest\InterestPin)->getPins($interest->id); $image = NULL ?>
+<?php
+try
+{
+	$pin = $interest->Pin();
+	$pin = $pin ? $pin->Pin() : NULL;
+
+	if($pin)
+		$image = \Pin\Helper\Image::getImage('small', $pin)->image;
+}
+catch(\Exception $e)
+{
+	throw $e;
+}
+?>
+
+	<li>
+		<a href="<?php echo $this->url([ 'interest_id' => $interest->id, 'query' => $this->urlQuery($interest->title) ], 'interest') ?>">
+			<img src="assets/images/grey.gif" data-original="<?php echo $image ?>" alt="<?php echo $interest->title ?>" class="event-load-lazy-load">
+			<span class="text-9 color-2"><?php echo $interest->title ?></span>
+		</a>
+	</li>
+
+<?php endforeach ?>
+</ul>
+</div>
+<?php elseif($empty_text): ?>
+
+<div class="notification notification-color-4"><?php echo $this->_($empty_text) ?></div>
+
+<?php endif ?>

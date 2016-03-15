@@ -1,0 +1,36 @@
+<?php  if(!$user) return;
+try
+{
+	$avatar = \User\Helper\Avatar::getImage('small', $user);
+} catch (Exception $e)
+{
+	$avatar = NULL;
+}
+?>
+
+<div class="avatar dropdown-show">
+	<a href="<?php echo $this->url([ 'user_id' => $user->id, 'query' => $user->username ], 'user'); ?>">
+		<img class="event-load-lazy-load" data-original="<?php echo $avatar->image ?>" src="assets/images/grey.gif" alt="" />
+	</a>
+	<div class="dropdown arrow-top-left">
+		<div class="dropdown-wrapper margin-top-0">
+			<p class="text-9 color-5 padding-left-15 padding-top-5 padding-top-10 padding-right-15"><a class="color-5" href="<?php echo $this->url([ 'user_id' => $user->id, 'query' => $this->urlQuery($user->username) ], 'user') ?>"><?php echo $user->getUserFullName() ?></a></p>
+			<div class="list-items-wrapper">
+				<ul>
+					<li class="group-top"><a href="<?php echo $this->url([ 'user_id' => $user->id, 'query' => $this->urlQuery($user->username)], 'user') ?>"><span class="fright"><?php echo $user->pins ?></span> <?php echo $this->_('View all Pins') ?></a></li>
+					<li><a href="<?php echo $this->url([ 'controller' => 'collection', 'user_id' => $user->id, 'query' => $this->urlQuery($user->username)], 'user_c') ?>"><span class="fright"><?php echo $user->wishlists ?></span> <?php echo $this->_('View all Collections') ?></a></li>
+					<li><a href="<?php echo $this->url([ 'controller' => 'like', 'user_id' => $user->id, 'query' => $this->urlQuery($user->username)], 'user_c') ?>"><span class="fright"><?php echo $user->likes ?></span> <?php echo $this->_('View all Likes') ?></a></li>
+					<li><a href="<?php echo $this->url([ 'controller' => 'followers', 'user_id' => $user->id, 'query' => $this->urlQuery($user->username)], 'user_c') ?>"><span class="fright"><?php echo $user->followers ?></span> <?php echo $this->_('View all Followers') ?></a></li>
+				</ul>
+			</div>
+
+			<p class="tcenter padding-top-5 padding-bottom-15">
+				<?php echo $this->widget('user.widget.followbutton', [
+					'user_id' => $user->id,
+					'following' => $user->following_user,
+					'username' => $user->username,
+				])?>	
+			</p>
+		</div>
+	</div>
+</div>

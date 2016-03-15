@@ -1,0 +1,44 @@
+<?php echo $this->getController('admin/layout/header_part'); ?>
+
+<div id="content">
+	<!-- Start Content-->
+	<div class="wrap">
+		<br class="mtop25">
+		<div class="info_line top">
+			<h3 class="fleft title">
+				<img alt="" src="cms/admin/images/extensions.png">
+				<?php echo $this->_('Translations');?>
+			</h3>
+
+			<div class="clear"></div>
+		</div>
+
+
+		<table cellspacing="0" cellpadding="0" class="display">
+			<thead>
+				<tr class="nodrop nodrag">
+					<th class="left"><?php echo $this->_('Group');?></th>
+					<th width="1"><?php echo $this->_('Actions');?></th>
+				</tr>
+			</thead>
+			<tbody>
+				<?php foreach($namespaces AS $namespace) { ?>
+				<tr class="grid_rows">
+					<td class="left"><?php echo $namespace;?></td>
+					<td align="center">
+						<a href="<?php echo $this->url(array('action'=>'group', 'module' => $this->getRequest()->getModule(), 'controller' => $this->getRequest()->getController(), 'query'=>'group='.$namespace), null, false, false);?>"><img title="<?php echo $this->_('Edit');?>" alt="" class="tooltip" src="cms/admin/images/edit.png"></a>
+					</td>
+				</tr>
+				<?php } ?>
+
+			</tbody>
+		</table>
+
+
+		<div class="clear"></div>
+
+	</div>
+	<!-- End Content/-->
+</div>
+
+<?php echo $this->getController('admin/layout/footer_part'); ?>

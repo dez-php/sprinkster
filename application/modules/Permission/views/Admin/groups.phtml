@@ -1,0 +1,67 @@
+<?php echo $this->getController('admin/layout/header_part'); ?>
+
+<?php 
+$self = $this;
+$default_group_id = (int) \Base\Config::get('default_permission_group_id');
+
+echo $this->widget('widget.grid.db', [
+	'head' => [
+		'title' => $this->_('Permission Groups'),
+	],
+	'atributes' => 'class="display"',
+	'dataProvider' => new \Permission\PermissionGroup(),
+	'checkbox' => true,
+	'columns' => [
+		[
+			'atributes' => 'class="left" style="width:50px;"',
+			'name' => 'id',
+			'label' => '#',
+			'order' => false
+		],
+		[
+			'atributes' => 'class="left"',
+			'name' => 'name',
+			'label' => $this->_('Name'),
+			'order' => false
+		],
+		[
+			'atributes' => 'class="left" style="width:50px;"',
+			'name' => 'active',
+			'label' => $this->_('Active'),
+			'order' => false,
+			'filter' => false,
+			'value' => function($record) use($self) {
+				return $self->_($record->active ? 'Yes' : 'No');
+			}
+		],
+	],
+
+	'editInNewWindow' => false,
+
+	'replaceEditLink' => function($record) use($self) {
+		return $self->url([
+				'action' => 'editgroup',
+				'module' => $this->getRequest()->getModule(),
+				'query'=> 'id=' . $record->id,
+			],
+			null,
+			false,
+			false
+		);
+	},
+
+	'sort' => 'name',
+	'order' => 'ASC',
+	'has_delete' => function($data) use($default_group_id) {
+		return (int) $data->id != $default_group_id;
+	},
+ 	'checkbox' => true,
+	'add_new' => true,
+	'add_url' => $this->url([ 'action' => 'creategroup', 'module' => $this->getRequest()->getModule() ]),
+	'nopagination' => true,
+	'limit' => 999999999,
+]);
+
+?>
+
+<?php echo $this->getController('admin/layout/footer_part'); ?>

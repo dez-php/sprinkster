@@ -1,0 +1,29 @@
+<?php echo $this->getController('home/layout/header_part') ?>
+
+<!-- WRAPPER - FOOTER HEIGHT // START -->
+<div class="container container-padding-header container-padding-footer">
+
+<!-- CONTENT // START -->
+<div class="container container-padding-5 container-shadow-1 bg-color-1">
+	<div class="table-grid table-grid-padding-40">
+		<div class="table-grid-cell">
+			<div class="container">
+				<h3 class="title-2 color-1"><?php echo $tag->tag;?></h3>
+			</div>
+		</div>
+	</div>
+</div>
+<div class="container-padding-tb-6 container-padding-lr-5">
+	<?php
+	echo $this->widget('pin.widget.grid', [
+		'filter'=> [ 'callback' => [ 'id' => '\Tag\PinTag::pinTagsCallback('.$tag->id.')' ] ],
+		'useIndex' => [ 'PRIMARY', 'user_id' ],
+	]);
+	?>
+</div>
+<!-- CONTENT // END -->
+
+</div>
+<!-- WRAPPER - FOOTER HEIGHT // END -->
+
+<?php echo $this->getController('home/layout/footer_part') ?>

@@ -1,0 +1,57 @@
+<?php echo $this->getController('admin/layout/header_part'); ?>
+
+<?php 
+$self = $this;
+echo $this->widget('widget.form.phparray', array(
+	'head' => array(
+		'title' => $this->_('Default follow users'),
+	),
+	'columns' => array(
+		array(
+			'name' => 'user_id',
+			'label' => $this->_('User'),
+			'type' => 'Text',
+			'required' => true,
+			'value' => '',
+		)
+	),
+	'onSave' => function($values, $widget) use($self) {
+		$userTable = new \User\UserFollowDefault();
+		$user = $userTable->fetchNew();
+		$user->user_id = $values['user_id'];
+		try {
+			$user->save();
+			return true;
+		} catch (\Core\Exception $e) {
+			$widget->errors = $e->getMessage();
+		}
+		return false;
+	}
+));
+
+?>
+
+<script type="text/javascript">
+$('input[name=user_id]').autocomplete({
+      source: function( request, response ) {
+        $.ajax({
+          url: "<?php echo $this->url(array('controller'=>'default-follow','action'=>'autocomplete'),null);?>",
+          dataType: "jsonp",
+          data: {
+            query: request.term
+          },
+          success: function( data ) {
+            response( $.map( data, function( item ) {
+              return {
+                label: item.fullname,
+                value: item.id
+              }
+            }));
+          }
+        });
+      },
+      minLength: 2
+    });
+</script>
+
+<?php echo $this->getController('admin/layout/footer_part'); ?>

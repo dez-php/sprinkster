@@ -1,0 +1,131 @@
+<?php echo $this->getController('admin/layout/header_part'); ?>
+
+<?php
+$self = $this;
+$has_enable = $this->getRequest()->getQuery('enable-order');
+echo $this->widget('widget.grid.db', array(
+    'head' => array(
+        'title' => $this->_('Categories'),
+        'icon' => 'cms/admin/images/question-type-multiple-correct.png'
+    ),
+    'atributes' => 'class="display"',
+    'dataProvider' => new \Category\Category(),
+    'checkbox' => true,
+    'columns' => array(
+        array(
+            'atributes' => 'class="left" style="width:50px;"',
+            'name' => 'id',
+            'label' => '#',
+            'order' => false
+        ),
+        array(
+            'atributes' => 'class="left"',
+            'name' => 'id',
+            'label' => $this->_('Title'),
+            //'virtual' => array('title' => 'Category\CategoryDescription'),
+            'value' => function($data) use($self) {
+                return '<a href="'.$self->url(array('module'=>'category','query'=>'filter[parent_id]='.$data->id),'admin_module',false,false).'">' . \Category\Category::getPathFromChild($data->id) . '</a>';
+            },
+            'filter' => false
+        ),
+        array(
+            'atributes' => 'class="left" style="width:50px;"',
+            'name' => 'sort_order',
+            'label' => $this->_('Sort'),
+            'order' => false
+        ),
+    ),
+    'filter' => array(
+        'parent_id' => $this->getRequest()->getQuery('filter[parent_id]')
+    ),
+    'has_delete' => function($data) {
+        $delete = true;
+        $categoryTable = new \Category\Category();
+        $pinTable = new \Pin\Pin();
+        if($categoryTable->countByParentId($data->id)) {
+            $delete = false;
+        } else if($pinTable->countByCategoryId($data->id)) {
+            $delete = false;
+        }
+        return $delete;
+    },
+    'actionsExtend' => function($data, $widget) use($self) {
+        return '<a href="' . $self->url(array('module'=>'category','query'=>'filter[parent_id]='.$data->id),'admin_module',false,false) . '"><img title="' . $self->_('Subcategories') . '" alt="" class="tooltip" src="cms/admin/images/folder.png"></a>';
+    },
+    'order' => 'ASC',
+    'sort' => 'sort_order',
+    'nopagination' => $has_enable ? true : false,
+    'buttonsExtend' => function() use($self) {
+        $request = $self->getRequest();
+        $parent = $request->getQuery('filter[parent_id]');
+        $has_enable = $request->getQuery('enable-order');
+        $url = '';
+        if($parent)
+            $url .= '&filter[parent_id]=' . $parent;
+        if(!$has_enable)
+            $url .= '&enable-order=1';
+        $button = \Core\Html::link($self->_($has_enable?'Disable Order':'Enable Order'), $self->url(['module' => 'category'], 'admin_module') . $url, ['class' => 'button']);
+        if($parent) {
+            $parcat = (new \Category\Category())->fetchRow(['id = ?' => (int)$parent]);
+            if($parcat) {
+                $url = '';
+                if($parcat->parent_id) {
+                    $url = '&filter[parent_id]=' . $parcat->parent_id;
+                }
+                $button .= \Core\Html::link($self->_('Back'), $self->url(['module' => 'category'], 'admin_module') . $url, ['class' => 'button']);
+            }
+        }
+        return $button;
+    },
+    'onPost' => function() use($has_enable, $self) {
+        $pageMenuTable = new \Category\Category();
+        if($self->getRequest()->getQuery('enable-order') && $self->getRequest()->issetPost('row')) {
+            $row = $self->getRequest()->getPost('row');
+            $result = array();
+            if ($row && is_array($row)) {
+                $pageMenuTable->getAdapter()->beginTransaction();
+                try {
+                    foreach ($row AS $sort_order => $page_id) {
+						$sort_order = ($sort_order + 1);
+                        $pageMenuTable->update(array('sort_order' => $sort_order), array('id = ?' => $page_id));
+                    }
+                    $pageMenuTable->getAdapter()->commit();
+                    $result['ok'] = true;
+                } catch (\Core\Exception $e) {
+                    $pageMenuTable->getAdapter()->rollBack();
+                    $result['error'] = $e->getMessage();
+                }
+            } else {
+                $result['error'] = $self->_('Missing post data!');
+            }
+            return $result;
+        }
+    }
+));
+
+?>
+
+<?php if($has_enable) { ?>
+    <script>
+        $(function() {
+            $( "#category-grid table tbody" ).sortable({
+                items: '> tr',
+                cursor:'move',
+                stop: function() {
+                    $.post(window.location.href, $( "#category-grid table tbody" ).sortable('serialize'), function(result) {
+                        if(result.ok) {
+                            $( "#category-grid table tbody td[data-column=\"sort_order\"]" ).each(function(i, item) {
+                                $(item).html(i+1);
+                            });
+                        } else if(result.error) {
+                            alert(result.error);
+                        }
+                    });
+                }
+            });
+            $( "#category-grid table tbody" ).disableSelection();
+        });
+    </script>
+<?php } ?>
+
+<?php echo $this->getController('admin/layout/footer_part'); ?>

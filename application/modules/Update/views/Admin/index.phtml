@@ -1,0 +1,166 @@
+<?php echo $this->getController('admin/layout/header_part'); ?>
+
+<br class="mtop25">
+
+<?php if(isset($success) || isset($error)) { ?>
+<?php if(isset($success)) { ?>
+<span id="<?php echo $this->id;?>-fader" class="fader-message"><span class="msgOk"><span><?php echo $this->_('Success!');?></span><?php echo $success;?></span></span>
+<?php } else if(isset($error)) { ?>
+<span id="<?php echo $this->id;?>-fader" class="fader-message"><span class="msgError"><span><?php echo $this->_('Error!');?></span><?php echo $error;?></span></span>
+<?php } ?>
+<script type="text/javascript"> 
+// <![CDATA[
+$(document).ready(function() {       
+	setTimeout(function() {
+		$("#<?php echo $this->id;?>-fader").customFadeOut("slow" ,    
+		function() {       
+			$("#<?php echo $this->id;?>-fader").remove();  
+		});
+	},
+	10000);
+});
+// ]]>
+</script>
+<?php } ?>
+
+<div class="info_line top">
+	<h3 class="fleft title">
+		<img alt="" src="cms/admin/images/extensions.png"> <?php echo $this->_('SQL Updates');?>
+	</h3>
+
+	<div class="clear"></div>
+</div>
+<?php $coreTitle = \Core\Registry::get('system_type'); ?>
+<p class="info">
+	<?php echo $this->_('SQL Update instructions!');?><br>
+	<strong><?php echo sprintf($this->_('Please install all updates availble for your "%s" first. You can then install updates for your modules.'),$coreTitle);?></strong>
+</p>
+
+<br class="mtop10">
+
+<?php $groups = array($this->_('For install'), $this->_('Installed'));?>
+
+<div class="vtabs">
+	<ul>
+		<?php foreach($groups AS $r => $title) { ?>
+		<li>
+			<a href="#tab_<?php echo $r;?>"><?php echo $title;?></a>
+		</li>
+		<?php } ?>
+	</ul> 
+	<div class="clear"></div>
+</div>
+
+<div class="vtabs-content">
+	<?php foreach($groups AS $r => $title) { ?>
+	<div id="tab_<?php echo $r;?>">
+		<?php if(isset($modules[$r])) { ?>
+			
+			<?php if(isset($modules[$r][$coreTitle])) { ?>
+			<div class="info_line top">
+				<h3 class="fleft title">
+					<img alt="" src="cms/admin/images/extensions.png"> <?php echo $coreTitle;?>
+				</h3>
+			
+				<div class="clear"></div>
+			</div>
+			<br class="mtop10">
+			
+			<table cellspacing="0" cellpadding="0" class="display">
+				<thead>
+					<tr class="nodrop nodrag">
+						<th class="left" style="width:30%;"><?php echo $this->_('Update');?></th>
+						<th class="left"><?php echo $this->_('Description');?></th>
+						<th width="1"><?php echo $this->_('Install');?></th>
+					</tr>
+				</thead>
+				<tbody>
+					<?php foreach($modules[$r][$coreTitle] AS $module) { ?>
+					<tr id="row_<?php echo $module['id'];?>" class="grid_rows">
+						<td class="left"><?php echo $module['title'];?></td>
+						<td class="left"><?php echo $module['description'];?></td>
+						<td align="center">
+							<div class="grid-actions">
+								<?php if(!$module['install']) { ?>
+								<a href="<?php echo $this->url(array('module'=>'update','controller'=>'admin', 'action'=>'install','query'=>'id='.$module['id']),'admin_module',false,false);?>">
+									<img title="<?php echo $this->_('Install');?>" alt="" class="tooltip" src="cms/admin/images/install.png">
+								</a>
+								<?php } ?>
+							</div>
+						</td>
+					</tr>
+					<?php } ?>
+				</tbody>
+			</table>
+			<div class="clear"></div>
+			<br class="mtop10">
+			
+			<?php unset($modules[$r][$coreTitle]); } ?>
+			
+			<?php if($modules[$r]) { ?>
+			<div class="info_line top">
+				<h3 class="fleft title">
+					<img alt="" src="cms/admin/images/extensions.png"> <?php echo $this->_('Other updates');?>
+				</h3>
+			
+				<div class="clear"></div>
+			</div>
+			<br class="mtop10">
+			
+			<table cellspacing="0" cellpadding="0" class="display">
+				<thead>
+					<tr class="nodrop nodrag">
+						<th class="left" style="width:30%;"><?php echo $this->_('Update');?></th>
+						<th class="left"><?php echo $this->_('Description');?></th>
+						<th width="1"><?php echo $this->_('Install');?></th>
+					</tr>
+				</thead>
+				
+				<?php foreach($modules[$r] AS $moduleTitle => $updates) { ?>
+				<thead>
+					<tr class="nodrop nodrag">
+						<th colspan="3"><?php echo $moduleTitle;?></th>
+					</tr>
+				</thead>
+				<?php foreach($updates AS $module) { ?>
+				<tbody>
+					<tr id="row_<?php echo $module['id'];?>" class="grid_rows">
+						<td class="left"><?php echo $module['title'];?></td>
+						<td class="left"><?php echo $module['description'];?></td>
+						<td align="center">
+							<div class="grid-actions">
+								<?php if(!$module['install']) { ?>
+								<a href="<?php echo $this->url(array('module'=>'update','controller'=>'admin', 'action'=>'install','query'=>'id='.$module['id']),'admin_module',false,false);?>">
+									<img title="<?php echo $this->_('Install');?>" alt="" class="tooltip" src="cms/admin/images/install.png">
+								</a>
+								<?php } ?>
+							</div>
+						</td>
+					</tr>
+				</tbody>
+				<?php } ?>
+				<?php } ?>
+				
+			</table>
+			<div class="clear"></div>
+			<br class="mtop10">
+			<?php } ?>
+			
+		<?php } else { ?>
+		<div class="msgInfo"><span><?php echo $this->_('Attention!');?></span><?php echo sprintf($this->_('No records found for section: %s'), $title);?></div>
+		<?php } ?>
+	</div>
+	<?php } ?>
+</div>
+
+
+<div class="clear"></div>
+
+<script type="text/javascript" src="cms/assets/tabs.js"></script>
+<script type="text/javascript"> 
+	$(document).ready(function(){
+		$(".tabs ul, .vtabs ul").idTabs(); 
+	});
+</script>
+
+<?php echo $this->getController('admin/layout/footer_part'); ?>

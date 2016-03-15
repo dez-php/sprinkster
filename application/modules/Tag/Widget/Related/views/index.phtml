@@ -1,0 +1,17 @@
+<?php 
+	$class = 'event-masonry-' . $pin->id . '-' . $this->getId() . ($this->getRequest()->isXmlHttpRequest() ? '-popup' : '');
+	$widget = $this->widget('pin.widget.grid', [
+				'filter' => [ 'callback' => [ 'id' => '\Tag\PinTag::getRelated(' . $pin->id. ', ' . $pin->pin_tags_related_total . ')'] ,'product' => $pin->product],
+				//'order' => [ 'callback' => [ 'pin.id' => '\Tag\PinTag::getRelated(' . $pin->id. ', ' . $pin->pin_tags_related_total . ')']],
+				'hide-filter' => TRUE,
+				'module' => 'related-tag',
+				'smartscroll' => '$(\'.' . $class . '\').closest(\'.jo-popup-wrap\').size() > 0 ? $(\'.' . $class . '\').closest(\'.jo-popup-wrap\') : window',
+				'event_class' => $class
+    		]);
+
+
+?>
+<div class="container container-size-1 margin-top-50 margin-bottom-30 event-pin-related-<?php echo $pin->id;?><?php echo ($this->getRequest()->isXmlHttpRequest() ? '-popup' : '');?>">
+	<h3 class="title-1 tcenter color-1"><?php echo $this->_('Related Pins') ?></h3>
+	<?php echo $widget->staticInit();?>
+</div>

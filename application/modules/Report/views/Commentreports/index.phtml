@@ -1,0 +1,150 @@
+<?php 
+$self = $this;
+$widget = $this->widget('widget.grid.db', array(
+	'head' => array(
+		'title' => $this->_('Comments Reports'),
+	),
+	'atributes' => 'class="display"',
+	'dataProvider' => new \Pin\PinCommentReport(),
+	'checkbox' => true,
+	'columns' => array(
+		array(
+			'atributes' => 'class="left" style="width:50px;"',
+			'name' => 'id',
+			'label' => '#'
+		),
+		array(
+			'atributes' => 'class="left"',
+			'name' => 'comment_report_category_id',
+			'label' => $this->_('Category'),
+			'value' => $this->_('Other')
+		),
+		array(
+			'atributes' => 'class="left"',
+			'name' => 'user_id',
+			'label' => $this->_('User')
+		),
+		array(
+			'atributes' => 'class="left"',
+			'name' => 'message',
+			'label' => $this->_('Message')
+		),
+		array(
+			'atributes' => 'class="left"',
+			'name' => 'comment_id',
+			'label' => $this->_('Comment'),
+			'filter' => false,
+			'value' => function($data) use($self) {
+				return '<a href="' . $self->url(array('pin_id' => $data->pin_id),'pin') . '" target="_blank">' . $data->comment . '</a>';
+			}
+		),
+		array(
+			'atributes' => 'class="left" style="width:140px;"',
+			'name' => 'date_added',
+			'label' => $this->_('Date added')
+		),
+		array(
+			'atributes' => 'class="left" style="width:50px;"',
+			'name' => 'status',
+			'label' => $this->_('Status'),
+			'value' => function($data) use($self) {
+				ob_start();
+				?>
+				<script type="text/javascript">
+					$(document).ready(function() {
+						$('.event-status-change select').change(function() {
+							$self = $(this);
+							$.post(window.location.href, $self.serialize(), function(json) {
+								if(json.error) {
+									alert(json.error);
+								}
+								if(json.callback) {
+									if(json.callback.old_status) {
+										$self.val(json.callback.old_status);
+									} else if(json.callback.del) {
+										$self.parents('.grid_rows').remove();
+									}
+								}
+							}, 'json');
+						});
+					});
+				</script>
+				<?php 
+				$self->placeholder('script', ob_get_clean());
+				
+				$form = new \Core\Htmlform\Htmlform('f');
+				return new \Core\Htmlform\Elements\Single('status[' . $data->id . ']', array(
+					'list' => array(
+						'0' => $self->_('New'),
+						'1' => $self->_('Delete Report'),
+						'2' => $self->_('Delete Comment'),
+					),
+					'label' => '',
+					'skin' => 'select',
+					'defaultValue' => (string)$data->status,
+					'class' => 'event-status-change event-row-' . $data->id
+				), $form);
+			},
+			'filter' => false
+		),
+	),
+	'filter' => array(
+		'status' => '!=2'		
+	),
+	'has_delete' => false,
+	'has_edit' => false,
+	'add_new' => false,
+	'nosearch' => true,
+	'onPost' => function() use($self) {
+		$status = $self->getRequest()->getPost('status');
+		$result = array();
+		$old_status = '0';
+		if(is_array($status)) {
+			$reportTable = new \Pin\PinCommentReport();
+			$commentTable = new \Pin\PinComment();
+			list($id, $value) = each($status);
+			$report = $reportTable->fetchRow($reportTable->makeWhere(array('id' => $id)));
+			if($report) { 
+				$old_status = $report->status?$report->status:'0';
+				$reportTable->getAdapter()->beginTransaction();
+				try {
+					if($value == 1) {
+						$report->delete();
+						$reportTable->getAdapter()->commit();
+					} else if($value == 2) {
+						$comment = $commentTable->fetchRow($commentTable->makeWhere(array('id' => $report->comment_id)));
+						if($comment) {
+							$comment->delete();
+						}
+						//$report->delete();
+						$reportTable->getAdapter()->commit();
+					} else {
+						$result['error'] = $self->_('Invalid action type!');
+					}
+				}catch (\Core\Exception $e) {
+					$reportTable->getAdapter()->rollBack();
+					$result['error'] = $e->getMessage();
+				}
+			} else {
+				$result['error'] = $self->_('Record not found!');
+			}
+		} else {
+			$result['error'] = $self->_('Record not found!');
+		}
+		if(isset($result['error'])) {
+			$result['callback'] = array('old_status' => $old_status);
+		} else {
+			$result['callback'] = array('del' => true);
+		}
+		
+		return $result;
+	}
+));
+
+?>
+
+<?php echo $this->getController('admin/layout/header_part'); ?>
+
+<?php echo $widget;?>
+
+<?php echo $this->getController('admin/layout/footer_part'); ?>

@@ -1,0 +1,9 @@
+<?php $self_data = \User\User::getUserData(); ?>
+<ul>
+	<li data-id="<?php echo $conversation->id;?>" class="clearfix event-conversation<?php if($self_data->id == $conversation->user_id) { ?> self-sender<?php } ?>">
+		<p class="text-2 color-2 fright"><?php echo \Core\Date::getInstance($conversation->date_added,'yy-mm-dd H:i',true)->toString();?></p>
+		<p class="avatar"><a href="<?php echo $this->url(array('user_id' => $self_data->id,'query'=>$self_data->username),'user');?>"><img alt="<?php echo $self_data->getUserFullname();?>" src="assets/images/grey.gif" data-original="<?php echo \User\Helper\Avatar::getImage('medium', $self_data)->image;?>" onload="$(this).LazyLoad();"></a></p>
+		<p class="title-5"><a href="<?php echo $this->url(array('user_id' => $self_data->id,'query'=>$self_data->username),'user');?>"><?php echo $self_data->getUserFullname();?></a></p>
+		<p class="text-1 color-2"><?php echo nl2br($this->mentionsInput($conversation->conversation));?></p>
+	</li>
+</ul>

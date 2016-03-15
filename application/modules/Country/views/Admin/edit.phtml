@@ -1,0 +1,30 @@
+<?php echo $this->getController('admin/layout/header_part'); ?>
+
+<?php 
+$self = $this;
+echo $this->widget('widget.form.db', array(
+	'head' => array(
+		'title' => $this->_('Countries'),
+	),
+	'atributes' => 'class="display"',
+	'dataProvider' => new \Country\Country(),
+	'checkbox' => true,
+	'columns' => array(
+		array(
+			'name' => 'name',
+			'label' => $this->_('Title'),
+		),
+		array(
+			'name' => 'iso_code_2',
+			'label' => $this->_('ISO 2'),
+		),
+		array(
+			'name' => 'iso_code_3',
+			'label' => $this->_('ISO 3'),
+		),
+	)
+));
+
+?>
+
+<?php echo $this->getController('admin/layout/footer_part'); ?>

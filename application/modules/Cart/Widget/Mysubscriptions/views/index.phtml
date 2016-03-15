@@ -1,0 +1,130 @@
+<div class="container container-padding-5 container-radius-1 container-shadow-1 bg-color-1">
+	<h3 class="title-2 title-border-bottom-1 color-1"><?php echo $this->_('My Subscriptions'); ?></h3>
+	<div class="responsive-table subs">
+		<?php
+		$self = $this;
+		$routes = \Core\Router\Router::getInstance();
+		echo $this->widget('widget.grid.db3', array(
+			'dataProvider' => new \Paymentgateway\Purchase(),
+			'atributes' => 'class="table-2 margin-top-30"',
+			'columns' => array(
+				array(
+					'atributes' => '',
+					'name' => 'id',
+					'label' => $this->_('Purchased'),
+					'value' => function($data) {
+						return \Core\Date::getInstance($data->created_at, 'yy-mm-dd H:i', true)->toString();
+					}
+				),
+				array(
+					'atributes' => 'class="wid20pc"',
+					'name' => 'id',
+					'label' => $this->_('Information'),
+					'value' => function($data) {
+						if(method_exists($data->getRoute(), 'getProfileInformation') && ($info = $data->getRoute()->getProfileInformation()) !== false) {
+							return $info;
+						}
+						return $data->getRoute()->getInformation();
+					}
+				),
+				array(
+					'atributes' => '',
+					'name' => 'id',
+					'label' => $this->_('Package'),
+					'value' => function($data) {
+						return $data->getRoute()->getTitle();
+					}
+				),
+//                 array(
+//                     'atributes' => '',
+//                     'name' => 'id',
+//                     'label' => $this->_('Fee'),
+//                     'value' => function($data) {
+//                         if($data->getRoute() instanceof Seller\Payment\Subscription) {
+//                             if($data->getRoute()->getFee()) {
+//                                 return $data->getRoute()->getFee() . '%';
+//                             }
+//                         }
+//                         return;
+//                     }
+//                 ),
+//                 array(
+//                     'atributes' => '',
+//                     'name' => 'id',
+//                     'label' => $this->_('Products count'),
+//                     'value' => function($data) {
+//                         if($data->getRoute() instanceof Seller\Payment\Subscription) {
+//                             if($data->getRoute()->getItemsCount()) {
+//                                 return $data->getRoute()->getItemsCount();
+//                             }
+//                         }
+//                         return;
+//                     }
+//                 ),
+				array(
+					'atributes' => 'class="tright"',
+					'name' => 'id',
+					'label' => $this->_('Price'),
+					'value' => function($data) {
+						return \Currency\Helper\Format::format($data->getAmount(), $data->currency, 1);
+					}
+				),
+				[
+					'atributes' => '',
+					'name' => 'id',
+					//'virtual' => [ 'title' => 'Paymentgateway\OrderStatusDescription' ],
+					'label' => $this->_('Payment Status'),
+					'value' => function($data) use ($self) {
+						$return = $self->_($data->Status()->OrderStatusDescription()->title);
+						$return .= '<br />';
+						$status = $data->getRoute()->isActiveSubscription();
+						if($data->status_id == \Base\Config::get('config_complete_status_id'))
+							$return .= ($status ? \Core\Html::tag('span',['class'=>'color-6'],$self->_('Active')) : \Core\Html::tag('span',['class'=>'color-5'], $self->_('Expired')));
+						return $return;
+					}
+				],
+				[
+					'atributes' => 'class="action-btns"',
+					'name' => 'id',
+					'label' => 'Action',
+					'value' => function($data) use($self, $routes) {
+						if($data->status_id != \Base\Config::get('config_complete_status_id'))
+							return;
+						$route = $data->getRoute();
+						if($data->getHandlerCode() == \Paymentgateway\Payment::SUBSCRIPTION) {
+							$status = $route->isActiveSubscription();
+							$return = '';
+
+							if($status) {
+								if($routes->hasRoute(strtolower($data->module) . '_upgared'))
+									$return .= ' ' . \Core\Html::link($self->_('Upgrade'), $this->url(['order_number' => $data->getNumber()],strtolower($data->module) . '_upgared'), ['class' => 'button button-type-1 button-color-2 button-size-2']);
+								if($routes->hasRoute(strtolower($data->module) . '_cancel'))
+									$return .= ' ' . \Core\Html::link($self->_('Cancel'), $this->url(['order_number' => $data->getNumber()],strtolower($data->module) . '_cancel'), ['class' => 'size-2', 'onclick' => 'return confirm("' . $this->_('Are you sure you want to cancel') . '");']);
+							}
+
+							return $return;
+//							return \Core\Html::link('Cancel', '#', ['class' => 'size-2']);
+						} elseif($data->getHandlerCode() == \Paymentgateway\Payment::PURCHASE) {
+							if($route->isRenew() && $routes->hasRoute(strtolower($data->module)))
+								return \Core\Html::link($self->_('Renew now'), $this->url(strtolower($data->module)), ['class' => 'button button-type-1 button-color-2 button-size-2']);
+						} elseif($data->getHandlerCode() == \Paymentgateway\Payment::CHAIN) {
+							
+						} elseif($data->getHandlerCode() == \Paymentgateway\Payment::DEPOSIT) {
+							
+						}
+					}
+				],
+			),
+			'filter' => array(
+				'user_id' => $user->id,
+				'status_id' => '>0',
+				'handler_code' => array( \Paymentgateway\Payment::SUBSCRIPTION,  \Paymentgateway\Payment::PURCHASE),
+				'parent_id' => 'IS NULL',
+				'system' => 1
+			),
+			'hasForm' => false,
+			'show_page_results' => false
+		));
+		?>
+	</div>
+</div>

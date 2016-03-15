@@ -1,0 +1,38 @@
+<?php echo $this->getController('admin/layout/header_part'); ?>
+
+<?php 
+$self = $this;
+echo $this->widget('widget.grid.db', array(
+	'head' => array(
+		'title' => $this->_('Site meta tags'),
+	),
+	'atributes' => 'class="display"',
+	'dataProvider' => new \Meta\Meta(),
+	'checkbox' => true,
+	'columns' => array(
+		array(
+			'atributes' => 'class="left" style="width:50px;"',
+			'name' => 'id',
+			'label' => '#'
+		),
+		array(
+			'atributes' => 'class="left" style="width:50px;"',
+			'name' => 'key',
+			'label' => $this->_('System key')
+		),
+		array(
+			'atributes' => 'class="left"',
+			'name' => 'id',
+			'label' => $this->_('Title'),
+			'virtual' => array('title' => 'Meta\MetaDescription'),
+			'filter' => false
+		),
+	),
+	'has_delete_button' => false,
+	'add_new' => false,
+	'has_delete' => function() { return false; }
+));
+
+?>
+
+<?php echo $this->getController('admin/layout/footer_part'); ?>

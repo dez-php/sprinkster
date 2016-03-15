@@ -1,0 +1,235 @@
+<?php
+use \Core\Http\Url;
+
+$me = \User\User::getUserData();
+?>
+
+<?php echo $this->getController('home/layout/header_part') ?>
+
+<!-- WRAPPER - FOOTER HEIGHT // START -->
+<div class="container container-padding-header container-padding-footer">
+
+<!-- CONTENT // START -->
+<div class="container container-padding-tb-6 container-padding-lr-5 responsive-content">
+	<div class="container container-size-1 clearfix responsive-messages">
+		<div class="container container-size-9 container-radius-1 container-shadow-1 bg-color-1 fleft">
+			<!-- <div class="container container-padding-lr-3 padding-top-30">
+				<span class="field-icon field-icon-position-2 fill">
+					<input type="text" placeholder="<?php echo $this->_('Search Friends') ?>" class="field field-color-1 field-size-1">
+					<button class="icon icon-type-3 icon-64">Icon</button>	
+				</span>
+			</div> -->
+			<div class="container container-padding-lr-3 padding-bottom-15 margin-top-15">
+				<h3 class="title-2 color-1"><?php echo $this->_('Recent Messages') ?></h3>
+			</div>
+			<div class="event-scroll-pane">
+				<ul class="list-6 clearfix">
+					<?php foreach($conversations AS $conversation): ?>
+					<li data-id="<?php echo $conversation->id ?>" id="event-user-<?php echo $conversation->id ?>"<?php echo $conversation_id == $conversation->id ? ' class="active"' : '' ?>>
+						<a href="<?php echo $this->url([ 'controller' => 'read', 'conversation_id' => $conversation->id ], 'conversation_c') ?>" class="clickable">
+							<span class="icon icon-type-6 icon-34 event-delete" title="<?php echo $this->_('Delete') ?>">Icon</span>
+							<span class="avatar text-1"><img alt="<?php echo $this->_('Avatar') ?>" src="<?php echo \User\Helper\Avatar::getImage('small', $conversation)->image ?>"></span>
+							<span class="text-2 color-3"><?php echo \Core\Date::getInstance($conversation->date_modified,'dd.mm.yy',true)->toString() ?></span>
+							<span class="title-6 color-2"><?php echo $conversation->getUserFullname() ?></span>
+							<span class="text-3 color-3"><?php echo $conversation->title ?></span>
+						</a>
+					</li>
+					<?php endforeach ?>
+				</ul>
+			</div>	
+		</div>
+		<div class="container container-size-11 container-padding-5 container-radius-1 container-shadow-1 bg-color-1 fright">
+			<div class="hide notification notification-color-3 event-notification-empty"><?php echo $this->_('You have no messages here.') ?></div>
+
+			<div class="event-scroll-pane-conversations">
+
+				<ul class="list-7 event-popup-comments-group"></ul>
+
+			</div>
+			<form action="<?php echo $this->url([ 'controller' => 'send' ], 'conversation_c') ?>" method="post" onsubmit="return false" class="event-conversation-sender">
+			<ul class="list-7 margin-top-30">
+				<li class="clearfix event-popup-comment-formholder">
+					<p class="avatar"><a href="<?php echo $this->url([ 'user_id' => $me->id, 'query' => $me->username ], 'user') ?>"><img alt="" src="assets/images/grey.gif" data-original="<?php echo \User\Helper\Avatar::getImage('medium', $me)->image ?>" onload="$(this).LazyLoad()"></a></p>
+					<textarea class="field field-color-1 field-size-1 field-size-1-b fill" placeholder="<?php echo $this->_('Enter your new message here...') ?>"></textarea>
+					<button type="submit" class="button button-type-1 button-color-2 button-size-3 margin-top-10 fright event-loader"><?php echo $this->_('Send') ?></button>
+				</li>
+			</ul>
+			</form>
+		</div>
+	</div>
+</div>
+<!-- CONTENT // END -->
+
+</div>
+<!-- WRAPPER - FOOTER HEIGHT // END -->
+<script type="text/javascript" src="<?php echo Url::to('assets/js/jquery.jscrollpane.min.js') ?>"></script>
+
+<script type="text/javascript">
+	$('body').addClass('body-conversation');
+
+	var $panel = $('.event-scroll-pane');
+	var conversation_id = <?php echo isset($conversation_id) && $conversation_id ? $conversation_id : '$panel.find(\'li:first\').data(\'id\')' ?>;
+	var jsp = $('.event-scroll-pane-conversations').css({'height':$(window).height()-$('.event-scroll-pane-conversations').offset().top-232}).jScrollPane({
+		mouseWheelSpeed: 25,
+		horizontalGutter: 0,
+		autoReinitialise: true,
+		stickToBottom: true
+	}).data('jsp');
+
+	if($panel.size())
+	{
+		$panel.css({ height: $(window).height() - $panel.offset().top - $('footer').height()-74 }).jScrollPane({
+			mouseWheelSpeed: 15,
+			horizontalGutter: 0
+		});
+
+		if(conversation_id)
+		{
+			App._ajax({
+				url: '<?php echo $this->url([ 'controller'=>'get-conversation' ],'conversation_c') ?>',
+				type:'POST',
+				data: { con_id: conversation_id },
+				onSuccess: function(json) {
+					if(json.error)
+					{
+						$('.event-scroll-pane-conversations').parent().prepend('<div class="notification notification-color-1 margin-bottom-20">' + json.error + '</div>');
+						return;
+					}
+
+					if(json.conversations)
+					{
+						var $ul = $('.event-popup-comments-group');
+
+						$('#event-user-'+conversation_id).removeClass('unread');
+						$(json.conversations).find('>li').each(function() {
+							$ul.prepend(this).find('img, .event-load-lazy-load').LazyLoad();
+						}).parents('.event-scroll-pane-conversations').css({'height':$(window).height()-$('.event-scroll-pane-conversations').offset().top-232}).jScrollPane({
+							mouseWheelSpeed: 25,
+							horizontalGutter: 0,
+							autoReinitialise: true,
+							stickToBottom: false
+						}).callbackAfter(function() {
+							jsp = $('.event-scroll-pane-conversations').bind('mousewheel touchmove', function(e) {
+					            e.preventDefault();
+					        }).data('jsp');
+							jsp.scrollTo(0, 1000000000000);
+						});
+
+						$ul.linkify();
+					}
+				}
+			});
+		}
+	}
+
+	$('form.event-conversation-sender').submit(function() {
+		$('.notification').remove();
+
+		App.addLoader('.event-loader');
+
+		App._ajax({
+			url: '<?php echo $this->url(array('controller'=>'send'),'conversation_c') ?>',
+			type: 'POST',
+			data: {
+				con_id: conversation_id,
+				conversation: $('textarea',this).val(),
+				last: $('.event-scroll-pane-conversations li:last').data('id')
+			},
+			onSuccess: function(json) {
+				App.removeLoader('.event-loader');
+				if(json.error) {
+					$('.event-scroll-pane-conversations').parent().prepend('<div class="notification notification-color-1 margin-bottom-20">' + json.error + '</div>');
+				} else if(json.conversations) {
+					$('form.event-conversation-sender textarea').val('');
+					var $ul = $('.event-popup-comments-group');
+					$(json.conversations).find('>li').each(function() {
+						if($('.event-popup-comments-group li:last').size() > 0) {
+							$ul.append(this).find('img, .event-load-lazy-load').LazyLoad().show(function() {
+								setTimeout(function() { jsp.scrollTo(0, 1000000000000); },500);
+							});
+						} else { 
+							$ul.prepend(this).find('img, .event-load-lazy-load').LazyLoad().show(function() {
+								setTimeout(function() { jsp.scrollTo(0, 1000000000000); },500);
+							});
+						}
+					});
+
+					$ul.linkify();
+				}
+			}
+		});
+		return false;
+	});
+
+	$('.event-delete').click(function(e) {
+		e.preventDefault();
+
+		var $parent = $(this).closest('li');
+		var id = $parent.data('id');
+
+		App._ajax({
+			url: '<?php echo $this->url(array('controller'=>'delete'),'conversation_c');?>',
+			type: 'POST',
+			data: {con_id:id},
+			onSuccess: function(json) {
+				if(json.error)
+				{
+					$('.event-scroll-pane-conversations').parent().prepend('<div class="notification notification-color-1">' + json.error + '</div>');
+					return;
+				}
+
+				if(json.ok)
+					conversation_id == id ? window.location.href = "<?php echo $this->url([], 'conversation') ?>" : $parent.remove();
+			}
+		});
+	});
+
+	function checkNew()
+	{
+		App._ajax({
+			url: '<?php echo $this->url(array('controller'=>'get-conversation'),'conversation_c');?>',
+			type: 'POST',
+			data: {check:true,con_id:conversation_id,last:$('.event-scroll-pane-conversations li:last').data('id')},
+			onSuccess: function(results) {
+				if(results && results.total) {
+					App._ajax({
+						url: '<?php echo $this->url(array('controller'=>'get-conversation'),'conversation_c');?>',
+						type: 'POST',
+						data: {
+							getnew: true,
+							con_id: conversation_id,
+							last: $('.event-scroll-pane-conversations li:last').data('id')
+						},
+						onSuccess: function(json) {
+							if(json.conversations) {
+								var $ul = $('.event-popup-comments-group');
+								$ul.empty();
+								$(json.conversations).find('>li').each(function() {
+									if($('.event-popup-comments-group li:last').size() > 0) {
+										$ul.append(this).find('img, .event-load-lazy-load').LazyLoad().show(function() {
+											setTimeout(function() { jsp.scrollTo(0, 1000000000000); },300);
+										});
+									} else { 
+										$ul.prepend(this).find('img, .event-load-lazy-load').LazyLoad().show(function() {
+											setTimeout(function() { jsp.scrollTo(0, 1000000000000); },300);
+										});
+									}
+								});
+
+								$ul.linkify();
+							}
+						}
+					});
+				}
+			}
+		});
+		setTimeout(checkNew,5000);
+	}
+
+	if(!conversation_id)
+		$(".event-notification-empty").removeClass("hide").show();
+
+	conversation_id ? setTimeout(checkNew,5000) : $('.event-popup-comment-formholder').remove();
+</script>
+
+<?php echo $this->getController('home/layout/footer_part') ?>

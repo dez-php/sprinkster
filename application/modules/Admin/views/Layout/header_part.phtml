@@ -1,0 +1,72 @@
+<?php $demo = strpos($this->getRequest()->getDomain(), 'pintastic.co') !== false;?>
+<script type="text/javascript">
+image_upload = function(field, preview) {
+	<?php if(!$demo) { ?>
+	$('<div id="myelfinder" />').elfinder({
+		url : '<?php echo $this->url(array('module' => 'filemanager'),'admin_module');?>',
+		lang : 'en',
+		dialog : { width : 900, modal : true, title : '<?php echo $this->_('WM Cms - file manager for web');?>' },
+		closeOnEditorCallback : true,
+		editorCallback : function(selected){
+			if(!selected || !selected.split('?') || !selected.split('?')[0]) return;
+			file = selected.split('?')[0].replace(/^uploads\/data\//,'');
+			$('#' + preview).attr('src',selected);
+			$('#' + field).attr('value', file);
+		}
+	});
+	<?php } ?>
+};
+file_upload = function(field) {
+	<?php if(!$demo) { ?>
+	$('<div id="myelfinder" />').elfinder({
+		url : '<?php echo $this->url(array('module' => 'filemanager'),'admin_module');?>',
+		lang : 'en',
+		dialog : { width : 900, modal : true, title : '<?php echo $this->_('WM Cms - file manager for web');?>' },
+		closeOnEditorCallback : true,
+		editorCallback : function(selected){
+			if(!selected || !selected.split('?') || !selected.split('?')[0]) return;
+			file = selected.split('?')[0];
+			$('#' + field).attr('value', file);
+		}
+	});
+	<?php } ?>
+};
+</script>
+
+<?php if($has_update && ($has_update['system'] || $has_update['modules'] || $has_update['themes'])) { ?>
+<div id="update-notify">
+	<div class="update-notify-pad">
+		<?php echo $this->_('Updates are available for your system.');?> <a href="<?php echo $this->url(array('module'=>'admin'),'admin_module') ?>"><?php echo $this->_('See details');?></a>
+		<a id="close-notify" href="javascript:;">X</a>
+	</div>
+</div>
+<style>body { padding-top: 33px; }</style>
+<?php } ?>
+<?php $user_data = \User\User::getUserData(); ?>
+<div id="menu">
+	<div class="w90p">
+        <div class="brand">
+            <p class="logo">
+            	<object type="image/svg+xml" data="cms/admin/images/sprinkster_logo.svg" width="150">
+				  Sprinkster Logo <!-- fallback image in CSS -->
+				</object>
+				<a href="./prodigy"><?php //echo \Meta\Meta::getGlobal('title'); ?></a></p>
+            <p class="viewsite"><a target="_blank" class="button-2" href="./"><?php echo $this->_('View Site');?></a></p>
+        </div>
+
+		<div class="fright">
+            <?php echo $this->widget('admin.widget.menu', ['group' => 'AdminMenuSystem']);?>
+            <ul class="usermenu">
+				<li><a class="no-style"><?php echo sprintf($this->_('Welcome <span class="username">%s</span>'), $user_data->getUserFullname());?></a></li>
+				<li><a href="<?php echo $this->url(array('controller' => 'login','action'=>'logout'),'user_c_a');?>"><img src="cms/admin/images/log-out.png" alt="" class="icon"><?php echo $this->_('Logout');?></a></li>
+			</ul>
+		</div>
+    	<div class="clear"></div>
+	</div>
+</div>
+<div id="submenu">
+    <?php echo $this->widget('admin.widget.menu');?>
+</div>
+
+<div id="content">  <!-- Start Content-->
+	<div class="wrap">

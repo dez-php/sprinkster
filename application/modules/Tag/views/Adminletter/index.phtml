@@ -1,0 +1,98 @@
+<?php 
+$self = $this;
+$widget = $this->widget('widget.grid.db', array(
+	'head' => array(
+		'title' => $this->_('Letter menu')
+	),
+	'atributes' => 'class="display"',
+	'dataProvider' => new \Tag\TagLetter(),
+	'checkbox' => true,
+	'columns' => array(
+		array(
+			'atributes' => 'class="left" style="width:50px;"',
+			'name' => 'id',
+			'label' => '#'
+		),
+		array(
+			'atributes' => 'class="left"',
+			'name' => 'letter',
+			'label' => $this->_('Letter'),
+		)
+		
+	),
+	'add_new' => false,
+	'has_edit' => false,
+	'sort' => 'letter',
+	'order' => 'ASC',
+	'actionsExtend' => function($data) use($self) {
+		ob_start();
+		?>
+		<script type="text/javascript">
+			$(document).ready(function() {
+				$('.add-to-menu.in').each(function() {
+					var tr = $(this).closest('tr');
+					tr.find('input').removeAttr('checked').hide();
+					tr.find('.delete').hide();
+				});
+				$('.add-to-menu').click(function() {
+					$self = $(this);
+					$.post(window.location.href, {toMenu:$self.attr('id').replace('letter_','')}, function(json) {
+						if(json.error) {
+							alert(json.error);
+						} else if(json.inMenu === true) {
+							$self.addClass('in').removeClass('out').find('img').replaceWith('<img title="<?php echo $self->_('Remove this letter from menu');?>" alt="" class="tooltip" src="cms/admin/images/delete2.png">');
+							var tr = $self.closest('tr');
+							tr.find('input').removeAttr('checked').hide();
+							tr.find('.delete').hide();
+						} else if(json.inMenu === false) {
+							$self.addClass('out').removeClass('in').find('img').replaceWith('<img title="<?php echo $self->_('Add this letter to menu');?>" alt="" class="tooltip" src="cms/admin/images/add.png">');
+							$self.closest('tr').find('input, .delete').show();
+						} else {
+							alert('error');
+						}
+					}, 'json');
+					return false;
+				});
+			});
+		</script>
+		<?php 
+		$self->placeholder('script', ob_get_clean());
+		if($data->in_menu) {
+			return '<a class="add-to-menu in" href="javascript:void(0);" id="letter_' . $data->id . '"><img title="' . $self->_('Remove this letter from menu') . '" alt="" class="tooltip" src="cms/admin/images/delete2.png"></a>';
+		} else {
+			return '<a class="add-to-menu out" href="javascript:void(0);" id="letter_' . $data->id . '"><img title="' . $self->_('Add this letter to menu') . '" alt="" class="tooltip" src="cms/admin/images/add.png"></a>';
+		}
+	},
+	'onPost' => function() use($self) {
+		$id = $self->getRequest()->getPost('toMenu');
+		$result = array();
+		$letterTable = new \Tag\TagLetter();
+		$row = $letterTable->fetchRow($letterTable->makeWhere(array('id' => $id)));
+		try {
+			if($row) {
+// 				$row->delete();
+				$row->in_menu = (int)!$row->in_menu;
+				$row->save();
+				$result['inMenu'] = (bool)$row->in_menu;
+			} else {
+				throw new \Core\Exception($self->_('Missing Letter!'));
+			}
+		} catch (\Core\Exception $e) {
+			$result['error'] = $e->getMessage();
+		}
+		
+		return $result;
+	},
+	'buttonsExtend' => function($widget) use($self) {
+		return '<a class="button" href="' . $self->url(array('action'=>'sort'), 'admin_tag_letter') . '">'.$self->_('Sort Letters').'</a>';
+	}
+));
+?>
+<?php echo $this->getController('admin/layout/header_part'); ?>
+
+<?php 
+echo $widget;
+
+?>
+
+<?php echo $this->getController('admin/layout/footer_part'); ?>

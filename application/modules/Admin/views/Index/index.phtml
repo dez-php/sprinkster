@@ -1,0 +1,292 @@
+<?php echo $this->getController('admin/layout/header_part'); ?>
+
+<div class="table mtop30">
+	<div class="table-row">
+		<div class="table-row-cell cell-65">
+			<div class="padding5">
+				<div class="info_line top">
+					<h3 class="fleft title mbottom0"><img src="cms/admin/images/quiz.png" alt=""><?php echo $this->_('Statistics')?></h3>
+					<div class="clear"></div>
+				</div>
+				<div class="infographic mtop30">
+					<div id="chartcontainer" style="min-width: 310px; height: 400px; margin: 0 auto"></div>
+				</div>
+				<div class="boxes mtop30">
+					<div class="box-cell">
+						<div class="square square-color-1">
+							<div class="head">
+								<div class="icon-wrapper"><img src="cms/admin/images/b-1.png" alt=""></div>
+								<h4><?php echo $this->_('Total Income')?></h4>
+							</div>
+							<div class="body">
+								<p class="text-1"><?php echo \Currency\Helper\Format::format($totalIncome);?></p>
+							</div>
+						</div>
+					</div>
+					<?php if($this->accessible('Seller')): ?>
+					<div class="box-cell">
+						<div class="square square-color-2">
+							<div class="head">
+								<div class="icon-wrapper"><img src="cms/admin/images/b-2.png" alt=""></div>
+								<h4><?php echo $sellerSubscriptionsCount;?> <?php echo $this->_('Sellers') ?></h4>
+							</div>
+							<div class="body">
+								<p class="text-1"><?php echo \Currency\Helper\Format::format($totalSellerSubscriptionIncome);?></p>
+							</div>
+						</div>
+					</div>
+					<?php endif ?>
+					<?php if($this->accessible('Vip')): ?>
+					<div class="box-cell">
+						<div class="square square-color-3">
+							<div class="head">
+								<div class="icon-wrapper"><img src="cms/admin/images/b-3.png" alt=""></div>
+								<h4><?php echo $vipPinCount;?> <?php echo $this->_('Featured items')?></h4>
+							</div>
+							<div class="body">
+								<p class="text-1"><?php echo \Currency\Helper\Format::format($pinSubscriptionTotalIncome); ?></p>
+							</div>
+						</div>
+					</div>
+					<?php endif ?>
+					<?php if($this->accessible('Poweruser')): ?>
+					<div class="box-cell">
+						<div class="square square-color-4">
+							<div class="head">
+								<div class="icon-wrapper"><img src="cms/admin/images/b-4.png" alt=""></div>
+								<h4><?php echo $powerUserCount;?> <?php echo $this->_('Power Users');?></h4>
+							</div>
+							<div class="body">
+								<p class="text-1"><?php echo \Currency\Helper\Format::format($powerSubscriptionTotalIncome);?></p>
+							</div>
+						</div>
+					</div>
+					<?php endif ?>
+					<?php if($this->accessible('Wallet')): ?>
+					<div class="box-cell">
+						<div class="square square-color-5">
+							<div class="head">
+								<div class="icon-wrapper"><img src="cms/admin/images/b-5.png" alt=""></div>
+								<h4><?php echo $walletTransactionCount;?> <?php echo $this->_('Wallet Payouts');?></h4>
+							</div>
+							<div class="body">
+								<p class="text-1"><?php echo \Currency\Helper\Format::format($walletTransaction);?></p>
+							</div>
+						</div>
+					</div>
+					<div class="box-cell">
+						<div class="square square-color-6">
+							<div class="head">
+								<div class="icon-wrapper"><img src="cms/admin/images/b-6.png" alt=""></div>
+								<h4><?php echo $walletDepositsCount;?> <?php echo $this->_('Wallet Deposits');?></h4>
+							</div>
+							<div class="body">
+								<p class="text-1"><?php echo \Currency\Helper\Format::format($walletDeposits);?></p>
+							</div>
+						</div>
+					</div>
+					<?php endif ?>
+				</div>
+			</div>
+		</div>
+		<?php if($this->accessible('Store')): ?>
+		<div class="table-row-cell cell-35">
+		   <div class="padding5">
+				<div class="info_line top">
+					<h3 class="fleft title mbottom0"><img src="cms/admin/images/quiz.png" alt=""><?php echo $this->_('Statistics') ?></h3>
+					<div class="clear"></div>
+				</div>
+				<div class="newborder pbottom20">
+					<div class="circlegraphic mtop30" style="position:relative">
+						<div id="piecontainer" style="min-width: 377px; height: 400px; margin: 0 auto"></div>
+						<div id="addText" style="position:absolute; left:0px; top:0px;"></div>
+					</div>
+					<div class="newtable mtop30">
+						<div class="newcell">
+							<div class="circle">
+								<img src="cms/admin/images/c-1.png" alt="">
+								<p class="text-1 color-1"><?php echo \Currency\Helper\Format::format($ordersTotalAmount, '', '', true, 0);?></p>
+							</div>
+							<p class="text-2 color-4 mtop20"><span class="color-3"><?php echo $ordersTotalCount;?></span> Orders</p>
+						</div>
+						<div class="newcell">
+							<div class="circle">
+								<img src="cms/admin/images/c-2.png" alt="">
+								<p class="text-1 color-2"><?php echo \Currency\Helper\Format::format($feeIncome, '', '', true, 0);?></p>
+							</div>
+							<p class="text-2 color-4 mtop20"><span class="color-3"><?php echo $completedPurchasesWithFeeCount;?> <?php echo $this->_('Orders');?></span> <br><?php echo $this->_('commision Income');?></p>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+		<?php endif ?>
+	</div>
+</div>
+
+<?php
+$menu = \Base\Menu::getMenu('AdminDashboard');
+
+if($menu) {
+	echo '<div class="table">';
+	$lastWidth = 0;
+	foreach($menu AS $row => $widget) {
+		if($widget->is_widget) {
+			if($widget->disabled())
+				continue;
+			
+			$config = array();
+			if($widget->config) {
+				$config = unserialize($widget->config);
+			}
+			$config['instance'] = $widget;
+			$width = isset($config['width'])&&(int)$config['width']<=100?(int)$config['width']:100;
+			if(!$lastWidth) {
+				echo '<div class="table-row">';
+			} elseif($lastWidth+$width > 100) {
+				echo '</div><div class="clear"></div>';
+				echo '<div class="table-row">';
+				$lastWidth=0;
+			}
+
+			echo '<div class="table-row-cell cell-'.$width.'"><div class="padding5">';
+			echo $this->widget($widget->widget, $config);
+			echo '</div></div>';
+			$lastWidth+=$width;
+		}
+	}
+	echo '</div><div class="clear"></div></div>';
+}
+?>
+
+<script type="text/javascript">
+	$(function () {
+		<?php if($this->accessible('Store')): ?>
+		var chart = new Highcharts.Chart({
+			credits: {enabled:''},
+			chart: {
+				renderTo: 'piecontainer',
+				type: 'pie',
+				plotBackgroundColor: null,
+				plotBorderWidth: null,
+				plotShadow: false
+			},
+			title: {
+				text: ''
+			},
+			colors: ['#8DC53D', '#00ACED'],
+			tooltip: {
+				pointFormat: ''
+			},
+			plotOptions: {
+				pie: {
+					dataLabels: {
+						enabled: false
+					},
+					innerSize: '61%'
+				}
+			},
+
+			series: [
+				{
+					type: 'pie',
+					name: 'Browser share',
+					data: [
+						['Orders', <?php echo $ordersTotalAmount;?>],
+						['Commission', <?php echo $feeIncome;?>]
+					]
+				}
+			]
+		},
+				function(chart) { // on complete
+					var textX = chart.plotLeft + (chart.plotWidth  * 0.5);
+					var textY = chart.plotTop  + (chart.plotHeight * 0.5);
+
+					var span = '<span id="pieChartInfoText" style="position:absolute; text-align:center; width">';
+					span += '<span style="font-size: 14px;display:inline-block;color: #777;width:100%">Average commision rate</span>';
+					span += '<span style="font-size: 24px;color: #333;font-weight:700"><?php echo number_format($avgSellerPackageCommission, 1);?>%</span><br>';
+					span += '</span>';
+
+					$("#addText").append(span);
+					span = $('#pieChartInfoText');
+					span.css('left', textX + (span.width() * -0.5));
+					span.css('top', textY + (span.height() * -0.5));
+				}
+		);
+		<?php endif ?>
+		$('#chartcontainer').highcharts({
+			credits: {enabled:''},
+			chart: {
+				type: 'area'
+			},
+			title: {
+				text: ''
+			},
+			subtitle: {
+				text: ''
+			},
+			xAxis: {
+				categories: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
+				tickmarkPlacement: 'on',
+				title: {
+					enabled: false
+				}
+			},
+			yAxis: {
+				title: {
+					text: ''
+				},
+				labels: {
+					formatter: function () {
+						return this.value;
+					}
+				}
+			},
+			tooltip: {
+				shared: true,
+				valueSuffix: ''
+			},
+			plotOptions: {
+				area: {
+					lineColor: '#666666',
+					lineWidth: 1,
+					marker: {
+						lineWidth: 1,
+						lineColor: '#666666'
+					}
+				}
+			},
+			series: [
+			<?php if($this->accessible('Seller')): ?>{
+				name: 'Sellers',
+				lineColor: '#8DC53D',
+				color: '#8DC53D ',
+				data: [<?php echo $sellerChart ?>]
+			}<?php endif ?><?php if($this->accessible('Vip')): ?><?php if($this->accessible('Seller')): ?>,<?php endif ?>{
+				name: 'Featured Items',
+				lineColor: '#00ACED',
+				color: '#00ACED ',
+				data: [<?php echo $vipChart ?>]
+			}<?php endif ?><?php if($this->accessible('Poweruser')): ?><?php if($this->accessible('Vip') || $this->accessible('Seller')): ?>,<?php endif ?>{
+				name: 'PowerUsers',
+				lineColor: '#E74C3C',
+				color: '#E74C3C',
+				data: [<?php echo $powerChart ?>]
+			}<?php endif ?><?php if($this->accessible('Wallet')): ?><?php if($this->accessible('Poweruser') || $this->accessible('Vip') || $this->accessible('Seller')): ?>,<?php endif ?>{
+				name: 'Payout',
+				lineColor: '#1bcba4',
+				color: '#1bcba4',
+				data: [<?php echo $withdrawChart ?>]
+			}<?php endif ?><?php if($this->accessible('Wallet')): ?><?php if($this->accessible('Wallet') || $this->accessible('Poweruser') || $this->accessible('Vip') || $this->accessible('Seller')): ?>,<?php endif ?>{
+				name: 'Deposits',
+				lineColor: '#ff6ac5',
+				color: '#ff6ac5',
+				data: [<?php echo $depositChart ?>]
+			}<?php endif ?>]
+		});
+
+	}
+	);
+</script>
+
+<?php echo $this->getController('admin/layout/footer_part'); ?>

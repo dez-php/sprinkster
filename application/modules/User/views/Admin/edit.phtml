@@ -1,0 +1,124 @@
+<?php echo $this->getController('admin/layout/header_part'); ?>
+
+<?php 
+$self = $this;
+$recordTable = new \User\User();
+$record = $recordTable->fetchRow($recordTable->makeWhere(array('id' => $this->getRequest()->getRequest('id'))));
+echo $this->widget('widget.form.phparray', array(
+	'head' => array(
+		'title' => $this->_('Users'),
+		'icon' => 'cms/admin/images/question-type-multiple-correct.png'
+	),
+	'columns' => array(
+		array(
+			'name' => 'username',
+			'label' => $this->_('Username'),
+			'type' => 'Username',
+			'required' => true,
+			'value' => $record?$record->username:'',
+		),
+		array(
+			'name' => 'firstname',
+			'label' => $this->_('Firstname'),
+			'type' => 'Text',
+			'required' => true,
+			'value' => $record?$record->firstname:'',
+		),
+		array(
+			'name' => 'lastname',
+			'label' => $this->_('Lastname'),
+			'type' => 'Text',
+			'required' => true,
+			'value' => $record?$record->lastname:'',
+		),
+		array(
+			'name' => 'email',
+			'label' => $this->_('Email'),
+			'type' => 'Email',
+			'required' => true,
+			'value' => $record?$record->email:'',
+			'readonly' => true
+		),
+		array(
+			'name' => 'website',
+			'label' => $this->_('Web site'),
+			'type' => 'Url',
+			'value' => $record?$record->website:'',
+		),
+		array(
+			'name' => 'status',
+			'label' => $this->_('Status'),
+			'type' => 'Single',
+			'required' => true,
+			'value' => $record?$record->status:'1',
+			'list' => array('0' => $this->_('Inactive'), '1' => $this->_('Active'), '2' => $this->_('Deactivated')/*, '3' => $this->_('DELETED')*/)
+		),
+		array(
+			'name' => 'is_admin',
+			'label' => $this->_('Administrator'),
+			'type' => 'Single',
+			'required' => true,
+			'value' => $record?$record->is_admin:'0',
+			'list' => array('0' => $this->_('No'), '1' => $this->_('Yes'))
+		),
+		array(
+			'name' => 'password',
+			'label' => $this->_('Password'),
+			'type' => 'Password',
+			'value' => '',
+			'autocomplete' => false,
+			'help' => $this->_('If you don\'t want to change the password - leave this field blank.')
+		),
+		array(
+			'name' => 'editinsite',
+			'label' => $this->_('Edit in site'),
+			'type' => 'Help2',
+			'value' => '<a target="_blank" href="'.$this->url(array('user_id'=>$record?$record->id:'0'),'settings').'">'.$this->_('Edit in site').'</a>'
+		),
+	),
+	'onSave' => function($values, $widget) use($self, $record, $recordTable) {
+
+		if($record) {
+			if($recordTable->countBy(array('id'=>'!='.$record->id,'email'=>$values['email']))) {
+				$widget->errors = $self->_('This e-mail address is already used');
+			} elseif($recordTable->countBy(array('id'=>'!='.$record->id,'username'=>$values['username']))) {
+				$widget->errors = $self->_('This username is already used');
+			} else if(in_array(strtolower($values['username']), (new \User\User())->getReserved())) {
+				$widget->errors = $this->_('This username is already used');
+			} else {
+				$record->username = $values['username'];
+				$record->firstname = $values['firstname'];
+				$record->lastname = $values['lastname'];
+				$record->email = $values['email'];
+				$record->website = $values['website'];
+				$record->status = $values['status'];
+				$record->is_admin = $values['is_admin'];
+				if($values['password']) {
+					$record->password = md5($values['password']);
+					$record->password_new = null;
+					$record->password_key = null;
+				}
+				$recordTable->getAdapter()->beginTransaction();
+				try {
+					if($record->save()) {
+						$recordTable->getAdapter()->commit();
+						return true;
+					} else {
+						$recordTable->getAdapter()->rollBack();
+						$widget->errors = $self->_('Record not save');
+					}
+				} catch (\Core\Exception $e) {
+					$recordTable->getAdapter()->rollBack();
+					$widget->errors = $e->getMessage();
+				}
+			}
+		} else {
+			$widget->errors = $self->_('User not found');
+		}
+		return false;
+	}
+));
+
+?>
+
+<?php echo $this->getController('admin/layout/footer_part'); ?>

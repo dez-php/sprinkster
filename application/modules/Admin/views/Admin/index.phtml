@@ -1,0 +1,106 @@
+<?php echo $this->getController('admin/layout/header_part'); ?>
+
+<div id="content">
+	<div class="wrap">
+		<br class="mtop25">
+
+		<div class="info_line top">
+			<h3 class="fleft title">
+				<img alt="" src="cms/admin/images/extensions.png">
+				<?php echo $this->_('System updates');?>	
+			</h3>
+			
+			<div class="clear"></div>
+		</div>
+		
+		<div class="clear"></div>
+		
+		<div id="tab_general">
+			<table cellspacing="0" cellpadding="0" class="formtable">
+				<thead>
+					<tr>
+						<td><strong><?php echo $this->_('Name');?></strong></td>
+						<td width="100"><strong><?php echo $this->_('Currently version');?></strong></td>
+						<td width="100"><strong><?php echo $this->_('New version');?></strong></td>
+					</tr>
+				</thead>
+				<tbody>
+					<?php if($has_update && ($has_update['system'] || $has_update['modules'] || $has_update['themes'])) { ?>
+					<?php if($has_update['system']) { ?>
+					<tr>
+						<td>
+							Pinterest Clone Script
+						</td>
+						<td>
+							<?php echo \Core\Registry::get('system_version');?>
+						</td>
+						<td>
+							<?php echo $has_update['version'];?>
+						</td>
+					</tr>
+					<tr>
+						<td colspan="3">&nbsp;</td>
+					</tr>
+					<?php } ?>
+					<?php 
+						if($has_update['modules']) {  ?>
+							<tr>
+								<th colspan="3" style="padding: 10px; border-top: 2px solid #F4F4F4">
+									<?php echo $this->_('Modules');?>
+								</th>
+							</tr>
+							<?php
+							foreach($has_update['modules'] AS $module) {
+					?>
+					<tr>
+						<td>
+							<?php echo $module['title'];?>
+						</td>
+						<td>
+							<?php echo $module['currently'];?>
+						</td>
+						<td>
+							<?php echo $module['new'];?>
+						</td>
+					</tr>
+					<?php } ?>
+					<?php } ?>
+						<?php
+						if($has_update['themes']) { ?>
+							<tr>
+								<th colspan="3" style="padding: 10px; border-top: 2px solid #F4F4F4">
+									<?php echo $this->_('Themes');?>
+								</th>
+							</tr>
+						<?php	foreach($has_update['themes'] AS $module) {
+								?>
+								<tr>
+									<td>
+										<?php echo $module['title'];?>
+									</td>
+									<td>
+										<?php echo $module['currently'];?>
+									</td>
+									<td>
+										<?php echo $module['new'];?>
+									</td>
+								</tr>
+							<?php } ?>
+						<?php } ?>
+					<?php } else { ?>
+					<tr>
+						<td colspan="3">
+							<div class="msgOk"><?php echo $this->_('Your system is up to date');?></div>
+						</td>
+					</tr>
+					<?php } ?>
+				</tbody>
+			</table>
+		</div>
+			
+		<div class="clear"></div>
+
+	</div>
+</div>
+
+<?php echo $this->getController('admin/layout/footer_part'); ?>

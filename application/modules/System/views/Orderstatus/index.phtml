@@ -1,0 +1,22 @@
+<?php echo $this->getController('admin/layout/header_part'); ?>
+
+<?php 
+$self = $this;
+echo $this->widget('widget.form.phparray', array(
+	'head' => array(
+		'title' => $this->_('System Order Statuses'),
+	),
+	'columns' => \Base\Config::getGroupForm('order_status', $this->_),
+	'onSave' => function($values, $widget) use($self) {
+		if(\Base\Config::updateGroup('order_status', $values)) {
+			return true;
+		} else {
+			$widget->errors = \Base\Config::getErrors();
+		}
+		return false;
+	}
+));
+
+?>
+
+<?php echo $this->getController('admin/layout/footer_part'); ?>

@@ -1,0 +1,73 @@
+<?php echo $this->getController('admin/layout/header_part'); ?>
+
+<?php 
+$self = $this;
+echo $this->widget('widget.form.db', array(
+	'head' => array(
+		'title' => $this->_('Currency'),
+	),
+	'atributes' => 'class="display"',
+	'dataProvider' => new \Currency\Currency(),
+	'checkbox' => true,
+	'columns' => array(
+		array(
+			'name' => 'title',
+			'label' => $this->_('Title'),
+		),
+		array(
+			'name' => 'symbol_left',
+			'label' => $this->_('Symbol Left'),
+			'required' => false
+		),
+		array(
+			'name' => 'symbol_right',
+			'label' => $this->_('Symbol Right'),
+			'required' => false
+		),
+		array(
+			'name' => 'code',
+			'label' => $this->_('Currency Code'),
+		),
+		array(
+			'name' => 'decimal_place',
+			'label' => $this->_('Decimal Place'),
+			'required' => false
+		),
+		array(
+			'name' => 'decimal_point',
+			'label' => $this->_('Decimal separator'),
+			'required' => false
+		),
+		array(
+			'name' => 'thousand_point',
+			'label' => $this->_('Thousands separator'),
+			'required' => false
+		),
+		array(
+			'name' => 'value',
+			'label' => $this->_('Value'),
+			'required' => false
+		),
+		array(
+			'name' => 'status',
+			'label' => $this->_('Status'),
+			'required' => false,
+			'callback' => function($value) use($self) {
+				$form = new \Core\Htmlform\Elements\Single('form_data[status]', array(
+					'list' => array(
+						0 => $self->_('Inactive'),
+						1 => $self->_('Active')		
+					),
+					'skin' => 'select',
+					'label' => '',
+					'defaultValue' => $value
+				), new \Core\Htmlform\Htmlform('forma'));
+				return $form->__toString(); 
+			}
+		),
+	)
+));
+
+?>
+
+<?php echo $this->getController('admin/layout/footer_part'); ?>

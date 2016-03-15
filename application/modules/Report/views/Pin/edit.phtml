@@ -1,0 +1,46 @@
+<?php echo $this->getController('admin/layout/header_part'); ?>
+
+<?php 
+$self = $this;
+$recordTable = new \Pin\PinReportCategory();
+$recordDescriptionTable = new \Pin\PinReportCategoryDescription();
+$category = $recordTable->fetchRow($recordTable->makeWhere(array('id' => $this->getRequest()->getRequest('id'))));
+$description = $recordDescriptionTable->fetchDescription($recordDescriptionTable->makeWhere(array('report_category_id' => $this->getRequest()->getRequest('id'))));
+echo $this->widget('widget.form.phparray', array(
+	'head' => array(
+		'title' => $this->_('Categories for Reported pins'),
+	),
+	'descriptionValue' => $description,
+	'description' => array(
+		array(
+			'name' => 'title',
+			'label' => $this->_('Title'),
+			'type' => 'Text',
+			'required' => true
+		),
+	),
+	'onSave' => function($values, $widget) use($self) {
+		$recordTable = new \Pin\PinReportCategory();
+		$recordDescriptionTable = new \Pin\PinReportCategoryDescription();
+		$category = $recordTable->fetchRow($recordTable->makeWhere(array('id' => $self->getRequest()->getRequest('id'))));
+		if(!$category) {
+			$category = $recordTable->fetchNew();
+		}
+		
+		$recordTable->getAdapter()->beginTransaction();
+		try {
+			$category->save();
+			$recordDescriptionTable->insertDescription(array('report_category_id' => $category->id), $values);
+			$recordTable->getAdapter()->commit();
+			return true;
+		} catch (\Core\Exception $e) {
+			$recordTable->getAdapter()->rollBack();
+			$widget->errors = $e->getMessage();
+		}
+		return false;
+	}
+));
+
+?>
+
+<?php echo $this->getController('admin/layout/footer_part'); ?>

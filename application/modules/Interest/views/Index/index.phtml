@@ -1,0 +1,46 @@
+<?php echo $this->getController('home/layout/header_part') ?>
+
+<?php if(\Core\Base\Action::getInstance()->isModuleAccessible('Sectionmap')):?>	
+	<?php $interest_id = $interest->id;?>
+	<?php echo $this->widget('sectionmap.widget.interestmap', ['interest_id' => $interest_id]);?>
+<?php endif;?>
+
+<?php echo $this->widget('interest.widget.gallery');?>
+
+<!-- WRAPPER - FOOTER HEIGHT // START -->
+<div class="container <?php if(!\Core\Registry::forceGet('pin_interest')) { ?>container-padding-header<?php } ?> container-padding-footer">
+
+	<?php if(!\Core\Registry::forceGet('pin_interest')) { ?>
+	<!-- CONTENT // START -->
+	<div class="container container-padding-5 container-shadow-1 bg-color-1">
+		<div class="table-grid table-grid-padding-40">
+			<div class="table-grid-cell">
+				<div class="container">
+					<h3 class="title-2 color-1"><?php echo $query;?></h3>
+				</div>
+			</div>
+		</div>
+	</div>
+	<?php } ?>
+	
+	<div class="container-padding-tb-6 container-padding-lr-5">
+		<?php 
+	
+		if($interest) {
+			$filter = array('callback' => array('id' => '\Interest\InterestPin::getPins('.$interest->id.')'));
+		} else {
+			$filter = array('id' => $pin_ids);
+		}
+		
+		echo $this->widget('pin.widget.grid', array(
+			'filter' => $filter,
+			'useIndex' => array('PRIMARY','category_id')
+		));
+		?>
+	</div>
+	<!-- CONTENT // END -->
+
+</div>
+<!-- WRAPPER - FOOTER HEIGHT // END -->
+
+<?php echo $this->getController('home/layout/footer_part') ?>

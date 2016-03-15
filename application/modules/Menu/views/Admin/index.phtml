@@ -1,0 +1,38 @@
+<?php 
+use Base\Menu;
+
+$self = $this;
+$menuTable = new \Base\Menu();
+$widget = $this->widget('widget.grid.db', array(
+	'head' => array(
+		'title' => $this->_('Menu Groups'),
+	),
+	'sql' => $menuTable->select()->group('group_id')->order('group_id ASC'),
+	'atributes' => 'class="display"',
+	'dataProvider' => $menuTable,
+	'checkbox' => false,
+	'columns' => array(
+		array(
+			'atributes' => 'class="left"',
+			'name' => 'group_id',
+			'label' => $this->_('Title'),
+			'value' => function($data) {
+				return \Core\Camel::toCamelCase(\Core\Camel::fromCamelCase($data->group_id), true, true);
+			}
+		),
+	),
+	'add_new' => false,
+	'has_delete' => false,
+	'nosearch' => true,
+	'limit' => 999999,
+	'replaceEditLink' => function($data) use($self) {
+		return $this->url(array('action'=>'edit', 'module' => $self->getRequest()->getModule(), 'controller' => $self->getRequest()->getController(), 'query'=>'id='.$data->group_id), null, false, false);
+	},
+	'editInNewWindow' => false
+));
+
+echo $this->getController('admin/layout/header_part'); ?>
+
+<?php echo $widget;?>
+
+<?php echo $this->getController('admin/layout/footer_part'); ?>

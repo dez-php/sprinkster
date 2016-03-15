@@ -1,0 +1,21 @@
+<?php
+$me = \User\User::getUserData();
+$users = [];
+?>
+<ul>
+	<?php foreach($conversations AS $conversation): ?>
+	<?php
+	if(!isset($users[$conversation->user_id]))
+		$users[$conversation->user_id] = isset($user_data[$conversation->user_id]) ? $users[$conversation->user_id] : $conversation->User();
+	
+	$user = $users[$conversation->user_id];
+	$components = [ 'user_id' => $user->id, 'query' => $this->urlQuery($user->username) ];
+	?>
+	<li data-id="<?php echo $conversation->id ?>" class="clearfix event-conversation<?php echo $me->id === $conversation->user_id  ? ' self-sender' : '' ?>">
+		<p class="text-2 color-3 fright"><?php echo \Core\Date::getInstance($conversation->date_added, 'yy-mm-dd H:i', TRUE)->toString() ?></p>
+		<p class="avatar"><a href="<?php echo $this->url($components, 'user') ?>"><img alt="<?php echo $this->_('Avatar') ?>" src="assets/images/grey.gif" data-original="<?php echo \User\Helper\Avatar::getImage('medium', $user)->image ?>" onload="$(this).LazyLoad()"></a></p>
+		<p class="title-5"><a href="<?php echo $this->url($components, 'user') ?>" class="color-2"><?php echo $user->getUserFullName() ?></a></p>
+		<p class="text-1 color-3"><?php echo nl2br($this->mentionsInput($conversation->conversation)) ?></p>
+	</li>
+	<?php endforeach ?>
+</ul>

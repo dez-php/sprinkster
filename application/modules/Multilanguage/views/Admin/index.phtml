@@ -1,0 +1,68 @@
+<?php echo $this->getController('admin/layout/header_part'); ?>
+
+<?php 
+$self = $this;
+echo $this->widget('widget.grid.db', array(
+	'head' => array(
+		'title' => $this->_('Language'),
+	),
+	'atributes' => 'class="display"',
+	'dataProvider' => new \Language\Language(),
+	'checkbox' => true,
+	'columns' => array(
+		array(
+			'atributes' => 'class="left" style="width:50px;"',
+			'name' => 'id',
+			'label' => '#'
+		),
+		array(
+			'atributes' => 'class="left"',
+			'name' => 'name',
+			'label' => $this->_('Name'),
+			'value' => function($data) use($self) { 
+				$name = $data->name;
+				if($data->id == \Base\Config::get ( 'language_id' )) {
+					$name .= ' <b>' . $self->_('(Default)') . '</b>';
+				}
+				return $name;
+			},
+		),
+		array(
+			'atributes' => 'class="left" style="width:50px;"',
+			'name' => 'code',
+			'label' => $this->_('Code'),
+		),
+		array(
+			'atributes' => 'class="left" style="width:50px;"',
+			'name' => 'locale',
+			'label' => $this->_('Locale'),
+		),
+		array(
+			'atributes' => 'class="left" style="width:50px;"',
+			'name' => 'status',
+			'label' => $this->_('Status'),
+			'value' => function($data) use($self) {
+				if($data->status == 1) {
+					return $self->_('Active');
+				} else {
+					return $self->_('Deactivated');
+				}
+			},
+			'filter' => false
+		),
+	),
+	'has_delete' => function($data) {
+		$delete = true;
+		$pinTable = new \Pin\Pin();
+		if(\Base\Config::get ( 'language_id' ) == $data->id) {
+			$delete = false;
+		} else if($data->id == 1) {
+			$delete = false;
+		}
+		return $delete;
+	}
+));
+
+?>
+
+<?php echo $this->getController('admin/layout/footer_part'); ?>

@@ -1,0 +1,175 @@
+<?php $empty_text = isset($this->options['text-empty']) ? $this->options['text-empty'] : $this->_('There are no users.');?>
+<?php $disable_scroll = isset($this->options['disable-scroll']) ? (bool)$this->options['disable-scroll'] : false;?>
+
+<?php if($users->count()) : ?>
+<?php
+	$self_data = \User\User::getUserData();
+	$gridBoxes = \Base\PermissionMenu::getMenu('GridBoxes');
+?>
+<div>
+
+<?php foreach ($users AS $r => $user) : ?>
+
+<?php
+if($gridBoxes) {
+	foreach ($gridBoxes AS $widget) {
+		if (!$widget->is_widget)
+			continue;
+		$config = array();
+		if ($widget->config) {
+			$config = unserialize($widget->config);
+		}
+		$config['instance'] = $widget;
+		$config['user'] = $user;
+		$config['module'] = $this->options['module'];
+		$config['module_controller'] = $this->options['module_controller'];
+		$config['fromRow'] = $this->options['fromRow'];
+		$config['toRow'] = $this->options['toRow'];
+		$config['row'] = $r;
+		if(!$widget->disabled($user, $config))
+			echo $this->widget($widget->widget, $config);
+
+	}
+}
+?>
+
+<?php $pins = $user->findDependentRowset('Pin\Pin', null, $user->select()->limit(6)->order('id DESC')->where('status = 1')); ?>
+<div class="box box-2 event-box" <?php echo \Core\Html::renderDataAttributes($user->getHtmlAtributes());?>>
+	<div class="head">
+		<p class="text-9 color-5">
+			<a class="color-5" href="<?php echo $this->url(array('user_id' => $user->id,'query'=>$user->username),'user');?>"><?php echo $user->getUserFullname(); ?></a>
+		</p>
+		<p class="avatar margin-top-15 event-avatar-holder">
+			<a href="<?php echo $this->url(array('user_id' => $user->id,'query'=>$user->username),'user');?>">
+				<img alt="<?php echo $user->getUserFullname(); ?>" src="assets/images/grey.gif" data-original="<?php echo \User\Helper\Avatar::getImage('medium', $user)->image; ?>" class="event-load-lazy-load">
+			</a>
+		</p>
+		<?php if($this->type == 'topsellers' && $this->isModuleAccessible('Storerating')): ?>
+			<p class="margin-top-15"><?php echo \Storerating\Helper\Rating::getRating($user->id)?></p>
+		<?php endif;?>
+		<p class="text-2 color-3 <?php echo $this->type == 'topsellers' ? 'margin-top-10': 'margin-top-15'; ?>">
+			<?php echo sprintf($this->_('%s  Collections'), '<span class="event-wishlists">' . $user->wishlists . '</span>'); ?>&nbsp;&nbsp;
+			<?php echo sprintf($this->_('%s Followers'), '<span class="event-followers-'.$user->id.'">' . $user->followers . '</span>'); ?> &nbsp;&nbsp;
+			<?php echo sprintf($this->_('%s  Pins'), '<span class="event-pins">' . $user->pins . '</span>'); ?>
+		</p>
+
+		<?php if ($self_data->id != $user->id) { ?>
+		<p class="margin-top-15">
+			<?php echo $this->widget('user.widget.followbutton', [
+				'user_id' => $user->id,
+				'following' => $user->following_user,
+				'username' => $user->username
+			]);?>
+		</p>
+		<?php } else  {?>
+			<span class="button button-size-2 margin-top-15 no-border-color">&nbsp;</span>
+		<?php } ?>
+
+	</div>
+	<div class="body">
+		<ul class="list-20 clearfix">
+			<?php for ($i = 0; $i < 6; $i++) : ?>
+			<li>
+			<?php
+				if ($pins->offsetExists($i)) :
+					$image = \Pin\Helper\Image::getImage('small', $pins[$i]);
+					$pin = $pins[$i];
+			?>
+				<a href="<?php echo $this->url(['pin_id' => $pin->id, 'query' => $pin->title], 'pin') ?>">
+					<img src="assets/images/grey.gif" data-original="<?php echo $image->image; ?>" width="78" height="78" alt="<?php echo $user->getUserFullname(); ?>">
+				</a>
+			<?php else :
+					$image = \Pin\Helper\Image::noImage('small');
+			?>
+				<a href="javascript:void(0);">
+					<img src="assets/images/grey.gif" data-original="<?php echo $image->image; ?>" width="78" height="78" alt="<?php echo $user->getUserFullname(); ?>">
+				</a>
+			<?php endif ?>
+			</li>
+			<?php endfor ?>
+		</ul>
+	</div>
+</div>
+<?php endforeach ?>
+<?php
+if($users && $gridBoxes) {
+    foreach ($gridBoxes AS $widget) {
+        if (!$widget->is_widget)
+            continue;
+        $config = array();
+        if ($widget->config)
+            $config = unserialize($widget->config);
+
+        $config['instance'] = $widget;
+        $config['user'] = null;
+        $config['module'] = $this->options['module'];
+        $config['module_controller'] = $this->options['module_controller'];
+        $config['fromRow'] = $this->options['fromRow'];
+        $config['toRow'] = $this->options['toRow'];
+        $config['row'] = $r+1;
+        if(!$widget->disabled(null, $config))
+            echo $this->widget($widget->widget, $config);
+
+    }
+}
+?>
+</div>
+
+<p><a class="widget-paginator hide" href="<?php echo $this->getRequest()->getBaseUrl() ?>?widget=user.widget.grid&<?php echo $query; ?>"><?php echo $this->_('Next page'); ?></a></p>
+
+<?php $document = $this->getComponent('document'); ?>
+<?php $document->addScriptFile('assets/js/jquery.infinitescroll.min.js');?>
+<?php $document->addScriptFile('assets/js/masonry.pkgd.min.js');?>
+
+<?php ob_start() ?>
+$('img, .event-load-lazy-load').LazyLoad();
+
+$('.event-masonry').bind('append', function(){
+	$(this).find('img, .event-load-lazy-load').LazyLoad();
+});
+
+/*	masonry */
+var $container = $('.event-masonry');
+$container.masonry({
+	columnWidth: 236,
+	gutter: 10,
+	itemSelector: '.event-box',
+	isFitWidth: true,
+	transitionDuration: 0
+});
+<?php if(!$disable_scroll) { ?>
+$container.infscroll({
+	url: function () {
+		return $('.widget-paginator').attr('href');
+	},
+	offset: 200, //Math.ceil(Math.max($(window).height()*2,($(document).height()/2))),
+	loadingAppendTo: $('.event-masonry').parent(),
+	onSuccess: function (response) {
+		var section = $(response);
+		var elements = section.find('.event-box');
+		var paginator = section.find('.widget-paginator');
+
+		paginator.size() ? $('.widget-paginator').replaceWith(paginator) : $('.widget-paginator').remove();
+
+		if(elements.size())
+		{
+			$("#empty").addClass("hide").hide();
+			$('.event-masonry').append(elements).masonry( 'appended', elements ).find('img').LazyLoad();
+		}
+		else
+		{
+			$('.event-masonry').infscroll('destroy');
+			$("#empty").removeClass("hide").show();
+		}
+
+		if (!paginator.attr('href'))
+			paginator.parents('section').removeClass('hide');
+	}
+});
+<?php } ?>
+<?php $document->addScript('event_activity',ob_get_clean(), \Core\Document::POS_READY) ?>
+<?php else : ?>
+<div class="container container-size-1">
+	<div id="empty" class="notification notification-color-3 tcenter"><?php echo $empty_text ?></div>
+</div>
+<?php endif ?>

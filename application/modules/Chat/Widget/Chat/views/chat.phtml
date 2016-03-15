@@ -1,0 +1,77 @@
+<?php if(!\User\User::getUserData()->id) return ?>
+
+<!-- CHAT // START -->
+<div class="conversation-container"></div>
+
+<div class="container chat">
+	<div class="container container-chat">
+		<a href="#" class="ws-title users-count bg-color-5 color-7 text-9 event-chat-show"><span class="online_users">0</span> <?php echo $this->_('Online Users') ?></a>
+		
+		<div class="hide event-chat-window">
+			<div class="ws-title container container-padding-tb-1 container-padding-lr-2 bg-color-5 color-7">
+				<div class="table-grid table-grid-padding-10 table-grid-cols-3-5">
+					<div class="table-grid-cell">
+						<div class="table-grid table-grid-padding-10 table-grid-cols-1">
+							<div class="table-grid-cell">
+								<p class="text-9 nowrap"><span class="online_users">0</span> <?php echo $this->_('Online Users') ?></p>
+							</div>
+							<div class="table-grid-cell"></div>
+						</div>
+					</div>
+					<div class="table-grid-cell tright" style="width: 5%">
+						<span class="checkbox-slider-wrapper">
+								<span class="checkbox-slider-cell">
+									<span class="checkbox-slider">
+										<input id="ws-online-status" type="checkbox" value="1" />
+										<label for="ws-online-status"><span>&nbsp;</span></label>
+									</span>
+								</span>
+							</span>
+					</div>
+					<div class="table-grid-cell tright" style="width: 5%"><a href="javascript:void(0)" class="icon icon-33 icon-type-12 event-chat-close">Icon</a></div>
+				</div>
+			</div>
+			<div class="container bg-color-1">
+				<ul class="list-chat" id="follow-list">
+				</ul>
+			</div>
+		</div>
+	</div>
+</div>
+
+<script id="conversation-box" type="text/template">
+	<div data-id="${id}" class="box-list ws-chat history_${id}">
+			<div class="box-list-insider">
+			<div class="ws-title container container-padding-tb-1 container-padding-lr-2 bg-color-5">
+				<div class="table-grid table-grid-padding-10 table-grid-cols-2-4">
+					<div class="table-grid-cell">
+						<div class="table-grid table-grid-padding-10 table-grid-cols-2">
+							<div class="table-grid-cell">
+								<p class="text-9 nowrap">${name}</p>
+							</div>
+							<div class="table-grid-cell" style="width: 5%"><span class="icon-id-${id} icon icon-${icon-css} icon-type-6 fleft">Icon</span></div>
+						</div>
+					</div>
+					<div class="table-grid-cell tright"><a href="javascript:void(0)" data-id="${id}" class="close icon icon-33 icon-type-12 event-chat-close">Icon&times;</a></div>
+				</div>
+			</div>
+			<div class="container bg-color-1">
+				<ul class="list-chat chat-dialog" id="chat_${id}">
+					<li>&nbsp;</li>
+				</ul>
+			</div>
+			<div class="container bg-color-10">
+				<div class="form-1 form-margin-10">
+					<div class="form-row">
+						<div class="table-grid">
+							<div class="table-grid-cell"><input type="text" placeholder="<?php echo $this->_('Your message&hellip;') ?>" data-id="${id}" class="ws-message field field-color-8 field-size-1 fill"></div>
+						</div>
+					</div>
+				</div>
+			</div>
+			</div>
+		</div>
+</script>
+<!-- CHAT // END -->
+
+<?php self::getModule('Chat')->addScript(FALSE) ?>

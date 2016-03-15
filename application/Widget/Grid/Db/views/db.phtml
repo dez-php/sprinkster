@@ -1,0 +1,378 @@
+<?php if($this->hasForm) { ?>
+<br class="mtop25" />
+<?php if(isset($success) || isset($error)) { ?>
+<?php if(isset($success)) { ?>
+<span id="<?php echo $this->id;?>-fader" class="fader-message"><span class="msgOk"><span><?php echo $this->_('Success!');?></span><?php echo $success;?></span></span>
+<?php } else if(isset($error)) { ?>
+<span id="<?php echo $this->id;?>-fader" class="fader-message"><span class="msgError"><span><?php echo $this->_('Error!');?></span><?php echo $error;?></span></span>
+<?php } ?>
+<script type="text/javascript"> 
+// <![CDATA[
+$(document).ready(function() {       
+	setTimeout(function() {
+		$("#<?php echo $this->id;?>-fader").customFadeOut("slow" ,    
+		function() {       
+			$("#<?php echo $this->id;?>-fader").remove();  
+		});
+	},
+	10000);
+});
+// ]]>
+</script>
+<?php } ?>
+	
+<?php if($this->helpText) { ?>
+<div class="mtop10 mbot20 msgInfo">
+	<?php echo $this->helpText;?>
+</div>
+<?php } ?>
+	
+<?php if(isset($this->head['title'])) { ?>
+<div class="info_line top">
+	<h3 class="fleft title">
+		<?php if(isset($this->head['icon']) && $this->head['icon']) { ?>
+		<img alt="" src="<?php echo $this->head['icon'];?>">
+		<?php } else { ?>
+		<img alt="" src="cms/admin/images/extensions.png">
+		<?php } ?>
+		<?php echo $this->head['title'];?>	
+	</h3>
+	
+	<?php if($this->checkbox) { ?>
+	<div class="fright mtop3">
+		<?php if($this->add_new) { ?>
+		<a class="button" href="<?php echo $this->add_url ?: $this->url(array('action'=>'create', 'module' => $this->getRequest()->getModule(), 'controller' => $this->getRequest()->getController()), null);?>"><?php echo $this->_('Add new');?></a>
+		<?php } ?>
+		<?php if($this->has_delete_button) { ?>
+		<a class="button" href="javascript:void(0);" onclick="deleteSelected('#<?php echo $this->id;?>');"><?php echo $this->_('Delete selected');?></a>
+		<?php } ?>
+		<?php if($this->buttonsExtend && is_callable($this->buttonsExtend)) { ?>
+		<?php echo call_user_func($this->buttonsExtend, $this);?>
+		<?php } ?>
+	</div>
+	<?php } else { ?>
+	<div class="fright mtop3">
+		<?php if($this->add_new) { ?>
+		<a class="button" href="<?php echo $this->add_url ?: $this->url(array('action'=>'create', 'module' => $this->getRequest()->getModule(), 'controller' => $this->getRequest()->getController()), null);?>"><?php echo $this->_('Add new');?></a>
+		<?php } ?>
+		<?php if($this->buttonsExtend && is_callable($this->buttonsExtend)) { ?>
+		<?php echo call_user_func($this->buttonsExtend, $this);?>
+		<?php } ?>
+	</div>
+	<?php } ?>
+	<div class="clear"></div>
+</div>
+<?php if($this->checkbox) { ?>
+<?php ob_start();?>
+<script type="text/javascript">
+function deleteSelected(id) {
+	var checked = $(id + ' td input.check_list:checked');
+	if(checked.size()) {
+		var inputs='';
+		for(i in checked) {
+			if(checked[i].value) {
+				inputs += '<input type="hidden" name="delete[]" value="' + checked[i].value + '" />';
+			}
+		}
+		if(inputs) {
+			$('#<?php echo $this->id;?>-post').append(inputs).submit();
+		}
+	}
+}
+$(document).ready(function(){
+	$('#<?php echo $this->id;?> .check_all_list').change(function(){
+		$('#<?php echo $this->id;?> .check_list').attr('checked', $(this).is(':checked'));
+	});
+});
+</script>
+<?php $this->placeholder('script', ob_get_clean());?>
+<?php } ?>
+<?php } ?>
+
+<?php ob_start();?>
+<script type="text/javascript">
+$(document).ready(function(){
+	$('input.date_added,input.date_modified,input.due_date').datepicker({
+		'dateFormat' : 'yy-mm-dd'
+	});
+	$('body').append('<form action="" style="display:none;" method="post" id="<?php echo $this->id;?>-post"><input name="<?php echo $this->id;?>" id="showcaseElements-<?php echo $this->id;?>" type="hidden" class="input-hidden" value="showcaseElements"></form>');
+});
+</script>
+<?php $this->placeholder('script', ob_get_clean());?>
+
+
+<form action="" method="get" id="<?php echo $this->id;?>">
+<?php }  //hasForm ?>
+
+	<table cellspacing="0" cellpadding="0"  <?php echo $this->atributes?$this->atributes:' class="display"';?>>
+		<?php if($this->hasForm) { ?>
+		<thead>
+			<tr class="nodrop nodrag">
+				<?php if($this->checkbox) {?>
+				<th width="20"></th>	
+				<?php } ?>
+				<?php 
+				foreach($this->columns_useds AS $column => $c) {
+					$column_data = $this->columns[$column];  
+					$column = $c['name'];
+				?>
+				<th <?php echo $column_data['atributes'];?> data-column-title="<?php echo $this->escape( $column );?>">
+					<?php if( is_array($this->referenceMap) && array_search($column, $this->referenceMap) !== false ) { ?>
+					<?php echo $column_data['label'];?>
+					<?php } elseif(isset($column_data['refTableClass'])) { ?>
+					<?php echo $column_data['label'];?>
+					<?php } elseif(is_callable($column_data['value'])) { ?>
+					<?php echo $column_data['label'];?>
+					<?php } else if($column_data['order']) { ?>
+					<?php 
+					if($column == $this->sort) {
+						$sort_order = array('order' => ($this->order == 'ASC' ? 'DESC' : 'ASC'));
+						$class = 'sort-'.strtolower($this->order);
+					} else {
+						$sort_order = array('sort' => $column, 'order' => $this->order);
+						$class = '';
+					}
+					$link = $this->rebuldLink($this->getRequest()->getFullUrl(),$sort_order);
+					echo '<a class="'.$class.'" href="'.$link.'">'.$column_data['label'].'</a>';
+					?>
+					<?php } else { ?>
+					<?php echo $column_data['label'];?>
+					<?php } ?>
+				</th>
+				<?php } ?>
+				<?php if($this->has_edit || $this->has_delete || ($this->actionsExtend || is_callable($this->actionsExtend))) { ?>
+				<th width="1"><?php echo $this->_('Actions');?></th>
+				<?php } ?>
+			</tr>
+			<?php if(!$this->nosearch) { ?>
+			<tr class="search nodrop nodrag">
+				<?php if($this->checkbox) { ?>
+				<th width="20">
+					<input type="checkbox" class="check_all_list">
+				</th>	
+				<?php } ?>
+				<?php 
+				$r=0;
+				foreach($this->columns_useds AS $column => $c) { 
+					$column_data = $this->columns[$column]; 
+					$column = $c['name'];
+					$r++;
+				?>
+				<th <?php echo $column_data['atributes'];?> data-column-title="<?php echo $this->escape( $column );?>">
+					<?php if($column_data['filter'] && is_callable($column_data['filter'])) { ?>
+					<?php echo call_user_func($column_data['filter']);?>
+					<?php } else if($column_data['filter']) { ?>
+					<?php if(!isset($column_data['refTableClass'])) { ?>
+					<?php if( is_array($this->referenceMap) && ($reference = array_search($column, $this->referenceMap)) !== false ) { ?>
+					<input type="text" data-reference="<?php echo $reference;?>" name="filter[autocomplete][<?php echo $reference;?>][<?php echo $column;?>]" class="event-autocomplete-grid <?php echo $column;?>" value="<?php echo $this->getRequest()->getQuery('filter[autocomplete]['.$reference.']['.$column.']');?>">
+					
+					<?php /* ?>
+					<?php 
+						if(isset($this->referenceMapHelp[$reference]['referenceMap']['where'])) {
+							$refData = $this->dataProvider->findRowset($this->referenceMapHelp[$reference]['referenceMap']['refTableClass'], array(get_class($this->dataProvider) => $this->referenceMapHelp[$reference]['referenceMap']));
+						} else {
+							$refData = $this->dataProvider->findRowset($reference, array(get_class($this->dataProvider) => $this->referenceMapHelp[$reference]));
+						}
+					?>
+					<select style="width: 99%;" name="filter[<?php echo $column;?>]" class="<?php echo $column;?>">
+						<option value=""><?php echo $this->_('Select');?></option>
+						<?php if(isset($this->referenceMapHelp[$reference]['referenceMap']['where'])) { ?>
+							<?php foreach($refData AS $d) { ?>
+							<?php if( $d[$column] == $this->getRequest()->getQuery('filter['.$column.']')) { ?>
+							<option selected="selected" value="<?php echo $d[$column];?>"><?php echo $this->findColum($d);?></option>
+							<?php } else { ?>
+							<option value="<?php echo $d[$column];?>"><?php echo $this->findColum($d);?></option>
+							<?php } ?>
+							<?php } ?>
+						<?php } else { ?>
+							<?php foreach($refData AS $d) { ?>
+							<?php if( $d[$this->referenceMapHelp[$reference]['refColumns']] == $this->getRequest()->getQuery('filter['.$column.']')) { ?>
+							<option selected="selected" value="<?php echo $d[$this->referenceMapHelp[$reference]['refColumns']];?>"><?php echo $this->findColum($d);?></option>
+							<?php } else { ?>
+							<option value="<?php echo $d[$this->referenceMapHelp[$reference]['refColumns']];?>"><?php echo $this->findColum($d);?></option>
+							<?php } ?>
+							<?php } ?>
+						<?php } ?>
+					</select>
+					<?php */ ?>
+					<?php } else { ?>
+					<input type="text" name="filter[<?php echo $column;?>]" value="<?php echo $this->escape($this->getRequest()->getQuery('filter['.$column.']'));?>"  class="<?php echo $column;?>" />
+					<?php } ?>
+					<?php } ?>
+					<?php } ?>
+				</th>
+				<?php } ?>
+				<?php if($this->has_edit || $this->has_delete || ($this->actionsExtend || is_callable($this->actionsExtend))) { ?>
+				<th>
+					<input type="submit" value="<?php echo $this->_('Filter');?>" class="button">
+					&nbsp; <a href="<?php echo $this->url(array('module' => $this->getRequest()->getModule(),'controller'=>$this->getRequest()->getController()),null);?>"><img src="cms/admin/images/reload.png" class="tooltip" alt="" title="<?php echo $this->_('Reset');?>"></a>
+				</th>
+				<?php } ?>
+			</tr>
+			<?php } ?>
+		</thead>
+		<?php } else { ?>
+		<thead>
+			<tr class="nodrop nodrag">
+				<?php 
+				foreach($this->columns_useds AS $column => $c) {
+					$column_data = $this->columns[$column]; 
+					$column = $c['name'];
+				?>
+				<th <?php echo $column_data['atributes'];?> data-column-title="<?php echo $this->escape( $column );?>">
+					<?php echo $column_data['label'];?>
+				</th>
+				<?php } ?>
+			</tr>
+		</thead>
+		<?php } ?>
+		<tbody>
+			<?php if($results) { ?>
+			<?php foreach($results AS $result) { ?>
+			<tr id="row_<?php echo $result[$this->info['primary'][1]];?>" class="grid_rows">
+				<?php if($this->hasForm && $this->checkbox) { ?>
+				<td>
+					<?php if($this->has_delete && ( is_callable($this->has_delete) ? call_user_func($this->has_delete, $result) : true )) { ?>
+					<?php if(is_array($this->getRequest()->getPost('delete')) && in_array($result[$this->info['primary'][1]],$this->getRequest()->getPost('delete'))) { ?>
+					<input type="checkbox" class="check_list" name="action[]" value="<?php echo $result[$this->info['primary'][1]];?>" />
+					<?php } else {?>
+					<input type="checkbox" class="check_list" name="action[]" value="<?php echo $result[$this->info['primary'][1]];?>" />
+					<?php } ?>
+					<?php } ?>
+				</td>
+				<?php } ?>
+				<?php 
+				foreach($this->columns_useds AS $column => $c) {
+					$column_data = $this->columns[$column]; 
+					$column = $c['name'];
+				?>
+				<td <?php echo $column_data['atributes'];?>  data-column="<?php echo $this->escape( $column );?>">
+					<?php
+					if(isset($column_data['refTableClass']) && $column_data['refTableClass']) {
+						$referenceData = $result->findDependentRow($column_data['refTableClass']);
+						if($referenceData) {
+							if(isset($referenceData[$column_data['name']])) {
+								echo $referenceData[$column_data['name']];
+							} else {
+								echo $result[$column_data['refColumn']];
+							}
+						} else {
+							echo isset($result[$column_data['refColumn']])?$result[$column_data['refColumn']]:'';
+						}
+						
+					} else if($this->referenceMap && ($reference = array_search($column, $this->referenceMap)) !== false) {
+						$referenceData = null;
+// 						$reference = \Core\Base\Front::getInstance()->formatModuleName($reference);
+						if($result[$column]) {
+							if(isset($this->referenceMapHelp[$reference]['referenceMap']['where'])) {
+								$whereLambda = null;//create_function('', 'return ' . $this->referenceMapHelp[$reference]['referenceMap']['where'] . ';');
+								//$referenceData = $result->findDependentRow($this->referenceMapHelp[$reference]['referenceMap']['refTableClass'], null/*, $this->dataProvider->select()->where($whereLambda())*/);
+								$referenceData = $result->findDependentRow($reference)->findDependentRow($this->referenceMapHelp[$reference]['referenceMap']['refTableClass']);
+							} else {
+								$referenceData = $result->findDependentRow($reference);
+							} 
+						}
+						
+						if($referenceData && $referenceData instanceof \Core\Db\Table\Row) {
+							if( is_callable($column_data['value']) ) {
+								echo $column_data['value']($referenceData);
+							} else {
+								$result_found = $this->findColum($referenceData, $column);
+								if($result_found != \Widget\Grid\Db::ROW_AUTO_GET_NOT_FOUND) {
+									echo $result_found;
+								} else {
+									echo isset($result[$column])?$result[$column]:'';
+								}
+							}
+						} else {
+							echo isset($result[$column])&&$result[$column]?$result[$column]:(isset($column_data['value'])?(is_callable($column_data['value'])?call_user_func($column_data['value'],$result):$column_data['value']):'');
+						}
+						
+					} else if( is_callable($column_data['value']) ) {
+						echo $column_data['value']($result);
+					} else if($column_data['value'] == \Widget\Grid\Db::DEFAULT_VALUE_STORED) {
+						echo isset($result[$column])?$result[$column]:'';
+					} else {
+						echo isset($result[$column])?$result[$column]:'';
+					}
+					?>
+				</td>
+				<?php } ?>
+				<?php if($this->hasForm && ($this->has_edit || $this->has_delete || ($this->actionsExtend || is_callable($this->actionsExtend)))) { ?>
+				<td align="center">
+					<div class="grid-actions">
+					<?php if($this->has_edit && ( is_callable($this->has_edit) ? call_user_func($this->has_edit, $result) : true )) { ?>
+					<?php if($this->replaceEditLink && is_callable($this->replaceEditLink)) { ?>
+					<a href="<?php echo call_user_func($this->replaceEditLink,$result);?>"<?php echo $this->editInNewWindow ? ' target="_blank"' : '' ?>><img title="<?php echo $this->_('Edit');?>" alt="" class="tooltip" src="cms/admin/images/edit.png"></a>
+					<?php } else { ?>
+					<a href="<?php echo $this->url(array('action'=>'edit', 'module' => $this->getRequest()->getModule(), 'controller' => $this->getRequest()->getController(), 'query'=>'id='.$result[$this->info['primary'][1]]), $this->edit_route, false, false);?>"><img title="<?php echo $this->_('Edit');?>" alt="" class="tooltip" src="cms/admin/images/edit.png"></a>
+					<?php } ?>
+					<?php } ?>
+					<?php if($this->has_delete && ( is_callable($this->has_delete) ? call_user_func($this->has_delete, $result) : true )) { ?>
+					<a onclick="if(confirm('<?php echo $this->escape($this->_('Delete/Uninstall cannot be undone! Are you sure you want to do this?'));?>')) { $('#<?php echo $this->id;?>-post').append('<input type=\'hidden\' name=\'delete[]\' value=\'<?php echo $result[$this->info['primary'][1]];?>\' />').submit(); }" class="delete" href="javascript:void(0);"><img title="<?php echo $this->_('Delete');?>" alt="" class="tooltip" src="cms/admin/images/delete.png"></a>
+					<?php } ?>
+					<?php if($this->actionsExtend && is_callable($this->actionsExtend)) { ?>
+					<?php echo call_user_func($this->actionsExtend, $result, $this);?>
+					<?php } ?>
+					</div>
+				</td>
+				<?php } ?>
+			</tr>
+			<?php } ?>
+			<?php } else { ?>
+			<tr class="nodrop nodrag">
+				<td colspan="<?php echo (count($this->columns_useds)+($this->checkbox?1:0)+(($this->hasForm && ($this->has_edit || $this->has_delete || ($this->actionsExtend || is_callable($this->actionsExtend))))?1:0));?>">
+					<div class="msgAlert"><span><?php echo $this->_('Attention!');?></span><?php echo $this->_('No records found ...');?></div>
+				</td>
+			</tr>
+			<?php } ?>
+		</tbody>
+	</table>
+<?php if($this->hasForm) { ?>
+</form>
+
+<div class="clear"></div>
+<?php } ?>
+<?php if(!$this->nopagination && !$this->hidepagination) { ?>
+<div id="paginator" class="paginator clearfix">
+	<div class="fleft">
+		<?php echo $this->_('Page');?> <b><?php echo $page;?></b> <?php echo $this->_('from');?> <b><?php echo $total_pages;?></b> (<b><?php echo $total_records;?></b> <?php echo $this->_('records');?>)
+	</div>
+	<div class="pagination pages fright">
+		<?php echo $pagination;?>	 
+	</div>
+</div>
+<div class="clear"></div>
+<?php } ?>
+
+
+<script type="text/javascript">
+$('.event-autocomplete-grid').each(function() {
+	var item = $(this);
+	$(this).autocomplete({
+	      source: function( request, response ) {
+	        $.ajax({
+	          url: "?widget=widget.grid.autocomplete",
+	          dataType: "jsonp",
+	          data: {
+	            query: request.term,
+	            table: item.data('reference')
+	          },
+	          success: function( data ) {
+	            response( $.map( data, function( item ) {
+	              return {
+	                label: item.name,
+	                value: item.name
+	              }
+	            }));
+	          }
+	        });
+	      },
+	      minLength: 2,
+	      select: function( event, ui ) {
+	    	  $(this).val(ui.item.label);
+	    	  return false;
+	      }
+	    });
+});
+</script>

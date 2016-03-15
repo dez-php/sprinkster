@@ -1,0 +1,78 @@
+<br class="mtop25" />
+<div class="info_line top">
+	<h3 class="fleft title mbottom0">
+		<img alt="" src="cms/admin/images/quiz.png">
+		<?php echo $this->_('Statistics');?>
+	</h3>
+	<div class="fright mtop3">
+		<select id="select_year_chart">
+			<?php for($year=date('Y');$year>2012;$year--) { ?>
+			<option value="<?php echo $year;?>"><?php echo $year;?></option>
+			<?php } ?>
+		</select>
+	</div>
+	<div class="clear"></div>
+</div>
+
+<div id="container_statistic" style="height: 500px;text-align: center;">
+	<img src="cms/admin/images/ajax-loader.gif" alt="" style="margin-top: 150px;" />
+</div>
+
+
+<script type="text/javascript">
+var chart;
+
+options = {
+		chart: {
+			renderTo: 'container_statistic',
+			type: 'column'
+		},
+		title: {
+			text: ''
+		},
+		subtitle: {
+			text: ''
+		},
+		xAxis: {
+			categories: []
+		},
+		yAxis: {
+			min: 0,
+			title: {
+				text: ''
+			}
+		},
+		legend: {
+			layout: 'vertical',
+			backgroundColor: '#FFFFFF',
+			align: 'left',
+			verticalAlign: 'top',
+			x: 100,
+			y: 70,
+			floating: true,
+			shadow: true
+		},
+		tooltip: {
+			formatter: function() {
+				return ''+ this.x +': '+ this.y;
+			}
+		},
+		plotOptions: {
+			column: {
+				pointPadding: 0.2,
+				borderWidth: 0
+			}
+		},
+		series: [],
+		credits: {enabled:''}
+	}
+
+$(document).ready(function() {
+	$('#select_year_chart').change(function(){
+		$.get('?widget=admin.widget.statisticChart&waction=chart', {year: this.value}, function(data) {
+			options = $.extend({}, options, data);
+			chart = new Highcharts.Chart(options);
+		}, 'json');
+	}).change();
+});
+</script>

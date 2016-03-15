@@ -1,0 +1,4 @@
+<?php 
+$title = $query . ' / ' . (\Meta\Meta::getGlobal('meta_title')?\Meta\Meta::getGlobal('meta_title'):\Meta\Meta::getGlobal('title'));
+?>
+<title><?php echo $title;?></title>

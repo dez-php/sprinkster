@@ -1,0 +1,137 @@
+<?php echo $this->getController('admin/layout/header_part'); ?>
+
+<?php 
+$self = $this;
+$userInviteTable = new \User\UserInvite();
+
+$filter = array(
+	'status' => '!=3'	
+);
+
+$buttons = \Base\Menu::getMenu('admin-user-grid-button', NULL);
+
+echo $this->widget('widget.grid.db', array(
+	'head' => array(
+		'title' => $this->_('Users'),
+		'icon' => 'cms/admin/images/question-type-multiple-correct.png'
+	),
+	'atributes' => 'class="display"',
+	'dataProvider' => new \User\User(),
+	'checkbox' => true,
+	'columns' => array(
+		array(
+			'atributes' => 'class="left" style="width:50px;"',
+			'name' => 'id',
+			'label' => '#'
+		),
+		array(
+			'atributes' => 'class="left"',
+			'name' => 'username',
+			'label' => $this->_('Username')
+		),
+		array(
+			'atributes' => 'class="left"',
+			'name' => 'firstname',
+			'label' => $this->_('First name')
+		),
+		array(
+			'atributes' => 'class="left"',
+			'name' => 'lastname',
+			'label' => $this->_('Last name')
+		),
+		array(
+			'atributes' => 'class="left"',
+			'name' => 'email',
+			'label' => $this->_('Email')
+		),
+		array(
+			'atributes' => 'class="left" style="width:50px;"',
+			'name' => 'wishlists',
+			'label' => $this->_('Wishlists'),
+			'value' => function($data) use($self) { return '<a href="'.$self->url(array('module'=>'wishlist','query'=>'filter[user_id]='.$data->id),'admin_module',false,false).'">'.$data->wishlists.'</a>'; },
+			'filter' => false
+		),
+		array(
+			'atributes' => 'class="left" style="width:50px;"',
+			'name' => 'pins',
+			'label' => $this->_('Pins'),
+			'value' => function($data) use($self) { return '<a href="'.$self->url(array('module'=>'pin','query'=>'filter[user_id]='.$data->id),'admin_module',false,false).'">'.$data->pins.'</a>'; },
+			'filter' => false
+		),
+		array(
+			'atributes' => 'class="left" style="width:50px;"',
+			'name' => 'likes',
+			'label' => $this->_('Likes'),
+			'filter' => false
+		),
+		array(
+			'atributes' => 'class="left" style="width:50px;"',
+			'name' => 'status',
+			'label' => $this->_('Status'),
+			'value' => function($data) use($self) {
+				if($data->status == 1) {
+					return $self->_('Active');
+				} else if($data->status == 2) {
+					return $self->_('Deactivated');
+				} else if($data->status == 0) {
+					return $self->_('Inactive');
+				}
+			},
+			'filter' => false
+		),
+		array(
+			'atributes' => 'class="left" style="width:50px;"',
+			'name' => 'is_admin',
+			'label' => $this->_('Admin'),
+			'value' => function($data) use($self) {
+				if($data->is_admin) {
+					return $self->_('Yes');
+				} else {
+					return $self->_('No');
+				}
+			},
+			'filter' => false
+		),
+	),
+	'filter' => $filter,
+	'replaceDelete' => function($items, $widget) {
+        $userTable = new \User\User();
+        $userTable->getAdapter()->beginTransaction();
+        try {
+            set_time_limit(0);
+            $userTable = new \User\User();
+            foreach ($items AS $item) {
+                /*$item->status = 3;
+                $item->save();*/
+                $userTable->extendDelete($item->id);
+            }
+            $userTable->getAdapter()->commit();
+            return true;
+        } catch(\Core\Db\Exception $e) {
+            $items->setError($e->getMessage());
+            $userTable->getAdapter()->rollBack();
+            return false;
+        }
+	},
+	'add_new' => false,
+	'actionsExtend' => function($data) use($self, $buttons) {
+		$result = '';
+		foreach($buttons AS $widget) {
+			if($widget->is_widget) {
+				$config = [];
+					
+				if($widget->config)
+					$config = unserialize($widget->config);
+
+				$config['instance'] = $widget;
+				$config['user'] = $data;
+				$result .= (string)$this->widget($widget->widget, $config);
+			}
+		}
+		return $result;	
+	},
+));
+
+?>
+
+<?php echo $this->getController('admin/layout/footer_part'); ?>

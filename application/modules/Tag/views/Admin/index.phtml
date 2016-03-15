@@ -1,0 +1,36 @@
+<?php echo $this->getController('admin/layout/header_part'); ?>
+
+<?php 
+$self = $this;
+echo $this->widget('widget.grid.db', array(
+	'head' => array(
+		'title' => $this->_('Tags')
+	),
+	'atributes' => 'class="display"',
+	'dataProvider' => new \Tag\Tag(),
+	'checkbox' => true,
+	'columns' => array(
+		array(
+			'atributes' => 'class="left" style="width:50px;"',
+			'name' => 'id',
+			'label' => '#'
+		),
+		array(
+			'atributes' => 'class="left"',
+			'name' => 'tag',
+			'label' => $this->_('Tag'),
+		)
+		
+	),
+	'add_new' => false,
+	'has_edit' => false,
+	'sort' => 'tag',
+	'order' => 'ASC',
+	'buttonsExtend' => function($widget) use($self) {
+		return '<a class="button" href="' . $self->url([], 'admin_tag_letter') . '">'.$self->_('Letter menu').'</a>';
+	}
+));
+
+?>
+
+<?php echo $this->getController('admin/layout/footer_part'); ?>

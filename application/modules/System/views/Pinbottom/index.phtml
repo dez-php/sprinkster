@@ -1,0 +1,139 @@
+<?php 
+$self = $this;
+$pageMenuTable = new \Base\Menu();
+$widget = $this->widget('widget.grid.db', array(
+	'head' => array(
+		'title' => $this->_('Pin View Bottom'),
+	),
+	'atributes' => 'class="display"',
+	'dataProvider' => new \Base\Menu(),
+	'checkbox' => true,
+	'columns' => array(
+		array(
+			'atributes' => 'class="left" style="width:50px;"',
+			'name' => 'id',
+			'label' => '#',
+			'filter' => false,
+			'order' => false
+		),
+		array(
+			'atributes' => 'class="left"',
+			'name' => 'title',
+			'label' => $this->_('Title'),
+			'filter' => false,
+			'order' => false
+		),
+	),
+	'filter' => array(
+		'group_id' => 'PinViewBottom'
+	),
+	'has_delete' => false,
+	'has_edit' => false,
+	'nosearch' => true,
+	'add_new' => false,
+	'has_delete_button' => false,
+	'sort' => 'sort_order',
+	'order' => 'ASC',
+	'actionsExtend' => function($data) use($self) {
+		ob_start();
+		?>
+		<script type="text/javascript">
+			$(document).ready(function() {
+				$('.add-to-menu').click(function() {
+					$self = $(this);
+					$.post(window.location.href, {toMenu:$self.attr('id').replace('page_','')}, function(json) {
+						if(json.error) {
+							alert(json.error);
+						} else if(json.inMenu === true) {
+							$self.find('img').replaceWith('<img title="<?php echo $self->_('Remove this link from menu');?>" alt="" class="tooltip" src="cms/admin/images/delete2.png">');
+						} else if(json.inMenu === false) {
+							$self.find('img').replaceWith('<img title="<?php echo $self->_('Add this link to menu');?>" alt="" class="tooltip" src="cms/admin/images/add.png">');
+						} else {
+							alert('error');
+						}
+					}, 'json');
+					return false;
+				});
+			});
+		</script>
+		<?php 
+		$self->placeholder('script', ob_get_clean());
+		if($data->status) {
+			return '<a class="add-to-menu" href="javascript:void(0);" id="page_' . $data->id . '"><img title="' . $self->_('Remove this link from menu') . '" alt="" class="tooltip" src="cms/admin/images/delete2.png"></a>';
+		} else {
+			return '<a class="add-to-menu" href="javascript:void(0);" id="page_' . $data->id . '"><img title="' . $self->_('Add this link to menu') . '" alt="" class="tooltip" src="cms/admin/images/add.png"></a>';
+		}
+	},
+	'onPost' => function() use($pageMenuTable, $self) {
+		$result = '';
+		if($self->getRequest()->issetPost('toMenu')) {
+			$id = $self->getRequest()->getPost('toMenu');
+			$result = array();
+			$row = $pageMenuTable->fetchRow($pageMenuTable->makeWhere(array('id' => $id)));
+			try {
+				if($row->status) {
+					$row->status = 0;
+					$row->save();
+					$result['inMenu'] = false;
+				} else {
+					$row->status = 1;
+					$row->save();
+					$result['inMenu'] = true;
+				}
+			} catch (\Core\Exception $e) {
+				$result['error'] = $e->getMessage();
+			}
+		} else if($self->getRequest()->issetPost('row')) {
+			$row = $self->getRequest()->getPost('row');
+			$result = array();
+			if($row && is_array($row)) {
+				$pageMenuTable->getAdapter()->beginTransaction();
+				try {
+					foreach($row AS $sort_order => $page_id) {
+						$pageMenuTable->update(array('sort_order'=>$sort_order), array('id = ?' => $page_id));
+					}
+					$pageMenuTable->getAdapter()->commit();
+					$result['ok'] = true;
+				} catch (\Core\Exception $e) {
+					$pageMenuTable->getAdapter()->rollBack();
+					$result['error'] = $e->getMessage();
+				}
+			} else {
+				$result['error'] = $self->_('Missing post data!');
+			}
+		}
+		
+		return $result;
+	}
+));
+
+?>
+
+<?php echo $this->getController('admin/layout/header_part'); 
+
+echo $widget;
+
+?>
+
+<script>
+  $(function() {
+    $( "#menu-grid table tbody" ).sortable({
+    	items: '> tr',
+    	cursor:'move',
+    	stop: function() {
+			$.post(window.location.href, $( "#menu-grid table tbody" ).sortable('serialize'), function(result) {
+				if(result.ok) {
+					$( "#menu-grid table tbody td[data-column=\"sort_order\"]" ).each(function(i, item) {
+						$(item).html(i);
+					});
+				} else if(result.error) {
+					alert(result.error);
+				}
+			});
+        }
+    });
+    $( "#menu-grid table tbody" ).disableSelection();
+  });
+</script>
+
+<?php echo $this->getController('admin/layout/footer_part'); ?>

@@ -1,0 +1,50 @@
+<?php echo $this->getController('admin/layout/header_part'); ?>
+
+<?php 
+$self = $this;
+echo $this->widget('widget.grid.db', array(
+	'head' => array(
+		'title' => $this->_('Pin Interests'),
+		'icon' => 'cms/admin/images/question-type-multiple-correct.png'
+	),
+	'atributes' => 'class="display"',
+	'dataProvider' => new \Interest\Interest(),
+	'checkbox' => true,
+	'columns' => array(
+		array(
+			'atributes' => 'class="left" style="width:50px;"',
+			'name' => 'id',
+			'label' => '#'
+		),
+		array(
+			'atributes' => 'class="left"',
+			'name' => 'title',
+			'label' => $this->_('Title')
+		),
+		array(
+			'atributes' => 'class="left" style="width:140px;"',
+			'name' => 'category_id',
+			'label' => $this->_('Category')
+		),
+		array(
+			'atributes' => 'class="left" style="width:50px;"',
+			'name' => 'show',
+			'label' => $this->_('Show in category'),
+			'value' => function($data) use($self) {
+				return $self->_($data->show ? 'Yes' : 'No');
+			},
+			'filter' => false
+		),
+		array(
+			'atributes' => 'class="left" style="width:50px;"',
+			'name' => 'followers',
+			'label' => $this->_('Followers'),
+			'filter' => false,
+			'order' => false
+		),
+	)
+));
+
+?>
+
+<?php echo $this->getController('admin/layout/footer_part'); ?>

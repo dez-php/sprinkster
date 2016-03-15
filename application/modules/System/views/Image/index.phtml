@@ -1,0 +1,24 @@
+<?php echo $this->getController('admin/layout/header_part'); ?>
+
+<?php 
+$self = $this;
+echo $this->widget('widget.form.phparray', array(
+	'head' => array(
+		'title' => $this->_('Images Settings'),
+	),
+	'columns' => \Base\Config::getGroupForm('image', $this->_),
+	'onSave' => function($values, $widget) use($self) {
+		\Core\Utils\FileHelper::removeDirectory(BASE_PATH . '/uploads/noimage/', false);
+		if(\Base\Config::updateGroup('image', $values)) {
+            \Core\Utils\FileHelper::removeDirectory(BASE_PATH . '/uploads/noimage/', false);
+			return true;
+		} else {
+			$widget->errors = \Base\Config::getErrors();
+		}
+		return false;
+	}
+));
+
+?>
+
+<?php echo $this->getController('admin/layout/footer_part'); ?>

@@ -1,0 +1,15 @@
+<?php if($interests) { ?>
+<section class="no-shadow" id="interest">
+	<div class="container bgcolor-1 radius-3 fluid">
+		<div class="searchbar searchbar-reverse clearfix with-shadow">
+			<nav class="searchcats clearfix interest-tab">
+				<ul>
+					<?php foreach($interests AS $interest) { ?>
+					<li><a href="<?php echo $this->url(array('query'=>$interest->query),'interest');?>"><?php echo $interest->title;?></a></li>
+					<?php } ?>
+				</ul>
+			</nav>
+		</div>
+	</div>
+</section>
+<?php } ?>

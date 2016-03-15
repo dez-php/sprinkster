@@ -1,0 +1,36 @@
+<?php echo $this->getController('admin/layout/header_part'); ?>
+
+<?php 
+$self = $this;
+$recordTable = new \Base\Menu();
+$category = $recordTable->fetchRow($recordTable->makeWhere(array('id' => $this->getRequest()->getRequest('id'))));
+$config = unserialize($category->config);
+echo $this->widget('widget.form.phparray', array(
+	'head' => array(
+		'title' => \Core\Html::link($this->_('Home page'), $this->url(array('module'=>'homepage'))) . ' &raquo; '. $this->_('Newest pins'),
+	),
+	'columns' => array(
+		array(
+			'name' => 'limit',
+			'label' => $this->_('Limit'),
+			'type' => 'Number',
+			'required' => true,
+			'value' => isset($config['limit'])?$config['limit']:'10'
+		),
+	),
+	'onSave' => function($values, $widget) use($self, $category, $recordTable) {
+		$demo_user_id = \Base\Config::get('demo_user_id');
+		if($demo_user_id && $demo_user_id == \User\User::getUserData()->id) {
+			$widget->errors = $self->_('You don\'t have permissions for this action!');
+			return false;
+		}
+		$category->config = serialize($values);
+		$category->save();
+		return $self->getRequest()->getFullUrl();
+	},
+	'onCancel' => $this->url(array('module'=>'homepage'))
+));
+
+?>
+
+<?php echo $this->getController('admin/layout/footer_part'); ?>

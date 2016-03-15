@@ -1,0 +1,274 @@
+a:2:{s:4:"data";s:9825:"<!doctype html>
+<html xmlns:fb="https://www.facebook.com/2008/fbml">
+	<head>
+		<meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, height=device-height, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+		<base href="http://sprinkster.com/">
+		
+				<link rel="icon" href="http://sprinkster.com/cache/favicon.ico" type="image/x-icon" >
+        <link href="http://sprinkster.com/cache/favicon.ico" rel="SHORTCUT ICON"/>
+				
+		<link href="http://fonts.googleapis.com/css?family=Lato:400,400italic,700,700italic,900,900italic" rel="stylesheet" type="text/css" />
+		<link href="http://sprinkster.com/assets/css/main.css" rel="stylesheet" type="text/css" />
+		<link href="http://sprinkster.com/assets/js/jquery-mentions/jquery.mentionsInput.css" rel="stylesheet" type="text/css" />
+		<link href="http://sprinkster.com/assets/CLEditor/jquery.cleditor.css" rel="stylesheet" type="text/css" />
+
+						<script type="text/javascript">
+			var current_route = 'bookmarklet-create-pin-index';
+						var browserDetect = {
+				isMobile: false,
+				isTablet: false,
+				isDesktop: true			};
+		</script>
+		<script type="text/javascript" src="http://sprinkster.com/i18/js?1"></script>
+		<script type="text/javascript" src="http://sprinkster.com/assets/js/combine.min.js"></script>
+		
+				
+				
+				
+		
+        
+        
+	</head>
+	
+	<body class="pad-1 body-bookmarklet-create-pin" id="body-top">
+
+    			
+		
+<script type="text/javascript">
+var nonSubmitters = [];
+</script>
+
+<div class="container container-size-11 container-radius-1 container-padding-5 container-shadow-1 bg-color-1 position-relative responsive-popup">
+	<h3 class="title-2 title-border-bottom-1 color-1">Add a Image from a website</h3>
+
+	<form id="event-form-create-pin" action="http://sprinkster.com/bookmarklet/create-pin?" method="post" class="form-1 form-margin-20 margin-top-20">
+		<input name="media" type="hidden" value="http://sprinkster.com/assets/images/logo-2.png" />
+		<input name="url" type="hidden" value="http://sprinkster.com/user/following/mark" />
+		<input name="charset" type="hidden" value="UTF-8" />
+		<input type="hidden" name="X-form-cmd" value="13fe741da160361b3ae3b6ded1e92250-5c064b5823" />
+
+		
+		
+		<div class="form-row margin-top-20">
+			<div class="table-grid">
+				<div class="table-grid-cell">
+					<img class="fill event-image-container" src="http://sprinkster.com/assets/images/logo-2.png" />
+				</div>
+			</div>
+		</div>
+		<div class="form-row form-row-group-top form-row-group-top-padding-3 margin-top-20">
+			<div class="table-grid">
+				<div class="table-grid-cell">
+					<input name="title" id="f-1" type="text" class="field field-color-1 field-size-1 fill" placeholder="Title" value="Mark Pena / Pintastic meta title" />
+				</div>
+			</div>
+		</div>
+		<div class="form-row">
+			<div class="table-grid">
+				<div class="table-grid-cell"><textarea name="description" id="f-2" placeholder="Description" class="field field-color-1 field-size-1 field-size-1-c fill event-elastic event-wysiwyg-editor">Mark Pena / Pintastic meta title</textarea></div>
+			</div>
+		</div>
+		<div class="form-row">
+			<div class="table-grid">
+				<div class="table-grid-cell">
+					<select name="category_id" class="select select-color-1 select-size-1 fill">
+						<option>Select Category</option>
+												<option  value="1">Architecture</option>
+												<option  value="33">Architecture -> Urban architecture</option>
+												<option  value="2">Art</option>
+												<option  value="3">Cars &amp; Motorcycles</option>
+												<option  value="34">Cars &amp; Motorcycles -> American muscle</option>
+												<option  value="4">Design</option>
+												<option  value="5">DIY &amp; Crafts</option>
+												<option  value="6">Education</option>
+												<option  value="7">Film, Music &amp; Books</option>
+												<option  value="8">Fitness</option>
+												<option  value="9">Food &amp; Drink</option>
+												<option  value="10">Gardening</option>
+												<option  value="11">Geek</option>
+												<option  value="12">Hair &amp; Beauty</option>
+												<option  value="13">History</option>
+												<option  value="14">Holidays</option>
+												<option  value="15">Home Decor</option>
+												<option  value="16">Humor</option>
+												<option  value="17">Kids</option>
+												<option  value="20">Men&#039;s Apparel</option>
+												<option  value="18">My Life</option>
+												<option  value="32">Other</option>
+												<option  value="21">Outdoors</option>
+												<option  value="22">People</option>
+												<option  value="23">Pets</option>
+												<option  value="24">Photography</option>
+												<option  value="25">Print &amp; Posters</option>
+												<option  value="26">Products</option>
+												<option  value="27">Science &amp; Nature</option>
+												<option  value="28">Sports</option>
+												<option  value="29">Technology</option>
+												<option  value="30">Travel &amp; Places</option>
+												<option  value="31">Wedding &amp; Events</option>
+												<option  value="19">Women&#039;s Apparel</option>
+											</select>
+				</div>
+			</div>
+		</div>
+
+		<div class="form-row form-row-group-top form-row-group-top-padding-3 margin-top-20 item-tag-autocomplete position-relative">
+	<div class="table-grid">
+		<div class="table-grid-cell"><input type="text" data-item-height="40" data-visible-items="5" class="field field-color-1 field-size-1 fill event-tags-add event-tags-autocomplete" placeholder="Add Tag"></div>
+	</div>
+</div>
+<div class="form-row">
+	<div class="table-grid">
+		<div class="table-grid-cell">
+			<div class="tags event-pin-tags">
+							</div>
+		</div>
+	</div>
+</div>
+
+<div class="event-tags-carrier hide">
+	</div>
+
+<script type="Text/javascript">
+nonSubmitters.push("event-tags-add");
+
+$(".event-tags-add").keyup(function(e) {
+	var code = e.which || e.keyCode;
+	var keys = [ 10, 13 ];
+	var symbols = [ ',' ];
+
+	var $this = $(this);
+
+	if(-1 === keys.indexOf(code) && -1 === symbols.indexOf($this.val()[$this.val().length - 1]))
+		return;
+
+	if(-1 < symbols.indexOf($this.val()[$this.val().length - 1]))
+		$this.val($this.val().substring(0, $this.val().length - 1));
+
+	_add_tag(this);
+
+	return false;
+}).keydown(function(e) {
+	var code = e.which || e.keyCode;
+	if(code == 13) {
+		e.preventDefault();
+		return false;
+	}
+});
+
+$(".event-pin-tags").find("a").on("click", function() {
+	_remove_tag(this);
+});
+
+var total_tags = 0;
+function _add_tag(input)
+{
+	var exists = false;
+	var $input = $(input);
+	var tags = [];
+	var value = $('<div>').html($input.val()).text();
+	
+	if(!value)
+		return;
+
+	$(".tags-autocomplete").closest(".autocomplete").hide().addClass("hide");
+
+	$.each($(".event-pin-tags").find("a"), function() {
+		if($(this).find(".event-tag-name").text() !== value)
+			return true;
+
+		exists = true;
+		return false;
+	});
+
+	if(exists)
+	{
+		$input.val("");
+		return;
+	}
+
+	var $tag = $('<a class="button button-type-1 button-color-3 button-size-1" href="javascript:void(0)" data-tid="t_' + total_tags + '"></a>');
+
+	$tag.html('<span class="event-tag-name">' + value + '</span> <span class="color-2">&times;</span>');
+
+	$tag.appendTo(".event-pin-tags");
+	$(".event-tags-carrier").append('<input name="extended[tags][]" type="hidden" value="' + value.replace(/"/g,'&quot;') + '" data-tid="t_' + total_tags + '" />');
+
+	$input.val("");
+	total_tags++;
+	$(".event-pin-tags").find("a").off().on("click", function() {
+		_remove_tag(this);
+	});
+}
+
+function _remove_tag(link)
+{
+	var $link = $(link),
+		tid = $link.data('tid');
+	$(".event-tags-carrier input[data-tid=" + tid + "]").remove();
+	$link.remove();
+}
+</script>
+
+<script type="text/javascript">
+Turbo.head({
+	js: [ 'assets/js/jquery.autoComplete.js' ],
+	callback: function() {
+		$('.event-tags-autocomplete').autoComplete({
+			ajax: 'http://sprinkster.com/tag/',
+			maxHeight: 331,
+			width: 357,
+			backwardsCompatible: true,
+			list: "tags-autocomplete",
+			onSelect: function() {
+				_add_tag(this);
+			},
+			onShow: function(event, data) {
+				data.ul.addClass("list-text");
+			},
+			// multiple: true,
+			// multipleSeparator: ','
+		});
+	}
+});
+</script>
+		<div class="form-row form-row-group-top form-row-group-top-padding-3 margin-top-20 responsive-form-submit-row">
+			<div class="table-grid">
+				<div class="table-grid-cell tright">
+					<button type="button" class="button button-type-1 button-color-3 button-size-3 margin-right-10  event-window-close">Cancel</button>
+					<button type="submit" class="button button-type-1 button-color-2 button-size-3 event-url-save">Save</button>
+				</div>
+			</div>
+		</div>
+	</form>
+
+</div>
+<!-- POPUP 7 // END -->
+
+<script type="text/javascript">
+var svg = new Image();
+svg.src = 'assets/images/loaders/spinning-loader.svg';
+$('#event-form-create-pin').submit(function(){
+	App.addLoader('.event-url-save');
+	$('.notification').remove();
+});
+</script>
+<script type="text/javascript">
+	var height = parseInt($('body').css('padding-bottom'));
+	$('body').find('>*').each(function() {
+		height += $(this).outerHeight(true);
+		pt = $(this).css('padding-top');
+		if(pt) { height += parseInt(pt); }
+		pb = $(this).css('padding-bottom');
+		if(pb) { height += parseInt(pb); }  
+	});
+	height = Math.min(height, window.screen.availHeight||window.screenTop||window.screenY);
+	width = Math.min(window.screen.availWidth||window.screenLeft||window.screenX||800,800);
+	window.resizeTo(width,height);
+	$('.event-window-close').click(function() {
+		window.close();
+	});
+</script>		
+	</body>
+</html>";s:7:"headers";a:0:{}}

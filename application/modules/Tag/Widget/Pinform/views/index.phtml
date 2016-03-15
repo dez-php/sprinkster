@@ -1,0 +1,130 @@
+<div class="form-row form-row-group-top form-row-group-top-padding-3 margin-top-20 item-tag-autocomplete position-relative">
+	<div class="table-grid">
+		<div class="table-grid-cell"><input type="text" data-item-height="40" data-visible-items="5" class="field field-color-1 field-size-1 fill event-tags-add event-tags-autocomplete" placeholder="<?php echo $this->_('Add Tag') ?>"></div>
+	</div>
+</div>
+<div class="form-row">
+	<div class="table-grid">
+		<div class="table-grid-cell">
+			<div class="tags event-pin-tags">
+				<?php if(isset($tags) && $tags && 0 < $tags->count()): ?>
+				<?php foreach($tags as $tag): ?>
+				<a class="button button-type-1 button-color-3 button-size-1" href="javascript:void(0)" data-tid="o_<?php echo $tag->id; ?>"><span class="event-tag-name"><?php echo $tag->tag ?></span> <span class="color-2">&times;</span></a>
+				<?php endforeach ?>
+				<?php endif ?>
+			</div>
+		</div>
+	</div>
+</div>
+
+<div class="event-tags-carrier hide">
+	<?php if(isset($tags) && $tags && 0 < $tags->count()): ?>
+	<?php foreach($tags as $tag): ?>
+	<input name="extended[tags][]" type="hidden" value="<?php echo $tag->tag ?>" data-tid="o_<?php echo $tag->id; ?>" />
+	<?php endforeach ?>
+	<?php endif ?>
+</div>
+
+<script type="Text/javascript">
+nonSubmitters.push("event-tags-add");
+
+$(".event-tags-add").keyup(function(e) {
+	var code = e.which || e.keyCode;
+	var keys = [ 10, 13 ];
+	var symbols = [ ',' ];
+
+	var $this = $(this);
+
+	if(-1 === keys.indexOf(code) && -1 === symbols.indexOf($this.val()[$this.val().length - 1]))
+		return;
+
+	if(-1 < symbols.indexOf($this.val()[$this.val().length - 1]))
+		$this.val($this.val().substring(0, $this.val().length - 1));
+
+	_add_tag(this);
+
+	return false;
+}).keydown(function(e) {
+	var code = e.which || e.keyCode;
+	if(code == 13) {
+		e.preventDefault();
+		return false;
+	}
+});
+
+$(".event-pin-tags").find("a").on("click", function() {
+	_remove_tag(this);
+});
+
+var total_tags = 0;
+function _add_tag(input)
+{
+	var exists = false;
+	var $input = $(input);
+	var tags = [];
+	var value = $('<div>').html($input.val()).text();
+	
+	if(!value)
+		return;
+
+	$(".tags-autocomplete").closest(".autocomplete").hide().addClass("hide");
+
+	$.each($(".event-pin-tags").find("a"), function() {
+		if($(this).find(".event-tag-name").text() !== value)
+			return true;
+
+		exists = true;
+		return false;
+	});
+
+	if(exists)
+	{
+		$input.val("");
+		return;
+	}
+
+	var $tag = $('<a class="button button-type-1 button-color-3 button-size-1" href="javascript:void(0)" data-tid="t_' + total_tags + '"></a>');
+
+	$tag.html('<span class="event-tag-name">' + value + '</span> <span class="color-2">&times;</span>');
+
+	$tag.appendTo(".event-pin-tags");
+	$(".event-tags-carrier").append('<input name="extended[tags][]" type="hidden" value="' + value.replace(/"/g,'&quot;') + '" data-tid="t_' + total_tags + '" />');
+
+	$input.val("");
+	total_tags++;
+	$(".event-pin-tags").find("a").off().on("click", function() {
+		_remove_tag(this);
+	});
+}
+
+function _remove_tag(link)
+{
+	var $link = $(link),
+		tid = $link.data('tid');
+	$(".event-tags-carrier input[data-tid=" + tid + "]").remove();
+	$link.remove();
+}
+</script>
+
+<script type="text/javascript">
+Turbo.head({
+	js: [ 'assets/js/jquery.autoComplete.js' ],
+	callback: function() {
+		$('.event-tags-autocomplete').autoComplete({
+			ajax: '<?php echo $this->url([],'tag') ?>',
+			maxHeight: 331,
+			width: 357,
+			backwardsCompatible: true,
+			list: "tags-autocomplete",
+			onSelect: function() {
+				_add_tag(this);
+			},
+			onShow: function(event, data) {
+				data.ul.addClass("list-text");
+			},
+			// multiple: true,
+			// multipleSeparator: ','
+		});
+	}
+});
+</script>

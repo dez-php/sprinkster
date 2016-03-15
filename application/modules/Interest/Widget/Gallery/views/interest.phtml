@@ -1,0 +1,127 @@
+<?php $pin = $interest && ($rel = $interest->Order('pin_id ASC')->Pin()) ? $rel->Pin() : null;?>
+<?php ?>
+<?php if($pin) { ?>
+<?php \Core\Registry::set('pin_interest', $pin);?>
+<?php $self = \User\User::getUserData();?>
+<?php $document = $this->getComponent('document'); ?>
+<?php ob_start();?>
+<?php if($pin) { ?>
+.interestHeader .headerBackground {
+	background-color: <?php echo $pin ? $pin->background_color : 'transparent'?>;
+}
+.interestHeader .headerBackground .bgGradient {
+	background: -moz-linear-gradient(left,  rgba(<?php echo implode(',',\Core\Utils\Color::HexToRGB($pin->background_color));?>,1) 0%, rgba(<?php echo implode(',',\Core\Utils\Color::HexToRGB($pin->background_color));?>,0) 17%, rgba(<?php echo implode(',',\Core\Utils\Color::HexToRGB($pin->background_color));?>,1) 60%, rgba(<?php echo implode(',',\Core\Utils\Color::HexToRGB($pin->background_color));?>,1) 100%); /* FF3.6+ */
+	background: -webkit-gradient(linear, left top, right top, color-stop(0%,rgba(<?php echo implode(',',\Core\Utils\Color::HexToRGB($pin->background_color));?>,1)), color-stop(17%,rgba(<?php echo implode(',',\Core\Utils\Color::HexToRGB($pin->background_color));?>,0)), color-stop(35%,rgba(<?php echo implode(',',\Core\Utils\Color::HexToRGB($pin->background_color));?>,0)), color-stop(100%,rgba(<?php echo implode(',',\Core\Utils\Color::HexToRGB($pin->background_color));?>,1))); /* Chrome,Safari4+ */
+	background: -webkit-linear-gradient(left,  rgba(<?php echo implode(',',\Core\Utils\Color::HexToRGB($pin->background_color));?>,1) 0%,rgba(<?php echo implode(',',\Core\Utils\Color::HexToRGB($pin->background_color));?>,0) 17%,rgba(<?php echo implode(',',\Core\Utils\Color::HexToRGB($pin->background_color));?>,1) 60%,rgba(<?php echo implode(',',\Core\Utils\Color::HexToRGB($pin->background_color));?>,1) 100%); /* Chrome10+,Safari5.1+ */
+	background: -o-linear-gradient(left,  rgba(<?php echo implode(',',\Core\Utils\Color::HexToRGB($pin->background_color));?>,1) 0%,rgba(<?php echo implode(',',\Core\Utils\Color::HexToRGB($pin->background_color));?>,0) 17%,rgba(<?php echo implode(',',\Core\Utils\Color::HexToRGB($pin->background_color));?>,1) 60%,rgba(<?php echo implode(',',\Core\Utils\Color::HexToRGB($pin->background_color));?>,1) 100%); /* Opera 11.10+ */
+	background: -ms-linear-gradient(left,  rgba(<?php echo implode(',',\Core\Utils\Color::HexToRGB($pin->background_color));?>,1) 0%,rgba(<?php echo implode(',',\Core\Utils\Color::HexToRGB($pin->background_color));?>,0) 17%,rgba(<?php echo implode(',',\Core\Utils\Color::HexToRGB($pin->background_color));?>,1) 60%,rgba(<?php echo implode(',',\Core\Utils\Color::HexToRGB($pin->background_color));?>,1) 100%); /* IE10+ */
+	background: linear-gradient(to right,  rgba(<?php echo implode(',',\Core\Utils\Color::HexToRGB($pin->background_color));?>,1) 0%,rgba(<?php echo implode(',',\Core\Utils\Color::HexToRGB($pin->background_color));?>,0) 17%,rgba(<?php echo implode(',',\Core\Utils\Color::HexToRGB($pin->background_color));?>,1) 60%,rgba(<?php echo implode(',',\Core\Utils\Color::HexToRGB($pin->background_color));?>,1) 100%); /* W3C */
+}
+.interestHeader .headerBackground.forwards .bgGradient {
+	background: -moz-linear-gradient(right,  rgba(<?php echo implode(',',\Core\Utils\Color::HexToRGB($pin->background_color));?>,1) 0%, rgba(<?php echo implode(',',\Core\Utils\Color::HexToRGB($pin->background_color));?>,0) 17%, rgba(<?php echo implode(',',\Core\Utils\Color::HexToRGB($pin->background_color));?>,1) 60%, rgba(<?php echo implode(',',\Core\Utils\Color::HexToRGB($pin->background_color));?>,1) 100%); /* FF3.6+ */
+	background: -webkit-gradient(linear, right top, left top, color-stop(0%,rgba(<?php echo implode(',',\Core\Utils\Color::HexToRGB($pin->background_color));?>,1)), color-stop(17%,rgba(<?php echo implode(',',\Core\Utils\Color::HexToRGB($pin->background_color));?>,0)), color-stop(35%,rgba(<?php echo implode(',',\Core\Utils\Color::HexToRGB($pin->background_color));?>,0)), color-stop(100%,rgba(<?php echo implode(',',\Core\Utils\Color::HexToRGB($pin->background_color));?>,1))); /* Chrome,Safari4+ */
+	background: -webkit-linear-gradient(right,  rgba(<?php echo implode(',',\Core\Utils\Color::HexToRGB($pin->background_color));?>,1) 0%,rgba(<?php echo implode(',',\Core\Utils\Color::HexToRGB($pin->background_color));?>,0) 17%,rgba(<?php echo implode(',',\Core\Utils\Color::HexToRGB($pin->background_color));?>,1) 60%,rgba(<?php echo implode(',',\Core\Utils\Color::HexToRGB($pin->background_color));?>,1) 100%); /* Chrome10+,Safari5.1+ */
+	background: -o-linear-gradient(right,  rgba(<?php echo implode(',',\Core\Utils\Color::HexToRGB($pin->background_color));?>,1) 0%,rgba(<?php echo implode(',',\Core\Utils\Color::HexToRGB($pin->background_color));?>,0) 17%,rgba(<?php echo implode(',',\Core\Utils\Color::HexToRGB($pin->background_color));?>,1) 60%,rgba(<?php echo implode(',',\Core\Utils\Color::HexToRGB($pin->background_color));?>,1) 100%); /* Opera 11.10+ */
+	background: -ms-linear-gradient(right,  rgba(<?php echo implode(',',\Core\Utils\Color::HexToRGB($pin->background_color));?>,1) 0%,rgba(<?php echo implode(',',\Core\Utils\Color::HexToRGB($pin->background_color));?>,0) 17%,rgba(<?php echo implode(',',\Core\Utils\Color::HexToRGB($pin->background_color));?>,1) 60%,rgba(<?php echo implode(',',\Core\Utils\Color::HexToRGB($pin->background_color));?>,1) 100%); /* IE10+ */
+	background: linear-gradient(to left,  rgba(<?php echo implode(',',\Core\Utils\Color::HexToRGB($pin->background_color));?>,1) 0%,rgba(<?php echo implode(',',\Core\Utils\Color::HexToRGB($pin->background_color));?>,0) 17%,rgba(<?php echo implode(',',\Core\Utils\Color::HexToRGB($pin->background_color));?>,1) 60%,rgba(<?php echo implode(',',\Core\Utils\Color::HexToRGB($pin->background_color));?>,1) 100%); /* W3C */
+}
+.interestHeader .headerBackground .Image {
+	background-image: url(<?php echo $pin ? \Pin\Helper\Image::getImage('big', $pin)->image : ''?>);
+}
+<?php } ?>
+<?php $document->addCss('interest-header', ob_get_clean());?>
+
+<div class="container container-padding-header interestHeader">
+	<div class="container container-relative">
+		<div class="headerBackground <?php echo ($pin&&$pin->id%2?'forwards':'')?>">
+			<div class="bgGradient"></div>
+			<div class="Image"></div>
+		</div>
+		<div class="holder-description">
+			<h1><?php echo $interest->title;?></h1>
+			<p class="follow margin-top-20">
+
+				<?php echo $this->widget('interest.widget.followbutton', [
+					'interest_id' => $interest->id,
+					'following' => $self->id ? $interest->IsFollow() : null,
+					'title' => $interest->title
+				]);?>
+			</p>
+			<?php $followers = $interest->CountFollows();?>
+			<p class="interest-follow">
+				<?php echo sprintf($this->_('%s Followers'), '<span class="num event-followers-interest-'.$interest->id.'">'.$followers.'</span>');?>
+				<?php if($interest->date_modified) { ?>
+				<?php $date = (new \Date\Helper\Diff(time(), $interest->date_modified))->getSingle(); ?>
+				&nbsp; <?php echo sprintf($this->_('Updated %d %s ago'), $date->value, $date->key); ?>
+				<?php } ?>
+			</p>
+			<div>
+				<nav class="usermenu cell-25">
+					<ul>
+						<?php if($followers) { ?>
+						<?php foreach($interest->Order('id DESC')->Limit(8)->Follows() AS $follow) { ?>
+						<?php $user = $follow->User();?>
+						<?php if($user) {?>
+						<li><a class="member event-tooltip" href="<?php echo $this->url(array('user_id'=>$user->id,'query'=>$this->urlQuery($user->username)),'user');?>" title="<?php echo $this->escape($user->getUserFullname());?>"><img class="event-load-lazy-load" data-original="<?php echo \User\Helper\Avatar::getImage('small', $user)->image;?>" src="assets/images/grey.gif" width="60" height="60" alt="avatar"/></a></li>
+						<?php } ?>
+						<?php } ?>
+						<?php } ?>
+					</ul>
+				</nav>
+			</div>
+		</div>
+	</div>
+</div>
+
+<?php if($interests && $interests->count()) { ?>
+
+<!-- THUMBS SCROLLER // START -->
+<div class="container container-border-1 container-shadow-2 bg-color-1 responsive-thumbs-scroller">
+	<div class="thumbs-scroller event-thumbs-scroller">
+		<ul class="list-35 clearfix">
+			<?php foreach($interests as $interest) { ?>
+			<?php
+			$image = $title = null;
+			try
+			{
+				$pin = $interest->Pin();
+				$pin = $pin ? $pin->Pin() : NULL;
+				
+				if($pin) {
+					$image = \Pin\Helper\Image::getImage('small', $pin)->image;
+					$title = $pin->title;
+				}
+			}
+			catch(\Exception $e)
+			{
+				//throw $e;
+			}
+			?>
+			<li>
+				<a href="<?php echo $this->url([ 'interest_id' => $interest->id, 'query' => $this->urlQuery($interest->title) ], 'interest') ?>">
+					<img class="event-load-lazy-load" alt="<?php echo $this->escape($title);?>" src="assets/images/grey.gif" data-original="<?php echo $image;?>" onload="$(this).LazyLoad();" />
+					<span class="text-9 color-2"><?php echo $interest->title;?></span>
+				</a>
+			</li>
+			<?php } ?>
+		</ul>
+	</div>
+</div>
+<!-- THUMBS SCROLLER // END -->
+
+<?php ob_start();?>
+$('.event-bxSlider-slider').each(function() {
+	var slider = $('.event-bxSlider', this).bxSlider({
+		slideWidth: 100,
+		slideMargin: 10,
+		pager: false,
+		nextSelector: $('.event-next', this),
+		prevSelector: $('.event-prev', this),
+		minSlides: 2,
+		maxSlides: 30
+	});
+});
+<?php $document->addScript('.event-bxSlider-slider', ob_get_clean());?>
+
+<?php } ?>
+<?php } ?>

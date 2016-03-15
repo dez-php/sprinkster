@@ -1,0 +1,193 @@
+<?php
+
+$me = \User\User::getUserData();
+$media = new \Media\Helper\UrlInfo;
+
+$thumb = $pin->getImage('small')->image;
+$thumb2 = $pin->getImage('medium')->image;
+$image = $pin->getImage('big');
+$width = $image->width;
+$height = $image->height;
+$image = $image->image;
+?>
+
+<?php if(!$isXmlHttpRequest && $this->getRequest()->getParam('RSP') != 'html'): ?>
+<?php echo $this->getController('home/layout/header_part') ?>
+<?php endif ?>
+
+<!-- WRAPPER - FOOTER HEIGHT // START -->
+<div class="container event-item-contaner <?php if(!$popup && $this->getRequest()->getQuery('nolayout') != 'true') { ?>container-padding-header container-padding-footer<?php } ?><?php if(!$isXmlHttpRequest && $this->getRequest()->getParam('RSP') != 'html') { ?> item-hide-html-close<?php } ?>" <?php echo \Core\Html::renderDataAttributes($pin->getHtmlAtributes());?>>
+
+<!-- CONTENT // START -->
+<div class="container container-padding-tb-6 container-padding-lr-5 responsive-content pin-hide-close event-item-<?php echo $pin->id;?>">
+	<div class="container container-size-1 clearfix responsive-pin">
+		<div class="container container-size-11 container-radius-1 container-shadow-1 bg-color-1 fleft">
+			<div class="container container-padding-4">
+				<h2 class="title-2 color-1 event-item-title"><?php echo $pin->title ?></h2>
+				<div class="container margin-top-10 clearfix">
+					<?php if($pin->source_id) { ?>
+					<p class="fleft margin-right-15">
+						<a class="icon-wrapper event-tooltip event-pinned-from" href="<?php echo $pin->redirect_from;?>" target="_blank" title="<?php echo $this->escape(sprintf($this->_('Pinned from %s'), $pin->Source()->name));?>">
+							<span class="icon icon-type-3 icon-43"></span>
+							<span class="text-3 color-3"><?php echo $pin->Source()->name;?></span>
+						</a>
+					</p>
+					<?php } ?>
+					<p class="fleft margin-right-15 text-3 color-3" style="margin-top:2px;">
+						<?php $date = new \Date\Helper\Diff($pin->date_added, time()); ?>
+						<?php echo sprintf($this->_('%s %d %s ago'), $this->_($pin->pinned_from),$date->getSingle()->value, $this->_($date->getSingle()->key));?>
+					</p>
+					<?php if($wishlist->id) { ?>
+					<p class="fleft text-3 color-3" style="margin-top:2px;">
+						<a href="<?php echo $this->url([ 'wishlist_id' => $wishlist->id, 'query' => $this->urlQuery($wishlist->title) ], 'wishlist') ?>"><?php echo sprintf($this->_('Saved to %s'), $wishlist->title); ?></a>
+					</p>
+					<?php } ?>
+				</div>
+			</div>
+			<div class="featured-image-full event-preview-holder" style="text-align:center">
+
+
+				<?php if($pin->video && $media->parseUrl($pin->from)) : ?>
+                <div class="videoWrapper">
+                <?php
+					$media->setWidth(800);
+					$media->setHeight(600);
+					echo $media->getEmbedCode();
+				?>
+                </div>
+				<?php else : ?>
+					<?php /* ?>
+					<img class="event-preview event-load-lazy-load transition-all-2 opacity-5" alt="<?php echo $this->_('image') ?>" src="<?php echo $thumb2;?>" data-original="<?php echo $image ?>" width="<?php echo $width;?>" height="<?php echo $height;?>" />
+					<?php */ ?>
+					<img class="event-preview event-load-lazy-load transition-all-2 opacity-5" alt="<?php echo $this->escape($pin->title); ?>" src="<?php echo $image;?>" width="<?php echo $width;?>" height="<?php echo $height;?>" />
+				<?php endif ?>
+
+                <div class="event-PinRibbon"></div>
+
+				<ul class="list-28 clearfix event-stats-<?php echo $pin->id;?> event-PinActions"></ul>
+
+				<ul class="list-28 clearfix event-PinButtons"></ul>
+			</div>
+			
+			<div class="event-PinViewGallery"></div>
+
+			<div class="container container-padding-5">
+
+				<div class="event-PinViewMiddle"></div>
+				
+				<div class="event-PinViewBottom"></div>
+			</div>
+		</div>
+		<div class="container container-size-9 fright">
+			<div class="container-padding-3 container-radius-1 container-shadow-1 bg-color-1">
+				<div class="table-grid table-grid-cols-2 <?php /*if($popup) { ?>3<?php } else { ?>2<?php }*/ ?> table-grid-padding-10">
+					<?php if($prev_pin) : ?>
+					<div class="table-grid-cell wida">
+						<a class="button button-type-1 button-color-2 button-size-3 fill event-turbo-click event-prev" <?php if($popup) { ?> data-popup="true"<?php } ?> href="<?php echo $this->url(array('pin_id' => $prev_pin->id,'query'=>$this->urlQuery($prev_pin->title)),'pin');?>" title="<?php echo $this->_('Prev pin'); ?>">
+							<span class="icon icon-type-4 icon-72">Icon</span>
+						</a>
+					</div>
+					<?php elseif($popup) : ?>
+					<div class="table-grid-cell wida">
+						<a class="button button-type-1 button-color-2 button-size-3 fill event-js-prev" href="javascript:void(0);" title="<?php echo $this->_('Prev pin'); ?>">
+							<span class="icon icon-type-4 icon-72">Icon</span>
+						</a>
+					</div>
+					<?php else : ?>
+					<div class="table-grid-cell wida">
+						<a class="button button-type-1 button-color-1 button-size-3 fill" title="<?php echo $this->_('Prev pin'); ?>">
+							<span class="icon icon-type-4 icon-72">Icon</span>
+						</a>
+					</div>
+					<?php endif ?>
+
+					<?php if($next_pin) : ?>
+					<div class="table-grid-cell wida">
+						<a class="button button-type-1 button-color-2 button-size-3 fill event-turbo-click event-next" href="<?php echo $this->url(array('pin_id' => $next_pin->id,'query'=>$this->urlQuery($next_pin->title)),'pin');?>" <?php if($popup) { ?> data-popup="true"<?php } ?> title="<?php echo $this->_('Next pin'); ?>">
+							<span class="icon icon-type-4 icon-73">Icon</span>
+						</a>
+					</div>
+					<?php elseif($popup) : ?>
+					<div class="table-grid-cell wida">
+						<a class="button button-type-1 button-color-2 button-size-3 fill event-js-next" href="javascript:void(0);" title="<?php echo $this->_('Next pin'); ?>">
+							<span class="icon icon-type-4 icon-73">Icon</span>
+						</a>
+					</div>
+					<?php else : ?>
+					<div class="table-grid-cell wida">
+						<a class="button button-type-1 button-color-1 button-size-3 fill" title="<?php echo $this->_('Next pin'); ?>">
+							<span class="icon icon-type-4 icon-73">Icon</span>
+						</a>
+					</div>
+					<?php endif ?>
+					<?php /*if($popup || $this->getRequest()->getParam('RSP') == 'html') { ?>
+					<div class="table-grid-cell widx-38">
+						<a class="icon icon-type-11 icon-49 event-popup-close" href="javascript:void(0);">Icon</a>
+					</div>
+					<?php }*/ ?>
+				</div>
+			</div>
+
+
+			<!-- CLOSE BUTTON -->
+			<?php if($popup || $this->getRequest()->getParam('RSP') == 'html') { ?>
+			<div class="container-shadow-1 popup-close-fixed">
+				<a class="icon icon-type-19 icon-49 event-popup-close" href="javascript:void(0);">Icon</a>
+			</div>
+			<?php } ?>
+
+			<div class="event-PinViewRight"></div>
+		</div>
+	</div>
+
+	<div class="event-PinViewAfter"></div>
+
+</div>
+<!-- CONTENT // END -->
+
+</div>
+<!-- WRAPPER - FOOTER HEIGHT // END -->
+
+<!-- JS SCRIPTS -->
+<?php ob_start();?>
+
+$('.event-js-prev,.event-js-next').removeClass('button-color-2').addClass('button-color-1');
+
+App._ajax({
+	url:'<?php echo $this->url(['pin_id' => $pin->id,'action' => 'apis'],'pin_c_a')?>',
+	cache: true,
+	onSuccess: function(json) {
+		for(var i in json.elements) {
+			$('.event-' + i).empty();
+			if(json.elements[i].length)
+				$('.event-' + i).html( json.elements[i].join('') );
+		};
+		
+		//prev next
+		$('.event-js-prev,.event-js-next').each(function(i, link) {
+			WMApp.pinNavigation('<?php echo $this->url(array('pin_id' => $pin->id),'pin');?>', $(link));
+		});
+		
+	}
+});
+
+$(document).unbind('.popupNav').bind('keydown.popupNav','keydown',function(e){
+	if(!$(e.target || e.srcElement).is('textarea')) {
+    	if(e.keyCode == 39) {
+    		$('.event-js-next, .event-turbo-click.event-next').click();
+    	} else if(e.keyCode == 37) {
+    		$('.event-js-prev, .event-turbo-click.event-prev').click();
+    	}
+	}
+});
+
+<?php $this->getComponent('document')->addScript('pin-detail', ob_get_clean()); ?>
+
+<?php
+if($isXmlHttpRequest || $this->getRequest()->getParam('RSP') == 'html')
+	$this->getComponent('document')->alreadyLoadedCoreScript('jquery');
+?>
+
+<?php if(!$isXmlHttpRequest && $this->getRequest()->getParam('RSP') != 'html'): ?>
+<?php echo $this->getController('home/layout/footer_part') ?>
+<?php endif ?>

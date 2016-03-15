@@ -1,0 +1,22 @@
+<?php echo $this->getController('admin/layout/header_part'); ?>
+
+<?php 
+$self = $this;
+echo $this->widget('widget.form.phparray', array(
+	'head' => array(
+		'title' => $this->_('Cache Settings'),
+	),
+	'columns' => \Base\Config::getGroupForm('cache', $this->_),
+	'onSave' => function($values, $widget) use($self) {
+		if(\Base\Config::updateGroup('cache', $values)) {
+			return true;
+		} else {
+			$widget->errors = \Base\Config::getErrors();
+		}
+		return false;
+	}
+));
+
+?>
+
+<?php echo $this->getController('admin/layout/footer_part'); ?>

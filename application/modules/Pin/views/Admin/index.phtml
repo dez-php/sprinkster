@@ -1,0 +1,92 @@
+<?php echo $this->getController('admin/layout/header_part'); ?>
+
+<?php 
+$self = $this;
+$pinTable = new \Pin\Pin();
+$columns = array(
+	array(
+		'atributes' => 'class="left" style="width:50px;"',
+		'name' => 'id',
+		'label' => '#'
+	),
+	array(
+		'atributes' => 'class="left" style="width:140px;"',
+		'name' => 'category_id',
+		'label' => $this->_('Category'),
+	),
+	array(
+		'atributes' => 'class="left" style="width:140px;"',
+		'name' => 'user_id',
+		'value' => function($data) use($self) {
+			return '<a href="'.$self->url(array('module'=>'user','query'=>'filter[id]='.$data->id),'admin_module',false,false).'">'.$data->getUserFullname().'</a>';
+		},
+		'label' => $this->_('User')
+	),
+	array(
+		'atributes' => 'class="left" style="width:140px;"',
+		'name' => 'source_id',
+		'value' => function($data) use($self) { return isset($data->name) ? '<a href="'.$self->url(array('module'=>'source','query'=>'filter[id]='.$data->id),'admin_module',false,false).'">'.$data->name.'</a>' : ''; },
+		'label' => $this->_('Source')
+	),
+	array(
+		'atributes' => 'class="left" style="width:50px;"',
+		'name' => 'likes',
+		'label' => $this->_('Likes'),
+		'filter' => false
+	),
+	array(
+		'atributes' => 'class="left"',
+		'name' => 'title',
+		'label' => $this->_('Title'),
+		'value' => function($data) { return (string)new Core\Utf8\SplitText($data->title, 70, '...'); }
+	)
+);
+
+if($pinTable->hasCol('active')) {
+    $columns[] = [
+        'atributes' => 'class="center" style="width:50px;"',
+        'name' => 'active',
+        'label' => $this->_('Active'),
+        'filter' => false,
+        'value' => function($data) use($self) { return $self->_($data->active ? 'Yes' : 'No'); }
+    ];
+}
+
+echo $this->widget('widget.grid.db', array(
+	'head' => array(
+		'title' => $this->_('Pins'),
+		'icon' => 'cms/admin/images/push_pin.png'
+	),
+	'atributes' => 'class="display"',
+	'dataProvider' => $pinTable,
+	'checkbox' => true,
+	'columns' => $columns,
+	'filter' => array(
+		'status' => 1		
+	),
+	//'checkbox' => false,
+	'add_new' => false,
+	'replaceDelete' => function($pins, $self) {
+		set_time_limit(0);
+		$pinTable = new \Pin\Pin();
+		$pinGalleryTable = new \Pin\PinGallery();
+		$pinTable->getAdapter()->beginTransaction();
+		try {
+			foreach($pins AS $pin) {
+				$pinTable->extendDelete($pin->id);
+			}
+			$pinTable->getAdapter()->commit();
+			return true;
+		} catch (\Core\Exception $e) {
+			$pinTable->getAdapter()->rollBack();
+			return false;
+		}
+	},
+	'replaceEditLink' => function($data) use($self) {
+		return $this->url(array('controller' => 'edit', 'pin_id' => $data->id), 'pin_c');
+	}
+));
+
+?>
+
+<?php echo $this->getController('admin/layout/footer_part'); ?>

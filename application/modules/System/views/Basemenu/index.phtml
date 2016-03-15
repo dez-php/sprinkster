@@ -1,0 +1,36 @@
+<?php echo $this->getController('admin/layout/header_part'); ?>
+
+<div class="info_line top">
+	<h3 class="fleft title">
+		<img alt="" src="cms/admin/images/extensions.png">
+		<?php echo $this->_('Menu Groups');?>	
+	</h3>
+	<div class="clear"></div>
+</div>
+
+
+<table cellspacing="0" cellpadding="0" class="display">
+	<thead>
+		<tr class="nodrop nodrag">
+			<th class="left">Title</th>
+			<th width="1">Actions</th>
+		</tr>
+	</thead>
+	<tbody>
+		<?php foreach($this->menu_groups AS $group => $title) { ?>
+		<tr class="grid_rows">
+			<td class="left"><?php echo $this->_($title);?></td>
+			<td align="center">
+				<div class="grid-actions">
+					<a href="<?php echo $this->url(['action' => 'edit','controller' => 'basemenu', 'query' => 'group=' . $group], null, false, false);?>"><img title="Edit" alt="" class="tooltip" src="cms/admin/images/edit.png"></a>
+				</div>
+			</td>
+		</tr>
+	<?php } ?>
+	</tbody>
+</table>
+
+<div class="clear"></div>
+
+
+<?php echo $this->getController('admin/layout/footer_part'); ?>

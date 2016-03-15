@@ -1,0 +1,37 @@
+<?php echo $this->getController('admin/layout/header_part'); ?>
+
+<?php 
+$self = $this;
+echo $this->widget('widget.grid.db', [
+	'head' => [
+		'title' => $this->_('Permissions'),
+	],
+	'atributes' => 'class="display"',
+	'dataProvider' => new \Permission\PermissionGroup(),
+	'checkbox' => true,
+	'columns' => [
+		[
+			'atributes' => 'class="left" style="width:50px;"',
+			'name' => 'id',
+			'label' => '#',
+			'order' => false
+		],
+		[
+			'atributes' => 'class="left"',
+			'name' => 'name',
+			'label' => $this->_('Name'),
+			'order' => false
+		],
+	],
+	'sort' => 'name',
+	'order' => 'ASC',
+	'has_delete' => FALSE,
+ 	'checkbox' => false,
+	'add_new' => false,
+	'nopagination' => true,
+	'limit' => 999999999,
+]);
+
+?>
+
+<?php echo $this->getController('admin/layout/footer_part'); ?>

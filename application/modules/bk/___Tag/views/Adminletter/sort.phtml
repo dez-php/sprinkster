@@ -1,0 +1,90 @@
+<?php 
+$self = $this;
+$widget = $this->widget('widget.grid.db', array(
+	'head' => array(
+		'title' => $this->_('Letter menu')
+	),
+	'atributes' => 'class="display"',
+	'dataProvider' => new \Tag\TagLetter(),
+	'checkbox' => true,
+	'columns' => array(
+		array(
+			'atributes' => 'class="left"',
+			'name' => 'letter',
+			'label' => $this->_('Letter'),
+			'filter' => false,
+			'order' => false
+		),
+		array(
+			'atributes' => 'class="left" width="50"',
+			'name' => 'sort_order',
+			'label' => $this->_('Sort'),
+			'filter' => false,
+			'order' => false
+		)
+	),
+	'filter' => array(
+		'in_menu' => 1
+	),
+	'add_new' => false,
+	'has_edit' => false,
+	'has_delete' => false,
+	'checkbox' => false,
+	'nosearch' => true,
+	'sort' => 'sort_order',
+	'order' => 'ASC',
+	'buttonsExtend' => function($widget) use($self) {
+		return '<a class="button" href="' . $self->url('admin_tag_letter') . '">'.$self->_('Stop Sort').'</a>';
+	},
+	'nopagination' => true,
+	'onPost' => function() use($self) {
+		$pageMenuTable = new \Tag\TagLetter();
+		$row = $self->getRequest()->getPost('row');
+		$result = array();
+		if($row && is_array($row)) {
+			$pageMenuTable->getAdapter()->beginTransaction();
+			try {
+				foreach($row AS $sort_order => $page_id) {
+					$pageMenuTable->update(array('sort_order'=>$sort_order), array('id = ?' => $page_id));
+				}
+				$pageMenuTable->getAdapter()->commit();
+				$result['ok'] = true;
+			} catch (\Core\Exception $e) {
+				$pageMenuTable->getAdapter()->rollBack();
+				$result['error'] = $e->getMessage();
+			}
+		} else {
+			$result['error'] = $self->_('Missing post data!');
+		}
+		return $result;
+	},
+));
+?>
+<?php echo $this->getController('admin/layout/header_part'); ?>
+
+<?php 
+echo $widget;
+
+?>
+
+<script>
+  $(function() {
+    $( "#tag_letter-grid table tbody" ).sortable({
+    	items: '> tr',
+    	stop: function() {
+			$.post(window.location.href, $( "#tag_letter-grid table tbody" ).sortable('serialize'), function(result) {
+				if(result.ok) {
+					$( "#tag_letter-grid table tbody td[data-column=\"sort_order\"]" ).each(function(i, item) {
+						$(item).html(i);
+					});
+				} else if(result.error) {
+					alert(result.error);
+				}
+			});
+        }
+    });
+    $( "#tag_letter-grid table tbody" ).disableSelection();
+  });
+  </script>
+
+<?php echo $this->getController('admin/layout/footer_part'); ?>

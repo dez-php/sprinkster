@@ -1,0 +1,67 @@
+<div class="container container-size-11 container-radius-1 container-padding-5 container-shadow-1 bg-color-1 position-relative responsive-popup">
+	<h3 class="title-2 title-border-bottom-1 color-1"><?php echo sprintf($this->_('Send a message to %s'), $pin->User()->getUserFullName()) ?></h3>
+
+	<form action="<?php echo $this->url([ 'controller'=>'send' ],'conversation_c') ?>" method="post" class="event-conversation-pin">
+		<input type="hidden" name="pin_id" value="<?php echo $pin->id ?>" />
+		<input type="hidden" name="to_user_id" value="<?php echo $pin->user_id ?>" />
+    
+    	<div class="hide notification margin-top-20 event-create-pin-message"></div>
+
+
+		<div class="form-row form-row-group-top-padding-3 margin-top-20">
+			<div class="table-grid">
+				<div class="table-grid-cell">
+					<input type="text" name="title" value="<?php echo $pin->title ?>" class="field field-color-1 field-size-1 fill" placeholder="<?php echo $this->_('Title') ?>">
+				</div>
+			</div>
+		</div>
+		<div class="form-row margin-top-20">
+			<div class="table-grid">
+				<div class="table-grid-cell">
+					<textarea class="field field-color-1 field-size-1 field-size-1-c fill event-focus event-conversation-message-focus event-elastic" name="conversation" placeholder="<?php echo $this->_('Message') ?>"></textarea>
+				</div>
+			</div>
+		</div>
+
+		<div class="form-row form-row-group-top form-row-group-top-padding-3 margin-top-20 responsive-form-submit-row">
+			<div class="table-grid">
+				<div class="table-grid-cell tright">
+					<a href="javascript:void(0)" class="button button-type-1 button-color-3 button-size-3 margin-right-10 event-dialog-close-button"><?php echo $this->_('Cancel') ?></a>
+					<button type="submit" class="event-loader button button-type-1 button-color-2 button-size-3 event-url-save"><?php echo $this->_('Send') ?></button>
+				</div>
+			</div>
+		</div>
+	</form>
+
+</div>
+<!-- POPUP 7 // END -->
+
+
+
+<script type="text/javascript">
+$('.event-conversation-pin').submit(function() {
+	$('.event-create-pin-message').addClass('hide').find(' > *').remove();
+	App.addLoader('.event-loader');
+	App._ajax({
+		url: '<?php echo $this->url(array('controller'=>'send'),'conversation_c');?>',
+		type: 'POST',
+		data: $(this).serialize(),
+		onSuccess: function(json) {
+			App.removeLoader('.event-loader');
+			if(json.error) {
+				$('.event-create-pin-message').removeClass('hide').append('<div class="notification notification-color-1">' + json.error + '</div>');
+			} else if(json.conversations) {
+				$('.event-conversation-pin textarea').val('');
+				
+				$('.event-create-pin-message').removeClass('hide').append('<div class="notification notification-color-2"><?php echo $this->escape($this->_('Message send successfully')); ?></div>');
+                setTimeout(function() {
+                    $('.event-dialog-close').click();
+                }, 1500);
+			}
+		}
+	});
+	return false;
+});
+
+$(".event-conversation-message-focus").trigger("focus");
+</script>

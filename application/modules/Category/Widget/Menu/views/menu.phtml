@@ -1,0 +1,19 @@
+<?php if($categories) { ?>
+<li <?php if($this->is_group) { ?>class="group"<?php } ?>>
+	<a href="javascript:void(0);" class="icon-categories"><?php echo $this->_('Categories');?></a>
+	<nav class="dropdown">
+		<div class="dropdown-wrapper arrow-left">
+			<?php for($i=0, $j=0; $i<$this->getColumns(); $i++) { ?>
+				<ul>
+					<?php for($r=0; $r<ceil(count($categories)/$this->getColumns()); $r++, $j++) { ?>
+					<?php if(isset($categories[$j])) { ?>
+					<?php $childs = $categories[$j]->subcategory ? $this->widget('category.widget.menu', array('parent_id' => $categories[$j]->id)) : false;?>
+					<li><a href="<?php echo $this->url(array('category_id'=>$categories[$j]->id,'query'=>$this->urlQuery($categories[$j]->title)),'category');?>"><?php echo $categories[$j]->title;?></a><?php if($childs) { ?><?php echo $childs;?><?php } ?></li>
+					<?php } ?>
+					<?php } ?>
+				</ul>
+			<?php } ?>
+		</div>
+	</nav>
+</li>
+<?php } ?>

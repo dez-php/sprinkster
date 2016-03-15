@@ -1,0 +1,22 @@
+<?php echo $this->getController('home/layout/header_part') ?>
+
+<section id="content">
+	<div class="container bgcolor-1 radius">
+		<div class="padding-3">
+			<div class="textbox">
+				<h1><?php echo $this->_('Chat') ?></h1>
+
+				<div class="chat">
+					<div id="contacts"></div>
+					<textarea id="history" readonly="readonly" cols="40" rows="10"></textarea>
+
+					<input name="message" id="message" type="text" maxlength="255" />
+				</div>
+
+				<div class="clear clearfix"></div>
+			</div>
+		</div>	
+	</div>
+</section>
+
+<?php echo $this->getController('home/layout/footer_part') ?>

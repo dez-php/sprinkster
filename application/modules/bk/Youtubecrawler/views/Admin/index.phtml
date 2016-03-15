@@ -1,0 +1,92 @@
+<?php use Youtubecrawler\Search;
+
+echo $this->getController('admin/layout/header_part');
+$dev_key = \Base\Config::get('youtube_developer_key');
+
+if(!$dev_key) {
+    ?>
+
+    <br class="mtop25"/>
+    <span id="youtube_developer_key-fader" class="fader-message"><span
+            class="msgError"><span><?php echo $this->_('Error!'); ?></span><?php echo $this->_('Before create new job, you must set your developer key from google!'); ?></span></span>
+
+    <?php
+}
+
+
+$self = $this;
+echo $this->widget('widget.grid.db', array(
+    'head' => array(
+        'title' => $this->_('Youtube crawler')
+    ),
+    'atributes' => 'class="display"',
+    'dataProvider' => new \Youtubecrawler\Search(),
+    'checkbox' => true,
+    'add_new' => !!$dev_key,
+    'columns' => array(
+        array(
+            'atributes' => 'class="left" style="width:50px;"',
+            'name' => 'id',
+            'label' => '#'
+        ),
+        array(
+            'atributes' => 'class="left"',
+            'name' => 'keyword',
+            'label' => $this->_('Search query'),
+        ),
+        array(
+            'atributes' => 'class="left" style="width:140px;"',
+            'name' => 'limit',
+            'label' => $this->_('Limit')
+        ),
+        array(
+            'atributes' => 'class="left" style="width:140px;"',
+            'name' => 'user_id',
+            'value' => function ($data) use ($self) {
+                if (isset($data->username)) {
+                    return '<a href="' . $self->url(array('module' => 'user', 'query' => 'filter[id]=' . $data->id), 'admin_module', false, false) . '">' . $data->username . '</a>';
+                } else {
+                    return $self->_('Retrieved from youtube');
+                }
+            },
+            'label' => $this->_('User')
+        ),
+        array(
+            'atributes' => 'class="left" style="width:140px;"',
+            'name' => 'category_id',
+            'value' => function ($data) use ($self) {
+                if (isset($data->title)) {
+                    return '<a href="' . $self->url(array('module' => 'category', 'query' => 'filter[id]=' . $data->category_id), 'admin_module', false, false) . '">' . $data->title . '</a>';
+                } else {
+                    return $self->_('Retrieved from youtube');
+                }
+            },
+            'label' => $this->_('Category'),
+            'filter' => false
+        ),
+        array(
+            'atributes' => 'class="left" style="width:50px;"',
+            'name' => 'indexing',
+            'label' => $this->_('Indexed'),
+            'filter' => false,
+            'value' => function ($data) use ($self) {
+                if ($data->indexing) {
+                    return $self->_('Yes');
+                } else {
+                    return $self->_('No');
+                }
+            },
+        ),
+    ),
+    'actionsExtend' => function ($data, $widget) use ($self) {
+        return '<a href="' . $self->url(array('action' => 'links', 'module' => 'youtube_crawler', 'controller' => 'admin', 'query' => 'id=' . $data->id), null, false, false) . '"><img title="' . $self->_('Links') . '" alt="" class="tooltip" src="cms/admin/images/folder.png"></a>';
+    },
+    'buttonsExtend' => function() use($self, $dev_key) {
+        return \Core\Html::link($dev_key ? $self->_('Change Developer Key') : $self->_('Set Developer Key'), $self->url(['module' => 'youtube_crawler', 'action' => 'key'], 'admin_module'), ['class' => 'button']);
+    },
+    'has_edit' => false
+));
+
+?>
+
+<?php echo $this->getController('admin/layout/footer_part'); ?>

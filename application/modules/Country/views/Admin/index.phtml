@@ -1,0 +1,44 @@
+<?php echo $this->getController('admin/layout/header_part'); ?>
+
+<?php 
+$self = $this;
+echo $this->widget('widget.grid.db', array(
+	'head' => array(
+		'title' => $this->_('Countries'),
+	),
+	'atributes' => 'class="display"',
+	'dataProvider' => new \Country\Country(),
+	'checkbox' => true,
+	'columns' => array(
+		array(
+			'atributes' => 'class="left" style="width:50px;"',
+			'name' => 'id',
+			'label' => '#',
+			'order' => false
+		),
+		array(
+			'atributes' => 'class="left"',
+			'name' => 'name',
+			'label' => $this->_('Title'),
+			'order' => false
+		),
+		array(
+			'atributes' => 'class="left" style="width:50px;"',
+			'name' => 'iso_code_2',
+			'label' => $this->_('ISO 2'),
+			'order' => false
+		),
+		array(
+			'atributes' => 'class="left" style="width:50px;"',
+			'name' => 'iso_code_3',
+			'label' => $this->_('ISO 3'),
+			'order' => false
+		),
+	),
+	'sort' => 'name',
+	'order' => 'ASC'
+));
+
+?>
+
+<?php echo $this->getController('admin/layout/footer_part'); ?>

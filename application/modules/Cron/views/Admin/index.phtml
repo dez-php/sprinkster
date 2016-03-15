@@ -1,0 +1,72 @@
+<?php echo $this->getController('admin/layout/header_part'); ?>
+
+<div id="content">
+	<div class="wrap">
+		<br class="mtop25">
+
+		<div class="info_line top">
+			<h3 class="fleft title">
+				<img alt="" src="cms/admin/images/extensions.png">
+				<?php echo $this->_('Crons');?>	
+			</h3>
+			
+			<div class="clear"></div>
+		</div>
+		
+		<div class="clear"></div>
+		
+		<div id="tab_general">
+			<table cellspacing="0" cellpadding="0" class="formtable">
+				<thead>
+					<tr>
+						<td width="100"><strong><?php echo $this->_('Interval');?></strong></td>
+						<td width="100"><strong><?php echo $this->_('Command');?></strong></td>
+						<td><strong><?php echo $this->_('CURL');?></strong></td>
+						<td><strong><?php echo $this->_('CMD');?></strong></td>
+					</tr>
+				</thead>
+				<tbody>
+					<?php 
+						$cronTable = new \Cron\Crons();
+						$crons = $cronTable->fetchAll(null,new \Core\Db\Expr('id ASC')); //minute ASC,route ASC,controller ASC
+						foreach($crons AS $cron) {
+					?>
+					<tr>
+						<td>
+							<?php 
+								$d = new \Date\Helper\Diff(time(), time()+($cron->minute*60)); 
+								$rows = $d->getAll();
+								$total_rows = count($rows);
+								foreach($rows AS $row => $value) {
+									echo sprintf($this->_('%d %s'),$value->value,$this->_($value->key));
+									if($total_rows == $row+2) {
+										echo $this->_(' and ');
+									} else if($total_rows > $row+2) {
+										echo ', ';
+									}
+								}
+							?>
+							<?php /*echo sprintf($this->_('%d minute' . ($cron->minute==1?'':'s')),$cron->minute);*/?>
+						</td>
+						<td>
+							<?php echo $cron->command;?>
+						</td>
+						<td>
+							curl <?php echo preg_replace('/([^:])(\/{2,})/', '$1/', $this->url(array('controller'=>$cron->controller,'action'=>$cron->action),$cron->route));?>
+						</td>
+						<td>
+							php <?php echo $this->getRequest()->getServer('SCRIPT_FILENAME');?> --module=<?php echo $cron->module;?> <?php if($cron->controller) { ?>--controller=<?php echo $cron->controller;?><?php } ?> <?php if($cron->action) { ?>--action=<?php echo $cron->action;?><?php } ?>
+						</td>
+					</tr>
+					<?php } ?>
+					
+				</tbody>
+			</table>
+		</div>
+			
+		<div class="clear"></div>
+
+	</div>
+</div>
+
+<?php echo $this->getController('admin/layout/footer_part'); ?>

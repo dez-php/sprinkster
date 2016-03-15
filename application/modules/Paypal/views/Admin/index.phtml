@@ -1,0 +1,35 @@
+<?php echo $this->getController('admin/layout/header_part'); ?>
+
+<?php 
+$self = $this;
+echo $this->widget('widget.form.phparray', array(
+	'head' => array(
+		'title' => \Core\Html::link($this->_('Payment provider'), $this->url(['module' => 'payment'], 'admin_module')) . ' / ' . $this->_('PayPal Settings'),
+	),
+	'columns' => \Base\Config::getGroupForm('paypal', $this->_),
+	'onSave' => function($values, $widget) use($self) {
+		$paymentProvider = new \Paymentgateway\PaymentProvider();
+		$paymentProvider->getAdapter()->beginTransaction();
+		try {
+			$payment = $paymentProvider->fetchRow(array('code LIKE ?' => 'PAYPAL'));
+			if($payment) {
+				$payment->active = $values['paypal_status'];
+				$payment->save();
+			}
+			if(\Base\Config::updateGroup('paypal', $values)) {
+				$paymentProvider->getAdapter()->commit();
+				return true;
+			} else {
+				$widget->errors = \Base\Config::getErrors();
+			}
+		} catch (\Core\Exception $e) {
+			$widget->errors = $e->getMessage();
+		}
+		$paymentProvider->getAdapter()->rollBack();
+		return false;
+	}
+));
+
+?>
+
+<?php echo $this->getController('admin/layout/footer_part'); ?>

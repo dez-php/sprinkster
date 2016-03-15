@@ -1,0 +1,49 @@
+<?php echo $this->getController('admin/layout/header_part'); ?>
+
+<?php
+
+$check = (new \Base\Config)->countByGroup_Key('youtube', 'youtube_developer_key');
+if(!$check) {
+    (new \Base\Config)->createRow([
+        'group' => 'youtube',
+        'key' => 'youtube_developer_key',
+        'value' => '',
+        'serialize' => 0,
+        'form_label' => 'Developer Key',
+        'form_type' => 'Text',
+        'form_list' => '',
+        'form_required' => 1,
+        'sort_order' => 1,
+        'form_helpMessage' => 'You can create your key from Google Developer Console (https://console.developers.google.com/)',
+    ])->save();
+}
+
+$self = $this;
+echo $this->widget('widget.form.phparray', array(
+	'head' => array(
+		'title' => \Core\Html::link($this->_('Youtube crawler'), $this->url(['module' => 'youtube_crawler'], 'admin_module')) . ' / ' . $this->_('Youtube Settings'),
+	),
+	'columns' => \Base\Config::getGroupForm('youtube', $this->_),
+	'onSave' => function($values, $widget) use($self) {
+        try {
+            include_once dirname(dirname(__DIR__)) . DIRECTORY_SEPARATOR . 'vendor/autoload.php';
+            $client = new \Google_Client();
+            $client->setDeveloperKey($values['youtube_developer_key']);
+            $yt = new \Google_Service_YouTube($client);
+            $yt->search->listSearch('id', ['q' => 'hammerfall']);
+        } catch(\Exception $e) {
+            $widget->errors = $self->_('Invalid key');
+            return false;
+        }
+		if(\Base\Config::updateGroup('youtube', $values)) {
+			return true;
+		} else {
+			$widget->errors = \Base\Config::getErrors();
+		}
+		return false;
+	}
+));
+
+?>
+
+<?php echo $this->getController('admin/layout/footer_part'); ?>

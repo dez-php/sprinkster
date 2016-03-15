@@ -1,0 +1,40 @@
+<?php $t = new \Translate\Locale('Backend\Layout', $this->getController()->getModule('Language')->getLanguageId());?>
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title><?php echo $t->_('Administration');?></title>
+
+<base href="<?php echo \Core\Http\Request::getInstance()->getBaseUrl();?>" />
+<link href='//fonts.googleapis.com/css?family=Open+Sans:400,700,300&subset=latin,cyrillic' rel='stylesheet' type='text/css'>
+<link href="cms/admin/assets/style.css" rel="stylesheet" type="text/css" />
+<link href="cms/admin/assets/themes/custom-theme/jquery-ui-1.8.11.custom.css" rel="stylesheet" type="text/css" />
+
+<link rel="stylesheet" href="cms/admin/assets/elrte/css/elrte.min.css" type="text/css" media="screen" charset="utf-8" />
+<link rel="stylesheet" href="cms/admin/assets/elfinder/css/elfinder.css" type="text/css" media="screen" charset="utf-8" />
+
+<?php $document = \Core\Base\Action::getComponent('document'); ?>
+<?php $document->alreadyLoadedCoreScript('jquery'); ?>
+<script type="text/javascript" src="cms/assets/jquery.js"></script>
+<script type="text/javascript" src="cms/assets/jquery-ui-1.8.11.custom.min.js"></script>
+<script type="text/javascript" src="cms/assets/tooltip.js"></script>
+<script type="text/javascript" src="cms/admin/assets/main.js"></script>
+
+<script src="cms/admin/assets/elrte/js/elrte.full.js" type="text/javascript" charset="utf-8"></script>
+<script src="cms/admin/assets/elfinder/js/elfinder.full.js" type="text/javascript" charset="utf-8"></script>
+<script type="text/javascript" src="cms/admin/assets/highcharts/highcharts.js"></script>
+
+<?php echo $this->placeholder('style');?>
+
+<?php echo $this->placeholder('script');?>
+
+</head>
+<body>
+
+	<?php echo $this->placeholder('content'); ?>
+
+</body>
+
+</html>

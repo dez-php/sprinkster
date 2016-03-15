@@ -1,0 +1,78 @@
+<?php echo $this->getController('admin/layout/header_part'); ?>
+
+<?php 
+$self = $this;
+$groupTable = new \Permission\PermissionGroup;
+$record = $groupTable->fetchRow([ 'id = ?' => (int) $this->getRequest()->getRequest('id')]);
+
+echo $this->widget('widget.form.phparray', [
+	'head' => [
+		'title' => $this->_('Group Permissions for &ldquo;' . ($record->name ?: '<i>Unknown</i>') . '&ldquo;'),
+	],
+	'columns' => [
+		[
+			'name' => 'permissions',
+			'label' => $this->_('Selection'),
+			'type' => 'Movable',
+			'value' => \Core\Htmlform\Elements\Movable::convertSelection($enabled),
+			'list' => \Core\Htmlform\Elements\Movable::convert($all),
+		],
+	],
+	'onSave' => function($values, $widget) use($self) {
+		$group_id = (int) $self->getRequest()->getRequest('id');
+		$selection = $self->getRequest()->getPost('permissions');
+		$pgTable = new \Permission\PermissionToPermissionGroup;
+		
+		if(!$selection || !is_array($selection) || empty($selection))
+		{
+			$pgTable->delete($pgTable->makeWhere([ 'permission_group_id' => (int) $group_id ]));
+			return TRUE;
+		}
+
+		array_walk($selection, 'intval');
+		array_filter($selection);
+
+		if(empty($selection))
+		{
+			$widget->errors = $self->_('Invalid selection made.');
+			return FALSE;
+		}
+
+		
+		$pgTable->getAdapter()->beginTransaction();
+		$pgTable->delete($pgTable->makeWhere([ 'permission_group_id' => (int) $group_id ]));
+
+		try
+		{
+			foreach($selection as $sel)
+			{
+				$new = $pgTable->fetchNew();
+				$new->permission_id = (int) $sel;
+				$new->permission_group_id = (int) $group_id;
+
+				if(!$new->save())
+					throw new Exception('Permission assignment failed.');
+			}
+
+			$pgTable->getAdapter()->commit();
+
+			return TRUE;
+		}
+		catch(\Core\Exception $e)
+		{
+			$widget->errors = $e->getMessage();
+		}
+		catch(\Exception $e)
+		{
+			$widget->errors = $e->getMessage();
+		}
+
+		$pgTable->getAdapter()->rollBack();
+
+		return FALSE;
+	},
+]);
+
+?>
+
+<?php echo $this->getController('admin/layout/footer_part'); ?>

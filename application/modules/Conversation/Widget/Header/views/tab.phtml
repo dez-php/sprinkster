@@ -1,0 +1,20 @@
+<li>
+	<a href="#event-header-tab-<?php echo $this->ID() ?>">
+		<?php echo $this->_($this->title) ?>
+
+		<?php if(0 < $total): ?>
+		<span class="icon icon-76"></span>
+		<?php endif ?>
+	</a>
+</li>
+
+<script type="text/javascript">
+	var total = parseInt($(".event-total-notifications").text());
+	total = !isNaN(total) && 0 <= total ? total : 0;
+
+	total += <?php echo (int) $total ?>;
+
+	$(".event-total-notifications").text(total);
+
+	0 < total ? $(".event-total-notifications").removeClass("hide").show() : $(".event-total-notifications").hide();
+</script>

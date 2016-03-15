@@ -1,0 +1,168 @@
+.field-color-8, .field-color-8:focus {
+    background-color: #f8f8f7;
+    border-color: #f8f8f7;
+    color: #596b7c;
+    border-radius: 0;
+    font-style: italic;
+}
+
+.footer-widgets .chat
+{
+	position: absolute;
+	right: 10px;
+	bottom: 0;
+	width: 320px;
+}
+
+.footer-widgets.active .chat
+{
+	bottom: 44px;
+}
+
+.chat #contacts
+{
+	width: 20%;
+	float: left;
+	border-right: #eee;
+}
+
+.chat .online
+{
+	color: green;
+}
+.offline
+{
+	opacity: 0.4;
+}
+
+.chat input[type="text"],
+.chat textarea
+{
+	width: 80%;
+	float: right;
+
+	-webkit-box-sizing: border-box;
+	-moz-box-sizing: border-box;
+	box-sizing: border-box;
+
+}
+
+.chat #history
+{
+	height: auto;
+}
+
+.footer-widgets .conversation-container {
+	position: absolute;
+	bottom: 0px;
+	right: 340px;
+	/*float: right;*/
+	padding-bottom: 0;
+	vertical-align: bottom;
+	display: table;
+}
+
+.footer-widgets.active .conversation-container {
+	bottom: 44px;
+}
+
+.box-list {
+	min-width: 285px;
+	display: table-cell !important;
+	position: relative;
+}
+
+.box-list-insider {
+	position: absolute;
+	bottom: 0;
+	left: 0;
+	margin-left: 5px;
+}
+
+.sys_z_index { 
+ z-index: 7911;
+}
+
+/*  list chat */
+.list-chat {
+	list-style-type: none;
+	max-height: 300px;
+	overflow-y: auto;
+	min-width: 280px;
+}
+.list-chat > li {
+	padding: 10px 10px 10px 60px;
+	border-bottom: 1px solid #d9d9d9;
+	position: relative;
+	min-height: 40px;
+}
+.list-chat:not(.chat-dialog) > li {
+	cursor: pointer;
+}
+.list-chat > li > .avatar {
+	position: absolute;
+	top: 10px;
+	left: 10px;
+}
+.list-chat > li > .avatar img {
+	width: 40px;
+	height: 40px;
+}
+
+.list-chat > li > p
+{
+	-ms-word-break: break-all;
+
+	/* Be VERY careful with this, breaks normal words wh_erever */
+	word-break: break-all;
+
+	/* Non standard for webkit */
+	word-break: break-word;
+
+	-webkit-hyphens: auto;
+	   -moz-hyphens: auto;
+	        hyphens: auto;
+}
+
+.chat a.ws-title
+{
+	display: block;
+	width: 290px;
+	padding: 15px 10px;
+}
+.ws-title .checkbox-slider-wrapper {
+    position: relative;
+    top: 3px;
+}
+
+
+.chat a.ws-title.bg-color-4,
+.chat a.ws-title.bg-color-4:hover
+{
+	color: white;
+}
+
+.chat a.ws-title.bg-color-5,
+.chat a.ws-title.bg-color-5:hover
+{
+	color: #848484;
+}
+
+.event-chat-close:hover {
+    background-position: center top;
+    background-color: #efefef;
+}
+
+@media all and (max-width:670px) {
+    .footer-widgets .chat {
+        width: 280px;
+    }
+    .chat a.ws-title {
+        width: 260px;
+    }
+    .footer-widgets .conversation-container {
+        z-index: 1;
+        right: 10px;
+    }
+
+}

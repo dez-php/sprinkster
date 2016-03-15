@@ -1,0 +1,8 @@
+<?php if($tags && $tags->count()): ?>
+<p class="tags text-1 color-2 margin-top-15">
+	<span class="color-3"><?php echo $this->_('Tags') ?>: &nbsp;</span>
+	<?php foreach($tags as $idx => $tag): ?>
+	<a class="button button-type-1 button-color-3 button-size-1" href="<?php echo $this->url([ 'tag_id' => $tag->id, 'query' => urlencode($tag->tag) ], 'search_tag', false, false) ?>"><?php echo $tag->tag ?></a>
+	<?php endforeach ?>
+</p>
+<?php endif ?>

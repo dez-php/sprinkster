@@ -1,0 +1,142 @@
+
+.mentions-input-box {
+  position: relative;
+  background: #fff;
+}
+
+.mentions-input-box textarea {
+  width: 100%;
+  display: block;
+  height: 18px;
+  padding: 9px;
+  border: 1px solid #dcdcdc;
+  border-radius:3px;
+  overflow: hidden;
+  background: transparent;
+  position: relative;
+  outline: 0;
+  resize: none;
+
+  -webkit-box-sizing: border-box;
+	 -moz-box-sizing: border-box;
+		  box-sizing: border-box;
+}
+
+.sys_z_index { 
+ z-index: 7911;
+}
+
+.mentions-input-box .mentions-autocomplete-list {
+  display: none;
+  position: absolute;
+  left: 0;
+  right: 0;
+  z-index: 10000;
+  margin-top: -2px;
+
+  border-radius:5px;
+  border-top-right-radius:0;
+  border-top-left-radius:0;
+
+ background-color: #fff;
+    border: 1px solid #ccc;
+    border-radius: 3px;
+    box-sizing: border-box;
+    font-size: 12px;
+}
+
+.mentions-input-box .mentions-autocomplete-list li {
+  overflow: hidden;
+  
+  box-sizing: border-box;
+	cursor: pointer;
+	-moz-box-sizing: border-box;
+	position: relative;
+	-webkit-box-sizing: border-box;
+  
+	min-height: 48px;
+	padding: 10px 20px 0 52px;
+}
+
+.mentions-input-box .mentions-autocomplete-list  li:hover,
+.mentions-input-box .mentions-autocomplete-list  li:hover * {
+	background-color: #e74c3c;
+	border-color: #e74c3c;
+	color: #fff;
+	cursor: pointer;
+}
+.mentions-input-box .mentions-autocomplete-list li > p.avatar
+{
+	left: 10px;
+	top: 8px;
+	position: absolute;
+}
+.mentions-input-box .mentions-autocomplete-list li > p.avatar img {
+	
+
+	border-radius: 100%;
+	-webkit-border-radius: 100%;
+	height: 32px;
+	width: 32px;
+}
+.mentions-input-box .mentions-autocomplete-list li > span
+{
+margin-top: 5px;
+display: inline-block;
+}
+
+.mentions-input-box .mentions-autocomplete-list li > img,
+.mentions-input-box .mentions-autocomplete-list li > div.icon {
+  
+
+  border-radius:3px;
+}
+
+.mentions-input-box .mentions-autocomplete-list li em {
+  font-weight: bold;
+  font-style: none;
+}
+
+.mentions-input-box .mentions-autocomplete-list li:hover,
+.mentions-input-box .mentions-autocomplete-list li.active {
+  
+}
+
+.mentions-input-box .mentions-autocomplete-list li b {
+  background: #ffff99;
+  font-weight: normal;
+}
+
+.mentions-input-box .mentions {
+  position: absolute;
+  left: 1px;
+  right: 0;
+  top: 1px;
+  bottom: 0;
+  padding: 9px;
+  color: #fff;
+  overflow: hidden;
+
+  white-space: pre-wrap;
+  word-wrap: break-word;
+}
+
+.mentions-input-box .mentions > div {
+  color: #fff;
+  white-space: pre-wrap;
+  width: 100%;
+}
+
+.mentions-input-box .mentions > div > strong {
+  font-weight:normal;
+  background: #d8dfea;
+}
+
+.mentions-input-box .mentions > div > strong > span {
+  filter: progid:DXImageTransform.Microsoft.Alpha(opacity=0);
+}
+
+.mentions-comments > div:first-of-type
+{
+	display: none;
+}

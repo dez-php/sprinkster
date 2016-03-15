@@ -1,0 +1,34 @@
+<?php echo $this->getController('home/layout/header_part') ?>
+
+<!-- WRAPPER - FOOTER HEIGHT // START -->
+<div class="container container-padding-header container-padding-footer">
+
+<!-- CONTENT // START -->
+<?php echo $this->widget('pin.widget.SearchHeader') ?>
+<div class="container container-padding-tb-6 padding-top-20 container-padding-lr-5 responsive-content">
+<?php 
+$pinsTable = new \Pin\Pin();
+$query = urldecode($this->getRequest()->getRequest('query'));
+$filter = array(
+		'callback' => [
+			'id' => [
+				'\Tag\Tag::getPinsByTag("'.$query.'")'
+			]
+		]
+	);
+if($this->isModuleAccessible('Store')) {
+	$filter['callback']['id'][] = '\Store\PurchasedStoreItem::inStock(FALSE)';
+}
+echo $this->widget('pin.widget.grid', array(
+	'filter' => $filter,
+	'useIndex' => array('PRIMARY'),
+	'module' => 'search_pin'
+));
+?>
+</div>
+<!-- CONTENT // END -->
+
+</div>
+<!-- WRAPPER - FOOTER HEIGHT // END -->
+
+<?php echo $this->getController('home/layout/footer_part') ?>

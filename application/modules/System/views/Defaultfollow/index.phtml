@@ -1,0 +1,33 @@
+<?php echo $this->getController('admin/layout/header_part'); ?>
+
+<?php 
+$self = $this;
+echo $this->widget('widget.grid.db', array(
+	'head' => array(
+		'title' => $this->_('Default follow users')
+	),
+	'atributes' => 'class="display"',
+	'dataProvider' => new \User\UserFollowDefault(),
+	'checkbox' => true,
+	'columns' => array(
+		array(
+			'atributes' => 'class="left" style="width:50px;"',
+			'name' => 'id',
+			'label' => '#'
+		),
+		array(
+			'atributes' => 'class="left"',
+			'name' => 'user_id',
+			'value' => function($data) use($self) { 
+				return '<a href="'.$self->url(array('module'=>'user','query'=>'filter[id]='.$data->id),'admin_module',false,false).'">'.$data->username.'</a>'; 
+			},
+			'label' => $this->_('User')
+		),
+	),
+	'nosearch' => true,
+	'has_edit' => false
+));
+
+?>
+
+<?php echo $this->getController('admin/layout/footer_part'); ?>

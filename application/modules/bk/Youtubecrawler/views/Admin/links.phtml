@@ -1,0 +1,83 @@
+<?php echo $this->getController('admin/layout/header_part'); ?>
+<?php 
+
+$searchTable = new \Youtubecrawler\Search();
+$search = $searchTable->fetchRow(array('id = ?' => (int)$this->getRequest()->getQuery('id')));
+
+if(!$search) {
+	$this->redirect($this->url(array('module' => 'youtube_crawler', 'controller' => 'admin'), null));
+}
+
+$self = $this;
+echo $this->widget('widget.grid.db', array(
+	'head' => array(
+		'title' => '<a href="' . $this->url(array('module' => 'youtube_crawler', 'controller' => 'admin'), null) . '">'.$this->_('Youtube crawler') . '</a> / ' . $search->keyword
+	),
+	'atributes' => 'class="display"',
+	'dataProvider' => new \Youtubecrawler\Link(),
+	'checkbox' => true,
+	'columns' => array(
+		array(
+			'atributes' => 'class="left" style="width:50px;"',
+			'name' => 'id',
+			'label' => '#',
+			'order' => false
+		),
+		array(
+			'atributes' => 'class="left"',
+			'name' => 'youtube_id',
+			'label' => $this->_('Video'),
+			'value' => function($data) {
+				return '<a href="//www.youtube.com/watch?v=' . $data->youtube_id . '" target="_blank">http://www.youtube.com/watch?v=' . $data->youtube_id . '</a>';
+			}
+		),
+		array(
+			'atributes' => 'class="left"',
+			'name' => 'pin_id',
+			'label' => $this->_('Pin'),
+			'filter' => false,
+			'value' => function($data) use($self) {
+				if(isset($data->title)) {
+					return '<a href="' . $self->url(array('pin_id' => $data->id),'pin') . '" target="_blank">' . \Core\Utf8::splitText($data->title, 100, '...') . '</a>';
+				}
+			}
+		),
+		array(
+			'atributes' => 'class="left" style="width:50px;"',
+			'name' => 'indexing',
+			'label' => $this->_('Indexed'),
+			'filter' => false,
+			'value' => function($data) use($self) {
+				if($data->indexing == 8) {
+					return '<img title="' . $self->_('Error get user data from system') . '" alt="" class="tooltip" src="cms/admin/images/error-ico.png">';
+				} elseif($data->indexing == 7) {
+					return '<img title="' . $self->_('Error get video thumb link from api') . '" alt="" class="tooltip" src="cms/admin/images/error-ico.png">';
+				} elseif($data->indexing == 6) {
+					return '<img title="' . $self->_('Error get video link from api') . '" alt="" class="tooltip" src="cms/admin/images/error-ico.png">';
+				} elseif($data->indexing == 5) {
+					return '<img title="' . $self->_('Error get video data from api') . '" alt="" class="tooltip" src="cms/admin/images/error-ico.png">';
+				} elseif($data->indexing == 4) {
+					return '<img title="' . $self->_('Error write video thumb') . '" alt="" class="tooltip" src="cms/admin/images/error-ico.png">';
+				} elseif($data->indexing == 3) {
+					return '<img title="' . $self->_('Error write pin data') . '" alt="" class="tooltip" src="cms/admin/images/error-ico.png">';
+				} elseif($data->indexing == 1) {
+					return $self->_('Yes');
+				} else {
+					return $self->_('No');
+				} 
+			},
+		),
+	),
+	'filter' => array(
+		'youtube_search_id' => $search->id		
+	),
+	'has_edit' => false,
+	'has_delete' => false,
+	'add_new' => false,
+	'checkbox' => false,
+	'nosearch' => true
+));
+
+?>
+
+<?php echo $this->getController('admin/layout/footer_part'); ?>

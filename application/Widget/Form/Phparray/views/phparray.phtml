@@ -1,0 +1,369 @@
+<br class="mtop25" />
+<?php if(isset($success) || isset($error)) { ?>
+<?php if(isset($success)) { ?>
+<span id="<?php echo $this->id;?>-fader" class="fader-message"><span class="msgOk"><span><?php echo $this->_('Success!');?></span><?php echo $success;?></span></span>
+<?php } else if(isset($error)) { ?>
+<span id="<?php echo $this->id;?>-fader" class="fader-message"><span class="msgError"><span><?php echo $this->_('Error!');?></span><?php echo $error;?></span></span>
+<?php } ?>
+<script type="text/javascript"> 
+// <![CDATA[
+$(document).ready(function() {       
+	setTimeout(function() {
+		$("#<?php echo $this->id;?>-fader").customFadeOut("slow" ,    
+		function() {       
+			$("#<?php echo $this->id;?>-fader").remove();  
+		});
+	},
+	10000);
+});
+// ]]>
+</script>
+<?php } ?>
+<?php 
+	// !!!!! work on edit in this moment........
+	$formExtendData = \Base\FormExtend::getExtension(array(implode('.',array('*.admin'.ucfirst($this->getRequest()->getController()),$this->getRequest()->getAction())),implode('.',array($this->getRequest()->getModule().ucfirst($this->getRequest()->getController()),$this->getRequest()->getAction()))));
+	$formExtendDataWidgets = array();
+	foreach($formExtendData AS $form) {
+		if($form->form) {
+			$formExtendDataWidgets[$form->form] = $form->form;
+		}
+	}
+	$form = new \Core\Htmlform\Htmlform($this->id, array('validator' => $this->validator));
+	echo $form->onlyOpen();
+	echo $form->addHidden('__query_id', array('defaultValue'=>$this->getRequest()->getQuery('id')));
+?>
+
+	<?php if(isset($this->head['title'])) { ?>
+	<div class="info_line top">
+		<h3 class="fleft title">
+			<?php if(isset($this->head['icon']) && $this->head['icon']) { ?>
+			<img alt="" src="<?php echo $this->head['icon'];?>">
+			<?php } else { ?>
+			<img alt="" src="cms/admin/images/extensions.png">
+			<?php } ?>
+			<?php echo $this->head['title'];?>	
+		</h3>
+		
+		<div class="fright mtop3">
+			<input type="submit" value="<?php echo $this->_('Save');?>" class="button" name="<?php echo $this->id;?>">
+			<a class="button" href="<?php echo $this->onCancel ? $this->onCancel : $this->url(array('module' => $this->getRequest()->getModule(), 'controller' => $this->getRequest()->getController()));?>"><?php echo ('Cancel');?></a>
+		</div>
+		<div class="clear"></div>
+	</div>
+	
+	<div class="clear"></div>
+	<?php } ?>
+	
+	<?php if($this->helpText) { ?>
+	<div class="mtop10 msgInfo">
+		<?php echo $this->helpText;?>
+	</div>
+	<?php } ?>
+	
+	<?php if($this->columns || $formExtendDataWidgets) { ?>
+	<br />
+	<div class="info_line top">
+		<h3 class="title">
+			<img alt="" src="cms/admin/images/extensions.png">
+			<?php echo $this->_('General');?>	
+		</h3>
+		<div class="clear"></div>
+	</div>
+	<div id="tab_general">
+	<?php if($this->columns) { ?>
+		<table cellspacing="0" cellpadding="0" class="formtable">
+			<tbody>
+				<?php foreach($this->columns AS $name => $column_data) { ?>
+				<tr>
+					<td width="150">
+						<?php echo $column_data['label'];?>
+						<?php if($column_data['required']) { ?>
+						<img title="<?php echo $this->_('This field is required');?>" class="tooltip" alt="<?php echo $this->_('This field is required');?>" src="cms/admin/images/required.gif">
+						<?php } ?>
+					</td>
+					<td class="form-row">
+						<?php 
+						if(strpos($column_data['type'], 'Callback') === 0) {
+							$callback = substr($column_data['type'], 8);
+							$callback = new $callback($column_data);
+							$column_data['type'] = null;
+							if($callback && is_callable(array($callback,'form'))) {
+								$column_data = $callback->form();
+							}
+						}
+						if( in_array($column_data['type'], array('Single','Number')) ) {
+							$column_data['value'] = !$column_data['value']?'0':$column_data['value'];
+						}
+						?>
+						<?php if($column_data['type']) { ?>
+							<?php 
+								$method = 'add'.$column_data['type'];
+								echo $form->$method($column_data['name'], \Core\Arrays::array_merge($column_data['options'], array(
+									'label' => '',
+									'defaultValue' => $column_data['value'],
+									'required' => $column_data['required'],
+									'list' => $column_data['list'],
+									'marker' => false,
+									'helpMessageHtml' => $column_data['help'],
+									'skin' => 'select',
+									'autocomplete' => $column_data['autocomplete'],
+									'readonly' => $column_data['readonly']
+								)));
+								
+							?>
+						<?php } ?>
+					</td>
+				</tr>
+				<?php } ?>
+			</tbody>
+		</table>
+	<?php } ?>
+	<?php if($formExtendDataWidgets) { ?>
+	<?php foreach($formExtendDataWidgets AS $formExtend) { 
+		echo $this->widget($formExtend, array('widget'=>$this,'form'=>$form));
+	}?>
+	<?php } ?>
+	</div>
+	<?php } ?>
+	
+	<?php if($this->description) { ?>
+	<br />
+	<div class="info_line top">
+		<h3 class="title">
+			<img alt="" src="cms/admin/images/extensions.png">
+			<?php echo $this->_('Information');?>	
+		</h3>
+		<div class="clear"></div>
+	</div>
+	<div id="tab_information">
+		
+		<?php $languages = $this->getModule('Language')->getLanguages(); ?>
+		
+		<div class="vtabs">
+			<ul>
+				<?php foreach($languages AS $language) { ?>
+				<li>
+					<a href="#tab_language_<?php echo $language->id;?>" style="background-image: url('assets/images/flags/<?php echo $language->image;?>')">
+						<?php echo $language->name;?>
+					</a>
+				</li>
+				<?php } ?>
+			</ul> 
+			<div class="clear"></div>
+		</div>
+		
+		<div class="vtabs-content">
+			<?php foreach($languages AS $language) { ?>
+			<div id="tab_language_<?php echo $language->id;?>">
+				<table cellspacing="0" cellpadding="0" class="formtable">
+					<tbody>
+						<?php if($this->description) { ?>
+						<?php foreach($this->description AS $name => $column_data) { ?>
+						<tr>
+							<td width="150">
+								<?php echo $column_data['label'];?>
+								<?php if($column_data['required']) { ?>
+								<img title="<?php echo $this->_('This field is required');?>" class="tooltip" alt="<?php echo $this->_('This field is required');?>" src="cms/admin/images/required.gif">
+								<?php } ?>
+							</td>
+							<td class="form-row">
+								<?php 
+								if(strpos($column_data['type'], 'Callback') === 0) {
+									$callback = substr($column_data['type'], 8);
+									$callback = new $callback($column_data);
+									$column_data['type'] = null;
+									if($callback && is_callable(array($callback,'form'))) {
+										$column_data = $callback->form();
+									}
+								}
+								?>
+								<?php if($column_data['type']) { ?>
+									<?php 
+										$name = 'language_' . $language->id . '_' . $column_data['name'];
+										if(in_array(strtolower($column_data['type']), array('help','help2')) ) {
+											$this->descriptionValue[$name] = $column_data['value'];
+										}
+										$method = 'add'.$column_data['type'];
+										echo $form->$method($name,array(
+											'label' => '',
+											'defaultValue' => isset($this->descriptionValue[$name]) ? $this->descriptionValue[$name] : '',
+											'required' => $column_data['required'],
+											'list' => $column_data['list'],
+											'marker' => false,
+											'helpMessageHtml' => $column_data['help'],
+											'skin' => 'select',
+										));
+										
+									?>
+								<?php } ?>
+							</td>
+						</tr>
+						<?php } ?>
+						<?php } ?>
+					</tbody>
+				</table>
+			</div>
+			<?php } ?>
+		</div>
+		<div class="clear"></div>
+	</div>
+	<?php } ?>
+	
+	<?php if($this->tabs) { ?>
+	<?php foreach($this->tabs AS $tab_title => $tab_data) { ?>
+	<br />
+	<div class="info_line top">
+		<h3 class="title">
+			<img alt="" src="cms/admin/images/extensions.png">
+			<?php echo $tab_title;?>	
+		</h3>
+		<div class="clear"></div>
+	</div>
+	<div id="tab_<?php echo md5($tab_title);?>">
+		<?php 
+			if(is_callable($tab_data)) {
+				echo call_user_func($tab_data, array('widget'=>$this,'form'=>$form,'type' => 'form','record_id'=>$this->record_id));
+			} else {
+				echo $tab_data;
+			}
+		?>
+	</div>
+	<?php } ?>
+	<?php } ?>
+			
+	<br />
+	<div class="info_line bottom">
+		<div class="fright mtop3">
+			<input type="submit" value="<?php echo $this->_('Save');?>" class="button" name="<?php echo $this->id;?>">
+			<a class="button" href="<?php echo $this->onCancel ? $this->onCancel : $this->url(array('module' => $this->getRequest()->getModule(), 'controller' => $this->getRequest()->getController()));?>"><?php echo ('Cancel');?></a>
+		</div>
+		<div class="clear"></div>
+	</div>
+	<div class="clear"></div>
+
+<?php 
+if($this->getRequest()->isPost()) { 
+	if($form->validate()) {
+
+		$demo_user_id = \Base\Config::get('demo_user_id');
+		if($demo_user_id && $demo_user_id == \User\User::getUserData()->id) {
+			\Core\Session\Base::set($this->id . '-error', $this->_('You don\'t have permissions for this action!'));
+			$this->redirect( $this->getRequest()->getFullUrl() );	
+		} else if($this->onSave && is_callable($this->onSave)) {
+			$errors = array();
+			$result = false;
+			
+			foreach($formExtendData AS $formExtend) {
+				if($formExtend->validator) {
+					$obj = $formExtend->validator;
+					$call = new $obj($form->getValues());
+					if($call instanceof \Widget\Form\Phparray\Validator) {
+						if(!$call->isValid()) {
+							$this->errors = $call->getError();
+						}
+					}
+				}
+			}
+			
+			if($this->tabs) {
+				foreach($this->tabs AS $tab_title => $tab_data) {
+					if(is_callable($tab_data)) {
+						try {
+							call_user_func($tab_data, array('widget'=>$this,'form'=>$form,'type' => 'validate','record_id'=>$this->record_id));
+						} catch (\Core\Exception $e) { 
+							$this->errors = $e->getMessage();
+						}
+					}
+				}
+			}
+			
+			if(!$this->errors) { 
+				$db = \Core\Db\Init::getDefaultAdapter();
+				$db->beginTransaction();
+				try {
+					$result = call_user_func($this->onSave, $form->getValues(), $this);
+					
+					if($result) {
+						foreach($formExtendData AS $formExtend) {
+							if($formExtend->save) {
+								$obj = $formExtend->save;
+								new $obj($form->getValues(), $this);
+							}
+						}
+						
+						if($this->tabs) {
+							foreach($this->tabs AS $tab_title => $tab_data) {
+								if(is_callable($tab_data)) {
+									try {
+										call_user_func($tab_data, array('widget'=>$this,'form'=>$form,'type' => 'save','record_id'=>$this->record_id));
+									}  catch (\Core\Exception $e) { 
+										$result = false;
+										$this->errors = $e->getMessage();
+									}
+								}
+							}
+						}
+					}
+					$this->errors ? $db->rollBack() : $db->commit();
+				} catch (\Core\Db\Exception $e) {
+					$db->rollBack();
+					$result = false;
+					$this->errors = $e->getMessage();
+				}
+			}
+			if($result) {
+				$form->clearSession();
+				\Core\Session\Base::set($this->id . '-success', $this->_('Data successfully saved'));
+				if(strpos($result, 'http')===0) {
+					$this->redirect( $result );
+				} else {
+					$this->redirect( $this->url(array('module' => $this->getRequest()->getModule(), 'controller' => $this->getRequest()->getController())) );
+				}
+			} else {
+				\Core\Session\Base::set($this->id . '-error', $this->errors);
+				$this->redirect( $this->getRequest()->getFullUrl() );
+			}
+		}
+	} else {
+		\Core\Session\Base::set($this->id . '-error', $this->_('Please check the form carefully for errors!'));
+		$this->redirect( $this->getRequest()->getFullUrl() );
+	}
+}
+?>
+
+
+<script type="text/javascript"> 
+	$(document).ready(function(){
+		$().ready(function() {
+			var opts = {
+				cssClass : 'el-rte',
+				height   : 450,
+				toolbar  : 'complete',
+				basePath : '<?php echo $this->getRequest()->getBaseUrl();?>',
+				fmOpen : function(callback) {
+					$('<div id="myelfinder" />').elfinder({
+						url : '<?php echo $this->url(array('module' => 'filemanager'),'admin_module');?>',
+						lang : 'en',
+						dialog : { width : 900, modal : true, title : '<?php echo $this->_('WM Cms - file manager for web');?>' },
+						closeOnEditorCallback : true,
+						editorCallback : callback
+					});
+				}
+			};
+			$('.input-elrte textarea').elrte(opts);
+		});
+	});
+</script>
+
+<script type="text/javascript" src="cms/assets/tabs.js"></script>
+<script type="text/javascript"> 
+	$(document).ready(function(){
+		$(".vtabs ul").idTabs(); 
+	});
+</script>
+
+<script type="text/javascript" src="cms/assets/tooltipHelp.js"></script>
+<script type="text/javascript">
+	$('.form-row p').tooltipHelp('.form-row', '.helpMessage');
+</script>
+<?php echo $form->onlyClose();?>

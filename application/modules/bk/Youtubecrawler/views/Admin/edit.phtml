@@ -1,0 +1,76 @@
+<?php echo $this->getController('admin/layout/header_part'); ?>
+
+<?php 
+$searchTable = new \Youtubecrawler\Search();
+$search = $searchTable->fetchRow(array('id = ?' => (int)$this->getRequest()->getQuery('id')));
+
+if($search) {
+	$this->redirect($this->url(array('module' => 'youtube_crawler', 'controller' => 'admin'), null));
+}
+
+$self = $this;
+$categoryTable = new \Category\Category();
+echo $this->widget('widget.form.phparray', array(
+		'head' => array(
+			'title' => $this->_('Youtube crawler'),
+		),
+		'columns' => array(
+			array(
+				'name' => 'keyword',
+				'label' => $this->_('Search query'),
+				'type' => 'Text',
+				'required' => true,
+				'value' => isset($search->keyword)?$search->keyword:''
+			),
+			array(
+				'name' => 'limit',
+				'label' => $this->_('Limit'),
+				'type' => 'Number',
+				'required' => true,
+				'value' => isset($search->limit)?$search->limit:500,
+				'options' => array(
+					'min'=>0,
+					'max'=>500,
+					'step' => 50
+				)
+			),
+			array(
+				'name' => 'user_id',
+				'label' => $this->_('User'),
+				'type' => 'Callback\Youtubecrawler\Helper\Users',
+				'value' => isset($search->user_id)?$search->user_id:''
+			),
+			array(
+				'name' => 'category_id',
+				'label' => $this->_('Category'),
+				'type' => 'Single',
+				'required' => true,
+				'value' => isset($search->category_id)?$search->category_id:null,
+				'list' => $categoryTable->getAllInLevels(null, -1, true, true)
+			),
+		),
+
+		'onSave' => function($values, $widget) use($self, $searchTable) {
+			$new = $searchTable->fetchNew();
+			$new->keyword = $values['keyword'];
+			$new->limit = $values['limit'];
+			if($values['user_id']) {
+				$new->user_id = $values['user_id'];
+			}
+			$new->category_id = $values['category_id'];
+			$new->date_added = \Core\Date::getInstance(null,\Core\Date::SQL_FULL)->toString();
+			$new->date_modified = $new->date_added;
+			
+			try {
+				$new->save();
+				return true;
+			} catch (\Core\Exception $e) {
+				$widget->errors = $e->getMessage();
+			}
+			return false;
+		}
+));
+
+?>
+
+<?php echo $this->getController('admin/layout/footer_part'); ?>

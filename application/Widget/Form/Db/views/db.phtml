@@ -1,0 +1,69 @@
+<br class="mtop25" />
+<form name="admin_form" id="admin_form" method="post" action="">
+
+	<?php if(isset($this->head['title'])) { ?>
+	<div class="info_line top">
+		<h3 class="fleft title">
+			<?php if(isset($this->head['icon']) && $this->head['icon']) { ?>
+			<img alt="" src="<?php echo $this->head['icon'];?>">
+			<?php } else { ?>
+			<img alt="" src="cms/admin/images/extensions.png">
+			<?php } ?>
+			<?php echo $this->head['title'];?>	
+		</h3>
+		
+		<?php if($this->errorsGlobal) { ?>
+		<span id="fader" class="fleft mleft30" >
+			<span class="msgError"><span><?php echo $this->_('Error!');?></span><i class="error_text"><?php echo implode('<br />', $this->errorsGlobal)?></i></span>
+		</span>
+		<?php } ?>
+		
+		<div class="fright mtop3">
+			<input type="submit" value="<?php echo $this->_('Save');?>" class="button" name="<?php echo $this->id;?>">
+			<a class="button" href="<?php echo $this->url(array('module' => $this->getRequest()->getModule()),'admin_module');?>"><?php echo ('Cancel');?></a>
+		</div>
+		<div class="clear"></div>
+	</div>
+	
+	<div class="clear"></div>
+	<?php } ?>
+	
+	<table cellspacing="0" cellpadding="0" class="formtable">
+		<tbody>
+			<?php for($i=0; $i<count($this->columns_useds);$i++) { ?>
+			<?php 
+				$column = array_search($i, $this->columns_useds);
+				$column_data = $this->columns[$column];
+			?>
+			<tr>
+				<td width="150">
+					<?php echo $column_data['label'];?>
+					<?php if(is_callable($column_data['required']) ? call_user_func($column_data['required']) : $column_data['required']) { ?>
+					<img title="<?php echo $this->_('This field is required');?>" class="tooltip" alt="<?php echo $this->_('This field is required');?>" src="cms/admin/images/required.gif">
+					<?php } ?>
+				</td>
+				<td>
+					<?php if($column_data['callback'] && is_callable($column_data['callback'])) { ?>
+					<?php echo call_user_func($column_data['callback'], (isset($result[$column])?$result[$column]:''));?>
+					<?php } else if(in_array($column_data['type'], array('float','tinyint','int','bigint','varchar','char'))) { ?>
+					<input type="text" size="55" value="<?php echo isset($result[$column])?$result[$column]:'';?>" name="form_data[<?php echo $column_data['name'];?>]" class="inputbox <?php echo ((is_callable($column_data['required']) ? call_user_func($column_data['required']) : $column_data['required'])?' required':'')?>" <?php echo $column_data['atributes'];?> />
+					<?php } ?>
+					<?php if(isset($this->errors[$column_data['name']])) { ?>
+					<label class="error"><?php echo $this->errors[$column_data['name']];?></label>
+					<?php } ?>
+				</td>
+			</tr>
+			<?php } ?>
+		</tbody>
+	</table>
+			
+	<div class="info_line bottom">
+		<div class="fright mtop3">
+			<input type="submit" value="<?php echo $this->_('Save');?>" class="button" name="<?php echo $this->id;?>">
+			<a class="button" href="<?php echo $this->url(array('module' => $this->getRequest()->getModule()),'admin_module');?>"><?php echo ('Cancel');?></a>
+		</div>
+		<div class="clear"></div>
+	</div>
+	<div class="clear"></div>
+		
+</form>

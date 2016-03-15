@@ -1,0 +1,12 @@
+<?php if(!$user) return; ?>
+
+<?php if(!$pinprofile && !$short) : ?>
+    <a href="<?php echo $this->url([ 'controller' => 'read', 'user_id' => $user->id,'query' => $user->username ],'conversation_u') ?>" class="icon-wrapper event-dialog-popup" title="<?php echo $this->_('Send Private Message') ?>">
+        <span class="icon icon-type-3 icon-45">&nbsp;</span>
+        <span>
+            <?php echo $this->_('Send private message') ?>
+        </span>
+    </a>
+<?php else: ?>
+    <li><a href="<?php echo $this->url([ 'controller' => 'read', 'user_id' => $user->id,'query' => $user->username ],'conversation_u') ?>" class="icon icon-type-3 icon-45 event-tooltip event-dialog-popup" title="<?php echo $this->_('Send Private Message') ?>"><?php echo $this->_('Message') ?></a></li>
+<?php endif ?>

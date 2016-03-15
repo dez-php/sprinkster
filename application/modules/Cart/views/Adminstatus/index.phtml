@@ -1,0 +1,37 @@
+<?php echo $this->getController('admin/layout/header_part'); ?>
+
+<?php 
+$self = $this;
+echo $this->widget('widget.grid.db', array(
+	'head' => array(
+		'title' => $this->_('Manage Order statuses'),
+	),
+	'atributes' => 'class="display"',
+	'dataProvider' => new \Paymentgateway\OrderStatus(),
+	'checkbox' => true,
+	'columns' => array(
+		array(
+			'atributes' => 'class="left" style="width:50px;"',
+			'name' => 'id',
+			'label' => '#'
+		),
+		array(
+			'atributes' => 'class="left"',
+			'name' => 'title',
+			'label' => $this->_('Title'),
+			'virtual' => array('title' => 'Paymentgateway\OrderStatusDescription'),
+			'filter' => false
+		),
+	),
+	'has_delete' => function($data) {
+		if( in_array($data->id, [\Base\Config::get('config_refunded_status_id'),\Base\Config::get('config_complete_status_id'),\Base\Config::get('config_failed_status_id'),\Base\Config::get('config_pending_status_id')]) )
+			return false;
+		if( (new \Paymentgateway\OrderManager())->countByStatusId($data->id) ) 
+			return false;
+		return true;
+	}
+));
+
+?>
+
+<?php echo $this->getController('admin/layout/footer_part'); ?>

@@ -1,0 +1,3 @@
+<li>
+	<a<?php echo 'following-interest' === $this->getRequest()->getController() ? ' class="active"' : '' ?> href="<?php echo $this->url([ 'user_id' => $user_id, 'query' => $this->getRequest()->getParam('query') ],'interest_follow') ?>"><?php echo sprintf($this->_('%s Interests'), '<span class="num">'.$total.'</span>') ?></a>
+</li>

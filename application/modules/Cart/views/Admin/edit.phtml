@@ -1,0 +1,240 @@
+<?php use Paymentgateway\OrderHistory;
+
+echo $this->getController('admin/layout/header_part'); ?>
+
+<?php 
+$self = $this;
+$recordTable = new \Paymentgateway\OrderManager();
+$order = $recordTable->fetchRow($recordTable->makeWhere(array('id' => $this->getRequest()->getRequest('id'))));
+if(!$order) {
+	$this->redirect( $this->url(array(),'cart_admin') );
+}
+
+$historyTable = new \Paymentgateway\OrderHistory();
+
+$cart_history = $this->widget('widget.grid.db', array(
+		'hasForm' => false,
+		'atributes' => 'class="display" id="order-status"',
+		'dataProvider' => $historyTable,
+		'checkbox' => true,
+		'columns' => array(
+				array(
+					'atributes' => 'class="left"',
+					'name' => 'status_id',
+					'virtual' => array('title' => 'Paymentgateway\OrderStatusDescription'),
+					'label' => $this->_('Status')
+				),
+				array(
+						'atributes' => 'class="left"',
+						'name' => 'notes',
+						'label' => $this->_('Note')
+				),
+				array(
+						'atributes' => 'class="left" style="width:120px;"',
+						'name' => 'created_at',
+						'label' => $this->_('Date added')
+				),
+		),
+		'filter' => array(
+			'order_id' => $order->id
+		),
+		'limit' => 15,
+		'order' => 'DESC'
+));
+
+$child_orders = '';
+if(is_null($order->parent_id)) {
+$child_orders = $this->widget('widget.grid.db', array(
+	'head' => array(
+		'title' => $this->_('Subscription'),
+	),
+	'atributes' => 'class="display"',
+	'dataProvider' => new \Paymentgateway\OrderManager(),
+	'head' => false,
+	'nosearch' => true,
+	'atributes' => 'class="display" id="order-status-childs"',
+	'checkbox' => false,
+	'columns' => array(
+		array(
+			'atributes' => 'class="left" style="width:50px;"',
+			'name' => 'id',
+			'label' => '#',
+			'order' => false
+		),
+		array(
+			'atributes' => 'class="left"',
+			'name' => 'number',
+			'label' => $this->_('Number'),
+			'order' => false
+		),
+		array(
+			'atributes' => 'class="left" style="width:60px;"',
+			'name' => 'total',
+			'value' => function($data) use($self) { 
+				return \Currency\Helper\Format::format($data->amount, $data->currency, 1); 
+			},
+			'label' => $this->_('Total'),
+			'order' => false
+		),
+		array(
+			'atributes' => 'class="left" style="width:100px;"',
+			'name' => 'status_id',
+			'virtual' => array('title' => 'Paymentgateway\OrderStatusDescription'),
+			'label' => $this->_('Status'),
+			'order' => false
+		),
+		array(
+			'atributes' => 'class="left" style="width:120px;"',
+			'name' => 'created_at',
+			'label' => $this->_('Date added'),
+			'order' => false
+		),
+	),
+	'filter' => array(
+		'status_id' => '>0',
+		'handler_code' => \Paymentgateway\Payment::SUBSCRIPTION,
+		'parent_id' => $order->id
+	),
+	'add_new' => false,
+	'onDelete' => function($elements, $dbGrid) use($self) {
+		foreach ($elements AS $element) {
+			$element->getRoute()->removeAction();
+		}
+	},
+	'limit' => 10,
+	'order' => 'DESC',
+	'page_var' => 'child-page'
+));
+}
+
+$col = new \Cart\Helper\Statusselect(array());
+$setHistory =  $col->history('status_id');
+
+echo $this->widget('widget.form.phparray', array(
+	'head' => array(
+		'title' => $this->_('Orders'),
+	),
+	'columns' => array(
+			array(
+					'name' => $order->number,
+					'label' => $this->_('Number'),
+					'type' => 'Html'
+			),
+			array(
+					'name' => 'module',
+					'label' => $this->_('Type'),
+					'type' => 'Help2',
+					'value' => function() use($order,$self) {
+						return $order->getRoute()->getTitle();
+					}
+			),
+			array(
+					'name' => 'information',
+					'label' => $this->_('Information'),
+					'type' => 'Help2',
+					'value' => function() use($order,$self) {
+						return $order->getRoute()->getInformation();
+					}
+			),
+			array(
+					'name' => 'module2',
+					'label' => $this->_('Title'),
+					'type' => 'Help2',
+					'value' => function() use($order,$self) {
+						return $order->getItems()->at(0)->name;
+					}
+			),
+			array(
+					'name' => 'user_id',
+					'label' => $this->_('User'),
+					'type' => 'Help2',
+					'value' => function() use($order,$self) {
+						$userTable = new \User\User();
+						$user = $userTable->fetchRow($userTable->makeWhere(array('id'=>$order->user_id)));
+						if($user) {
+							return '<a href="'.$self->url(array('module'=>'user','query'=>'filter[id]='.$order->user_id),'admin_module',false,false).'" target="_blank">'.$user->getUserFullname().'</a>';
+						} else {
+							return '';
+						}
+					}
+			),
+			array(
+					'name' => 'user_id',
+					'label' => $this->_('Total'),
+					'type' => 'Help2',
+					'value' => function() use($order,$self) {
+						return \Currency\Helper\Format::format($order->amount,$order->currency,1);
+					}
+			),
+			array(
+					'name' => 'provider_code',
+					'label' => $this->_('Payment provider'),
+					'type' => 'Help2',
+					'value' => function() use($order, $self) {
+						if($order->provider_code == 'FREE')
+							return $self->_('Free order');
+						$provider = $order->getProvider();
+						return $provider ? $provider->getName() : null;
+					}
+			),
+			array(
+					'name' => 'cart_status_id',
+					'label' => $this->_('Status'),
+					'type' => 'Help2',
+					'value' => function() use($order) {
+						$col = new \Cart\Helper\Statusselect(array());
+						$list = $col->form();
+						if(isset($list['list'][$order->cart_status_id])) {
+							return $list['list'][$order->cart_status_id];
+						}
+						return '';
+					}
+			),
+			array(
+					'name' => (string)$cart_history,
+					'label' => $this->_('Status history'),
+					'type' => 'Html'
+			),
+			array(
+					'name' => $setHistory->__toString(),
+					'label' => $this->_('Set order status'),
+					'type' => 'Html'
+			),
+			array(
+					'name' => (string)$child_orders,
+					'label' => $this->_('Next orders'),
+					'type' => 'Html'
+			),
+	),
+	'onSave' => function($values, $widget) use($self, $order, $historyTable) {
+		$status_id = $self->getRequest()->getPost('status_id');
+		if($status_id) {
+			$historyTable->getAdapter()->beginTransaction();
+			try {
+				$order->status_id = $status_id;
+				$order->modified_at = \Core\Date::getInstance(null,\Core\Date::SQL_FULL,true)->toString();
+				$order->save();
+				
+				if(\Base\Config::get('config_complete_status_id') == $status_id) {
+					$order->getRoute()->completeAction(['action' => 'pay']);
+				} else {
+					$order->getRoute()->removeAction();
+				}
+
+				$order->snapshot(sprintf($self->_('Order status updated to %s from Administrator.'), $order->StatusDescription()->title));
+				$historyTable->getAdapter()->commit();
+				return $self->getRequest()->getFullUrl();
+			} catch (\Core\Exception $e) {
+				$historyTable->getAdapter()->rollBack();
+				$widget->errors = $e->getMessage();
+			}
+		} else {
+			$widget->errors = $self->_('Please Select Order Status');
+		}
+		return false;
+	}
+));
+
+?>
+
+<?php echo $this->getController('admin/layout/footer_part'); ?>

@@ -1,0 +1,27 @@
+<?php
+use \Core\Text\String;
+?>
+<div id="event-header-tab-<?php echo $this->ID() ?>" class="event-tab">
+	<div class="scroll-tab event-scroll">
+		<?php if($conversations && 0 < $conversations->count()): ?>
+		<ul class="list-6 clearfix">
+			<?php foreach($conversations as $conversation): ?>
+
+			<li id="event-user-<?php echo $conversation->id ?>" data-id="<?php echo $conversation->id ?>"<?php echo !$conversation->read ? ' class="active"' : '' ?>>
+				<a class="clickable" href="<?php echo $this->url([ 'controller' => 'read', 'conversation_id' => $conversation->id ],'conversation_c') ?>">
+					<span class="avatar"><img data-original="<?php echo \User\Helper\Avatar::getImage('small', $conversation)->image ?>" src="assets/images/grey.gif" width="60" height="60" alt=" <?php // echo $this->_('Avatar') ?>"></span>
+					<span class="text-2 color-3"><?php echo \Core\Date::getInstance($conversation->date_modified, 'dd.mm.yy', TRUE)->toString() ?></span>
+					<span class="title-6 color-2"><?php echo $conversation->getUserFullname() ?></span>
+					<span class="text-3 color-3"><?php echo String::cut($conversation->title, 35) ?></span>
+				</a>
+			</li>
+
+			<?php endforeach ?>
+		</ul>
+		<?php else: ?>
+		<div class="container container-padding-3">
+			<div class="notification notification-color-3 tcenter"><?php echo $this->_('You have no messages.') ?></div>
+		</div>
+		<?php endif ?>
+	</div>
+</div>

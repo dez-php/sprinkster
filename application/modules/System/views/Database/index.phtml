@@ -1,0 +1,49 @@
+<?php echo $this->getController('admin/layout/header_part'); ?>
+
+<?php 
+$self = $this;
+echo $this->widget('widget.form.phparray', array(
+	'head' => array(
+		'title' => $this->_('Database Settings'),
+	),
+	'columns' => \Base\Config::getGroupForm('database', $this->_),
+	'onSave' => function($values, $widget) use($self) {
+		set_time_limit(0);
+		$pinTable = new \Pin\Pin();
+		$pinTable->getAdapter()->beginTransaction();
+		try {
+			if($values['database_fulltext_status']) {
+				if( version_compare($pinTable->getAdapter()->getServerVersion(), '5.6','>=') ) {
+					$indexes = $pinTable->getIndexes(true);
+					if(array_search('description', $indexes)) {
+						$pinTable->getAdapter()->query('ALTER TABLE pin DROP INDEX `description`;');
+					}
+					if(!array_search('title_description', $indexes)) {
+						$pinTable->getAdapter()->query('ALTER TABLE `pin` ADD FULLTEXT `title_description` (`title`, `description`);');
+					}
+				} else {
+					$values['database_fulltext_status'] = 0;
+				}
+			} else {
+				$indexes = $pinTable->getIndexes(true);
+				if(array_search('title_description', $indexes)) {
+					$pinTable->getAdapter()->query('ALTER TABLE pin DROP INDEX `title_description`;');
+				}
+			}
+			if(\Base\Config::updateGroup('database', $values)) {
+				$pinTable->getAdapter()->commit();
+				return true;
+			} else {
+				$widget->errors = \Base\Config::getErrors();
+			}
+		} catch (\Core\Exception $e) {
+			$widget->errors = $e->getMessage();
+		}
+		$pinTable->getAdapter()->rollBack();
+		return false;
+	}
+));
+
+?>
+
+<?php echo $this->getController('admin/layout/footer_part'); ?>

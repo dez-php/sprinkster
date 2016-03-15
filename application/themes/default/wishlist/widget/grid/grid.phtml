@@ -1,0 +1,196 @@
+<?php $empty_text = isset($this->options['text-empty']) ? $this->options['text-empty'] : $this->_('There are no wishlists.');?>
+<?php
+$me = \User\User::getUserData();
+$count = $wishlists->count();
+$document = $this->getComponent('document');
+
+if($count) :
+
+$document->addScriptFile(\Core\Http\Url::to('assets/js/jquery.infinitescroll.min.js'));
+?>
+
+<?php if($this->options['page'] == 2 && $this->createNewWishlist): ?>
+<div class="box box-3 event-box event-box-create">
+	<a href="<?php echo $this->url([], 'createwishlist') ?>" class="link-wrapper event-popup"></a>
+	<img src="assets/images/box-3-empty.png" alt="">
+</div>
+<?php endif ?>
+
+<?php if($isXmlHttpRequest): ?>
+<div>
+<?php endif ?>
+
+<?php $gridBoxes = \Base\PermissionMenu::getMenu('GridBoxes');?>
+
+<?php foreach($wishlists as $r => $wishlist): $pins = \Pin\PinRepin::getWishlistRepins($wishlist->id, 'id DESC') ?>
+
+<?php 
+if($gridBoxes) {
+	foreach ($gridBoxes AS $widget) {
+		if (!$widget->is_widget)
+			continue;
+		$config = array();
+		if ($widget->config) {
+			$config = unserialize($widget->config);
+		}
+		$config['instance'] = $widget;
+		$config['wishlist'] = $wishlist;
+		$config['module'] = $this->options['module'];
+		$config['module_controller'] = $this->options['module_controller'];
+		$config['fromRow'] = $this->options['fromRow'];
+		$config['toRow'] = $this->options['toRow'];
+		$config['row'] = $r;
+		if(!$widget->disabled($wishlist, $config))
+			echo $this->widget($widget->widget, $config);
+
+	}
+}
+?>
+
+<div class="box box-3 event-box">
+	<div class="head clearfix">
+		<div class="data">
+			<h3 class="title-5 color-5"><a class="color-5" href="<?php echo $this->url([ 'wishlist_id' => $wishlist->id, 'query' => $this->urlQuery($wishlist->title) ], 'wishlist') ?>"><?php echo $wishlist->title ?></a></h3>
+			<p class="text-2 color-3 event-stats-wishlist-<?php echo $wishlist->id?>">
+				<?php echo sprintf($this->_('%s Pins &nbsp; %s Followers'),'<span class="num event-pins">'.$wishlist->pins.'</span>','<span class="num event-followers">'.$wishlist->followers.'</span>') ?>
+				<?php if($wishlist->shared_wishlist && !$wishlist->self_shared_wishlist):?>
+				<?php echo $this->_('(owner)');?>
+				<?php endif;?>
+			</p>
+		</div>
+		
+		<?php if($me->id != $wishlist->user_id) : ?>
+		<p class="fu-button">
+		<?php echo $this->widget('wishlist.widget.followbutton', [
+						'wishlist_id' => $wishlist->id,
+						'user_id' => $wishlist->user_id,
+						'following' => $wishlist->following_wishlist,
+						'title' => $wishlist->title
+					]);?>
+		</p>
+		<?php endif; ?>
+		
+
+		<div class="options">
+			<?php if($wishlist->secret): ?>
+			<span class="icon icon-type-3 icon-59 event-tooltip" title="<?php echo $this->escape($this->_('Secret Collection')) ?>"><?php echo $this->_('Secret Wishlist') ?></span>
+			<?php endif ?>
+
+			<?php if($wishlist->shared_wishlist): ?>
+			<?php if($wishlist->self_shared_wishlist): ?>
+			<a href="<?php echo $this->url([ 'controller' => 'share-remove', 'wishlist_id' => $wishlist->id ], 'wishlist_c') ?>" class="icon icon-type-3 icon-58 event-tooltip event-popup event-wishlist-share-<?php echo $wishlist->id;?>" title="<?php echo $this->escape($this->_('Shared Collection')) ?>"><?php echo $this->_('Shared Collection') ?></a>
+			<?php else: ?>
+			<span class="icon icon-type-3 icon-58 event-tooltip" title="<?php echo $this->escape($this->_('Shared Collection')) ?>"><?php echo $this->_('Shared Collection') ?></span>
+			<?php endif ?>
+			<?php endif ?>
+
+			<?php if($wishlist->type && \Install\Modules::isInstalled($wishlist->type)): ?>
+			<span class="icon icon-type-3 icon-58 event-tooltip" title="<?php echo $this->escape($this->_(\Core\Camel::toCamelCase($wishlist->type, TRUE, TRUE))) ?>"><?php echo $this->_(\Core\Camel::toCamelCase($wishlist->type, TRUE, TRUE)) ?></span>
+			<?php endif ?>
+		</div>
+	</div>
+	<div class="body">
+		<ul class="thumbs clearfix">
+			<?php for($i=0; $i<8; $i++): $image = NULL ?>
+			<?php 
+			try
+			{
+				$image = $pins->offsetExists($i) ? \Pin\Helper\Image::getImage('small', $pins[$i])->image : \Pin\Helper\Image::noImage('small')->image;
+			}
+			catch(\Exception $e)
+			{
+			}
+			?>
+			
+			<li>
+				<a href="<?php echo $this->url([ 'wishlist_id' => $wishlist->id , 'query' => $this->urlQuery($wishlist->title) ],'wishlist') ?>">
+					<img src="assets/images/grey.gif" data-original="<?php echo $image ?>" alt="<?php echo $this->escape($wishlist->title) ?>" class="event-load-lazy-load">
+				</a>
+			</li>
+
+			<?php endfor ?>
+		</ul>
+	</div>
+</div>
+<?php endforeach ?>
+<?php
+if($gridBoxes) {
+    foreach ($gridBoxes AS $widget) {
+        if (!$widget->is_widget)
+            continue;
+        $config = array();
+        if ($widget->config)
+            $config = unserialize($widget->config);
+
+        $config['instance'] = $widget;
+        $config['module'] = $this->options['module'];
+        $config['module_controller'] = $this->options['module_controller'];
+        $config['fromRow'] = $this->options['fromRow'];
+        $config['toRow'] = $this->options['toRow'];
+        $config['row'] = $r+1;
+        if(!$widget->disabled(null, $config))
+            echo $this->widget($widget->widget, $config);
+
+    }
+}
+?>
+
+<?php if($isXmlHttpRequest): ?>
+</div>
+<?php endif ?>
+
+<div class="no-results">
+	<div class="container">
+		<p><a class="widget-paginator hide" id="last-result-0" href="<?php echo $this->getRequest()->getBaseUrl();?>?widget=wishlist.widget.grid&<?php echo $query ?>"></a></p>	
+	</div>
+</div>
+
+<script type="text/javascript">
+	$('.event-load-lazy-load').LazyLoad();
+
+	/*	masonry */
+	var $container = $('.event-masonry');
+
+	$container.masonry({
+		columnWidth: 403,
+		gutter: 10,
+		itemSelector: '.event-box',
+		isFitWidth: true,
+		transitionDuration: 0
+	}).infscroll({
+		url: function() { return $('.widget-paginator').attr('href'); },
+		offset: function() { return Math.ceil( Math.max( $(window).height() * 2, ($(document).height() / 1.5) ) ); },
+		loadingAppendTo: $('.event-wishlist-list').parent(),
+		onSuccess: function(response){
+			var $section = $(response);
+			var $elements = $section.find('.box');
+			var $paginator = $section.find('.widget-paginator');
+
+			if(!$paginator.attr('href'))
+				$paginator.removeClass('hide');
+
+			$paginator.size() ? $('.widget-paginator').replaceWith($paginator) : $('.widget-paginator').remove();
+			$elements.size() ? $('.event-wishlist-list').append($elements).masonry('appended', $elements) : $('.event-wishlist-list').infscroll('destroy');
+		}
+	});
+
+	$container.bind('append', function() {
+		$(this).find('img, .event-load-lazy-load').LazyLoad();
+	});
+</script>
+
+<?php elseif($this->options['page'] == 2) : ?>
+<?php if($this->createNewWishlist): ?>
+<div class="container container-size-1">
+	<div id="empty" class="notification notification-color-3 tcenter"><?php echo $empty_text ?></div>
+</div>
+<div class="box box-3 event-box event-box-create margin-top-50" style="position: relative;margin: auto;">
+	<a href="<?php echo $this->url([], 'createwishlist') ?>" class="link-wrapper event-popup"></a>
+	<img src="assets/images/box-3-empty.png" alt="">
+</div>
+<?php else: ?>
+<div class="container container-size-1">
+	<div id="empty" class="notification notification-color-3 tcenter"><?php echo $empty_text ?></div>
+</div>
+<?php endif ?>
+<?php endif; ?>

@@ -1,0 +1,95 @@
+<?php 
+$self = $this;
+$pageMenuTable = new \Page\PageMenu();
+$widget = $this->widget('widget.grid.db', array(
+	'head' => array(
+		'title' => $this->_('System pages'),
+	),
+	'atributes' => 'class="display"',
+	'dataProvider' => new \Page\Page(),
+	'checkbox' => true,
+	'columns' => array(
+		array(
+			'atributes' => 'class="left" style="width:50px;"',
+			'name' => 'id',
+			'label' => '#'
+		),
+		array(
+			'atributes' => 'class="left"',
+			'name' => 'parent_id',
+			'label' => $this->_('Title'),
+			'virtual' => array('title' => 'Page\PageDescription'),
+			'filter' => false
+		)
+	),
+	'filter' => array(
+		'key' => new \Core\Db\Expr('IS NOT NULL')
+	),
+	'has_delete' => false,
+	'add_new' => false,
+	'actionsExtend' => function($data) use($pageMenuTable, $self) {
+		ob_start();
+		?>
+		<script type="text/javascript">
+			$(document).ready(function() {
+				$('.add-to-menu').click(function() {
+					$self = $(this);
+					$.post(window.location.href, {toMenu:$self.attr('id').replace('page_','')}, function(json) {
+						if(json.error) {
+							alert(json.error);
+						} else if(json.inMenu === true) {
+							$self.find('img').replaceWith('<img title="<?php echo $self->_('Remove this page from menu');?>" alt="" class="tooltip" src="cms/admin/images/delete2.png">');
+						} else if(json.inMenu === false) {
+							$self.find('img').replaceWith('<img title="<?php echo $self->_('Add this page to menu');?>" alt="" class="tooltip" src="cms/admin/images/add.png">');
+						} else {
+							alert('error');
+						}
+					}, 'json');
+					return false;
+				});
+			});
+		</script>
+		<?php 
+		$self->placeholder('script', ob_get_clean());
+		
+		$in_menu = false;
+		if($pageMenuTable->countByPageId($data->id)) {
+			$in_menu = true;
+		}
+		if($in_menu) {
+			return '<a class="add-to-menu" href="javascript:void(0);" id="page_' . $data->id . '"><img title="' . $self->_('Remove this page from menu') . '" alt="" class="tooltip" src="cms/admin/images/delete2.png"></a>';
+		} else {
+			return '<a class="add-to-menu" href="javascript:void(0);" id="page_' . $data->id . '"><img title="' . $self->_('Add this page to menu') . '" alt="" class="tooltip" src="cms/admin/images/add.png"></a>';
+		}
+	},
+	'onPost' => function() use($pageMenuTable, $self) {
+		$id = $self->getRequest()->getPost('toMenu');
+		$result = array();
+		$row = $pageMenuTable->fetchRow($pageMenuTable->makeWhere(array('page_id' => $id)));
+		try {
+			if($row) {
+				$row->delete();
+				$result['inMenu'] = false;
+			} else {
+				$row = $pageMenuTable->fetchNew();
+				$row->page_id = $id;
+				$row->save();
+				$result['inMenu'] = true;
+			}
+		} catch (\Core\Exception $e) {
+			$result['error'] = $e->getMessage();
+		}
+		
+		return $result;
+	}
+));
+
+?>
+
+<?php echo $this->getController('admin/layout/header_part'); 
+
+echo $widget;
+
+?>
+
+<?php echo $this->getController('admin/layout/footer_part'); ?>

@@ -1,0 +1,77 @@
+<?php echo $this->getController('admin/layout/header_part'); ?>
+
+<?php 
+$self = $this;
+echo $this->widget('widget.grid.db', array(
+	'head' => array(
+		'title' => $this->_('Wishlists'),
+		'icon' => 'cms/admin/images/push_pin.png'
+	),
+	'atributes' => 'class="display"',
+	'dataProvider' => new \Wishlist\Wishlist(),
+	'checkbox' => true,
+	'columns' => array(
+		array(
+			'atributes' => 'class="left" style="width:50px;"',
+			'name' => 'id',
+			'label' => '#'
+		),
+		array(
+			'atributes' => 'class="left"',
+			'name' => 'title',
+			'label' => $this->_('Title'),
+		),
+		array(
+			'atributes' => 'class="left" style="width:140px;"',
+			'name' => 'user_id',
+			'value' => function($data) use($self) { return '<a href="'.$self->url(array('module'=>'user','query'=>'filter[id]='.$data->id),'admin_module',false,false).'">'.$data->getUserFullname().'</a>'; },
+			'label' => $this->_('User')
+		),
+		array(
+			'atributes' => 'class="left" style="width:50px;"',
+			'name' => 'pins',
+			'label' => $this->_('Pins'),
+			'filter' => false
+		),
+		array(
+			'atributes' => 'class="left" style="width:50px;"',
+			'name' => 'followers',
+			'label' => $this->_('Followers'),
+			'filter' => false
+		),
+		array(
+			'atributes' => 'class="left" style="width:50px;"',
+			'name' => 'status',
+			'label' => $this->_('Status'),
+			'value' => function($data) use($self) {
+				if($data->status == 1) {
+					return $self->_('Active');
+				} else if($data->status == 2) {
+					return $self->_('Deactivated');
+				} else {
+					return $self->_('Inactive');
+				}
+			},
+			'filter' => false
+		),
+	),
+	'filter' => array(
+		'status' => array(1,2)		
+	),
+	'add_new' => false,
+	'replaceDelete' => function($items, $self) {
+		$wishlistTable = new \Wishlist\Wishlist();
+		foreach($items AS $item) {
+			/*$item->status = 0;
+			$item->save();*/
+			$wishlistTable->extendDelete($item->id);
+		}
+	},
+	'replaceEditLink' => function($data) use($self) {
+		return $self->url(array('controller'=>'edit', 'wishlist_id'=>$data->id,'query'=>$self->urlQuery($data->title)),'wishlist_c');
+	}
+));
+
+?>
+
+<?php echo $this->getController('admin/layout/footer_part'); ?>

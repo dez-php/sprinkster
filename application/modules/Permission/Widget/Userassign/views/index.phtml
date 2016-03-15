@@ -1,0 +1,33 @@
+<table class="formtable">
+	<tr>
+		<th colspan="2" style="padding: 5px;background-color: #E0E7EF;border: 1px solid #CFCFCF;">
+			<?php echo $this->_('Permission Group') ?>
+		</th>
+	</tr>
+	<tr>
+		<td width="150">
+			<?php echo $this->_('Permission Group') ?>
+			<img class="tooltip" alt="<?php echo $this->_('This field is required') ?>" src="cms/admin/images/required.gif" />
+		</td>
+		<td>
+		<?php
+		$select = new \Permission\Helper\GroupSelect();
+		$selectData = $select->form();
+		$data = [ '' => '' ];
+
+		if(isset($selectData['list']) && is_array($selectData['list']))
+			foreach($selectData['list'] AS $key => $value)
+				$data[$key] = $value;
+		
+		echo $this->form->addSingle('permission_group_id', array(
+			'label' => '',
+			'defaultValue' => \Permission\PermissionGroup::getUserGroup($this->getRequest()->getQuery('id')),
+			'list' => $data,
+			'required' => true,
+			'marker' => false,
+			'skin' => 'select'
+		));
+		?>
+		</td>
+	</tr>
+</table>

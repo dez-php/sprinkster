@@ -1,0 +1,69 @@
+<?php echo $this->getController('admin/layout/header_part'); ?>
+
+<div id="content">
+	<!-- Start Content-->
+	<div class="wrap">
+		<br class="mtop25">
+		<div class="info_line top">
+			<h3 class="fleft title">
+				<img alt="" src="cms/admin/images/extensions.png">
+				<a href="<?php echo $this->url(array('module' => $this->getRequest()->getModule(), 'controller' => $this->getRequest()->getController()), null);?>"><?php echo $this->_('Translation Groups');?></a> / <?php echo $group;?>
+			</h3>
+
+            <form method="get" action="<?php echo $this->url(array('action'=>'search', 'module' => $this->getRequest()->getModule(), 'controller' => $this->getRequest()->getController()));?>">
+                <div class="fright mtop3">
+                    <input type="hidden" name="group" value="<?php echo $group;?>">
+                    <input name="search" type="text" class="fleft" style="position: relative;top: -2px;margin-right: 5px;">
+                    <button type="submit" class="button">Search</button>
+                </div>
+            </form>
+
+			<div class="clear"></div>
+		</div>
+
+
+		<table cellspacing="0" cellpadding="0" class="display translate-grid">
+			<thead>
+				<tr class="nodrop nodrag">
+					<th class="left"><?php echo $this->_('Group');?></th>
+					<?php foreach($languages AS $language) { ?>
+					<th class="left"><span class="language-title" style="background-image: url('assets/images/flags/<?php echo $language->image;?>')"><?php echo $language->name;?></span></th>
+					<?php } ?>
+					<th width="1"><?php echo $this->_('Actions');?></th>
+				</tr>
+			</thead>
+			<tbody>
+				<?php foreach($namespaces AS $namespace) { ?>
+				<?php 
+					$partes = explode('\\', $namespace['namespace']);
+					$title = $module = array_pop($partes);
+					try {
+						$moduleConfig = self::getModuleConfig($title);
+						if($moduleConfig && ($mtitle = $moduleConfig->get('title'))) {
+							$translate = new \Translate\Locale('Backend\\'.ucfirst(strtolower($title)), self::getModule('Language')->getLanguageId());
+							$title = $translate->_($mtitle);
+						}
+					} catch(\Exception $e) {}
+				?>
+				<tr class="grid_rows">
+					<td class="left"><?php echo implode(' -> ', $partes);?> -> <?php echo $module;?> / <?php echo $title;?></td>
+					<?php foreach($languages AS $language) { ?>
+					<td><span class="percent-bar" style="width:<?php echo max(20,$namespace['percents_'.$language->id]);?>%;"><?php echo round($namespace['percents_'.$language->id],2);?>%</span></td>
+					<?php } ?>
+					<td align="center">
+						<a href="<?php echo $this->url(array('action'=>'translate', 'module' => $this->getRequest()->getModule(), 'controller' => $this->getRequest()->getController(), 'query'=>'group='.$namespace['namespace']), null, false, false);?>"><img title="<?php echo $this->_('Edit');?>" alt="" class="tooltip" src="cms/admin/images/edit.png"></a>
+					</td>
+				</tr>
+				<?php } ?>
+
+			</tbody>
+		</table>
+
+
+		<div class="clear"></div>
+
+	</div>
+	<!-- End Content/-->
+</div>
+
+<?php echo $this->getController('admin/layout/footer_part'); ?>

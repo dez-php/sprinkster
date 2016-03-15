@@ -1,0 +1,112 @@
+<?php echo $this->getController('admin/layout/header_part'); ?>
+
+<?php
+$self = $this;
+$recordTable = new \Category\Category();
+$recordDescriptionTable = new \Category\CategoryDescription();
+$category = $recordTable->fetchRow($recordTable->makeWhere(array('id' => $this->getRequest()->getRequest('id'))));
+$description = $recordDescriptionTable->fetchDescription($recordDescriptionTable->makeWhere(array('category_id' => $this->getRequest()->getRequest('id'))));
+
+echo $this->widget('widget.form.phparray', array(
+    'head' => array(
+        'title' => $this->_('Categories'),
+        'icon' => 'cms/admin/images/question-type-multiple-correct.png'
+    ),
+    'columns' => array(
+        array(
+            'name' => 'status',
+            'label' => $this->_('Status'),
+            'type' => 'Single',
+            'required' => true,
+            'value' => isset($category->status)?$category->status:'1',
+            'list' => array('0' => $this->_('Inactive'), '1' => $this->_('Active'))
+        ),
+        array(
+            'name' => 'parent_id',
+            'label' => $this->_('Parent Category'),
+            'type' => 'Single',
+            'required' => true,
+            'value' => isset($category->parent_id)?$category->parent_id:null,
+            'list' => $recordTable->getAllInLevels(null, -1, true, true, (isset($category->id)?$category->id:null))
+        ),
+        array(
+            'name' => 'image',
+            'label' => $this->_('Image'),
+            'type' => 'Imagemanager',
+            //'required' => true,
+            'value' => isset($category->image)?$category->image:''
+        ),
+    ),
+    'descriptionValue' => $description,
+    'description' => array(
+        array(
+            'name' => 'title',
+            'label' => $this->_('Title'),
+            'type' => 'Text',
+            'required' => true
+        ),
+        array(
+            'name' => 'description',
+            'label' => $this->_('Description'),
+            'type' => 'Elrte',
+            'required' => false
+        ),
+        array(
+            'name' => 'meta_title',
+            'label' => $this->_('Meta Title'),
+            'type' => 'Text',
+            'required' => false
+        ),
+        array(
+            'name' => 'meta_description',
+            'label' => $this->_('Meta Description'),
+            'type' => 'Textarea',
+            'required' => false
+        ),
+        array(
+            'name' => 'meta_keywords',
+            'label' => $this->_('Meta Keywords'),
+            'type' => 'Textarea',
+            'required' => false
+        ),
+    ),
+    'onSave' => function($values, $widget) use($self) {
+        $recordTable = new \Category\Category();
+        $recordDescriptionTable = new \Category\CategoryDescription();
+        $category = $recordTable->fetchRow($recordTable->makeWhere(array('id' => $self->getRequest()->getRequest('id'))));
+        $new = false;
+        if(!$category) {
+            $category = $recordTable->fetchNew();
+            $new = true;
+        }
+
+        $recordTable->getAdapter()->beginTransaction();
+        try {
+            $category->status = $values['status'];
+            $category->image = $values['image'];
+            $category->parent_id = !$values['parent_id'] ? null : $values['parent_id'];
+            if($new) {
+                $sql = $recordTable->getAdapter()->select()
+                    ->from('category','MAX(sort_order)');
+                if($category->parent_id)
+                    $sql->where('parent_id = ?', $category->parent_id);
+                else
+                    $sql->where('parent_id IS NULL');
+                $max = $recordTable->getAdapter()->fetchOne($sql);
+                $category->sort_order = (((int)$max + 1)-1);
+            }
+            $category->save();
+            $recordDescriptionTable->insertDescription(array('category_id' => $category->id), $values);
+            $recordTable->getAdapter()->commit();
+            return true;
+        } catch (\Core\Exception $e) {
+            $recordTable->getAdapter()->rollBack();
+            $widget->errors = $e->getMessage();
+        }
+        return false;
+    }
+));
+
+?>
+
+<?php echo $this->getController('admin/layout/footer_part'); ?>

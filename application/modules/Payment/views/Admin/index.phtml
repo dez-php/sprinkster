@@ -1,0 +1,200 @@
+<?php 
+$self = $this;
+$widget = $this->widget('widget.grid.db', array(
+	'head' => array(
+		'title' => $this->_('Payment provider'),
+	),
+	'atributes' => 'class="display"',
+	'dataProvider' => new \Paymentgateway\PaymentProvider(),
+	'checkbox' => true,
+	'columns' => array(
+		array(
+			'atributes' => 'class="left" width="50"',
+			'name' => 'priority',
+			'label' => $this->_('Priority'),
+			'filter' => false,
+			'order' => false
+		),
+		array(
+			'atributes' => 'class="left"',
+			'name' => 'name',
+			'label' => $this->_('Name'),
+			'filter' => false,
+			'order' => false
+		),
+// 		array(
+// 			'atributes' => 'class="left" width="50"',
+// 			'name' => 'CheckoutSupport',
+// 			'label' => $this->_('Checkout'),
+// 			'filter' => false,
+// 			'order' => false,
+// 			'value' => function($data) use($self) {
+// 				$class = '\\' . $data->module . '\PaymentProvider';
+// 				return (new $class)->supports(\Paymentgateway\Payment::PURCHASE_SUPPORT) ? $self->_('Yes') : $self->_('No');
+// 			}
+// 		),
+		array(
+			'atributes' => 'class="left" width="50"',
+			'name' => 'SubscriptionSupport',
+			'label' => $this->_('Support Subscription'),
+			'filter' => false,
+			'order' => false,
+			'value' => function($data) use($self) {
+				$class = '\\' . $data->module . '\PaymentProvider';
+				return (new $class)->supports(\Paymentgateway\Payment::SUBSCRIPTION_SUPPORT) ? $self->_('Yes') : $self->_('No');
+			}
+		),
+		array(
+			'atributes' => 'class="left" width="50"',
+			'name' => 'ChainSupport',
+			'label' => $this->_('Support Chaind Payment'),
+			'filter' => false,
+			'order' => false,
+			'value' => function($data) use($self) {
+				$class = '\\' . $data->module . '\PaymentProvider';
+				return (new $class)->supports(\Paymentgateway\Payment::CHAIN_SUPPORT) ? $self->_('Yes') : $self->_('No');
+			}
+		),
+		array(
+			'atributes' => 'class="left" width="50"',
+			'name' => 'DepositSupport',
+			'label' => $this->_('Support Deposit'),
+			'filter' => false,
+			'order' => false,
+			'value' => function($data) use($self) {
+				$class = '\\' . $data->module . '\PaymentProvider';
+				return (new $class)->supports(\Paymentgateway\Payment::DEPOSIT_SUPPORT) ? $self->_('Yes') : $self->_('No');
+			}
+		),
+		array(
+			'atributes' => 'class="left" width="50"',
+			'name' => 'active',
+			'label' => $this->_('Status'),
+			'filter' => false,
+			'order' => false,
+			'value' => function($data) use($self) {
+				return $data->active ? $self->_('Active') : $self->_('Inactive');
+			}
+		),
+	),
+	'has_delete' => false,
+	'nosearch' => true,
+	'add_new' => false,
+	'editInNewWindow' => false,
+	'has_delete_button' => false,
+	'sort' => 'priority',
+	'order' => 'ASC',
+	'nopagination' => true,
+	'has_edit' => function($data) use($self) {
+		return $self->getFrontController()->isDispatchable('admin', $data->module);
+	},
+	'replaceEditLink' => function($data) use($self) {
+		return $self->url(['module' => strtolower($data->module)], 'admin_module');
+	},
+	'actionsExtend' => function($data) use($self) {
+		ob_start();
+		?>
+			<script type="text/javascript">
+				$(document).ready(function() {
+					$('.add-to-menu').click(function() {
+						$self = $(this);
+						$.post(window.location.href, {toMenu:$self.attr('id')}, function(json) {
+							if(json.error) {
+								alert(json.error);
+							} else if(json.active === true) {
+								$self.closest('tr').find('td[data-column="active"]').text('<?php echo $self->_('Active');?>');
+								$self.find('img').replaceWith('<img title="<?php echo $self->_('Disable');?>" alt="" class="tooltip" src="cms/admin/images/delete2.png">');
+							} else if(json.active === false) {
+								$self.closest('tr').find('td[data-column="active"]').text('<?php echo $self->_('Inactive');?>');
+								$self.find('img').replaceWith('<img title="<?php echo $self->_('Enable');?>" alt="" class="tooltip" src="cms/admin/images/add.png">');
+							} else {
+								alert('error');
+							}
+						}, 'json');
+						return false;
+					});
+				});
+			</script>
+			<?php 
+			$self->placeholder('script', ob_get_clean());
+			
+			if($data->active) {
+				return '<a class="add-to-menu" href="javascript:void(0);" id="' . $data->code . '"><img title="' . $self->_('Disable') . '" alt="" class="tooltip" src="cms/admin/images/delete2.png"></a>';
+			} else {
+				return '<a class="add-to-menu" href="javascript:void(0);" id="' . $data->code . '"><img title="' . $self->_('Enable') . '" alt="" class="tooltip" src="cms/admin/images/add.png"></a>';
+			}
+		},
+		'onPost' => function() use($self) {
+			$result = '';
+			$paymentProvider = new \Paymentgateway\PaymentProvider();
+			if($self->getRequest()->issetPost('toMenu')) {
+				$result = [];
+				$id = $self->getRequest()->getPost('toMenu');
+				$result = array();
+				$provider = $paymentProvider->fetchRow(['code = ?' => $id]);
+				if($provider) {
+					$provider->active = $provider->active ? 0 : 1;
+					try {
+						$provider->save();
+						$result['active'] = $provider->active ? true : false;
+					} catch (\Core\Exception $e) {
+						$result['error'] = $e->getMessage();
+					}
+				} else {
+					$result['error'] = $self->_('Payment Provider Not Found!');
+				}
+			} else if($self->getRequest()->issetPost('row')) {
+				$row = $self->getRequest()->getPost('row');
+				$result = array();
+				if($row && is_array($row)) {
+					$paymentProvider->getAdapter()->beginTransaction();
+					try {
+						$sort_order = 1;
+						foreach($row AS $page_id) {
+							$paymentProvider->update(array('priority'=>$sort_order++), array('id = ?' => $page_id));
+						}
+						$paymentProvider->getAdapter()->commit();
+						$result['ok'] = true;
+					} catch (\Core\Exception $e) {
+						$paymentProvider->getAdapter()->rollBack();
+						$result['error'] = $e->getMessage();
+					}
+				} else {
+					$result['error'] = $self->_('Missing post data!');
+				}
+			}
+			return $result;
+		}
+
+));
+
+?>
+
+<?php echo $this->getController('admin/layout/header_part'); 
+
+echo $widget;
+
+?>
+
+<script>
+  $(function() {
+    $( "#payment_provider-grid table tbody" ).sortable({
+    	items: '> tr',
+    	cursor:'move',
+    	stop: function() {
+			$.post(window.location.href, $( "#payment_provider-grid table tbody" ).sortable('serialize'), function(result) {
+				if(result.ok) {
+					$( "#payment_provider-grid table tbody td[data-column=\"priority\"]" ).each(function(i, item) {
+						$(item).html(i + 1);
+					});
+				} else if(result.error) {
+					alert(result.error);
+				}
+			});
+        }
+    });
+    $( "#payment_provider-grid table tbody" ).disableSelection();
+  });
+</script>
+
+<?php echo $this->getController('admin/layout/footer_part'); ?>

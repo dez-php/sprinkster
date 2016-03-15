@@ -1,0 +1,35 @@
+<?php if($menu) { ?>
+<?php 
+	$module = $this->getRequest()->getModule();
+	$getController = $this->getRequest()->getController();
+	$routeName = $this->getApplication()->getRouter()->getCurrentRouteName();	
+?>
+<ul>
+<?php foreach($menu AS $m) { 
+	if($m->disabled())
+		continue;
+	?>
+	<?php $wroute = (array)unserialize($m->route);?>
+	<?php 
+		$route = 'admin_module';
+		$controller = isset($wroute['controller']) ? $wroute['controller'] : 'admin';
+		if(!isset($wroute['module'])) {
+			$wroute['module'] = $m->widget;
+		} else {
+			$route = $m->widget;
+		}
+	?>
+	<li id="menu_<?php echo $m->id;?>"<?php if($m->id == $active) {?> class="active"<?php } ?>>
+		<?php if($m->widget) { ?>
+		<a href="<?php echo $this->url($wroute,$route);?>"><?php echo $this->_($m->title);?></a>
+		<?php } else { ?>
+		<a href="javascript:;"><?php echo $this->_($m->title);?></a>
+		<?php } ?>
+		<?php echo $this->widget('admin.widget.menu', array('parent_id' => $m->id));?>
+		<?php if($m->id == $active) { ?>
+		<script type="text/javascript">$('#menu_<?php echo $m->id;?>').parents('li').addClass('active');</script>
+		<?php } ?>
+	</li>
+<?php } ?>
+</ul>
+<?php } ?>

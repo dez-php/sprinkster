@@ -1,0 +1,150 @@
+<?php $document = $this->getComponent('document'); ?>
+<br class="mtop25" />
+<?php if(isset($success) || isset($error)) { ?>
+<?php if(isset($success)) { ?>
+<span id="<?php echo $this->id;?>-fader" class="fader-message"><span class="msgOk"><span><?php echo $this->_('Success!');?></span><?php echo $success;?></span></span>
+<?php } else if(isset($error)) { ?>
+<span id="<?php echo $this->id;?>-fader" class="fader-message"><span class="msgError"><span><?php echo $this->_('Error!');?></span><?php echo $error;?></span></span>
+<?php } ?>
+<script type="text/javascript"> 
+// <![CDATA[
+$(document).ready(function() {       
+	setTimeout(function() {
+		$("#<?php echo $this->id;?>-fader").customFadeOut("slow" ,    
+		function() {       
+			$("#<?php echo $this->id;?>-fader").remove();  
+		});
+	},
+	10000);
+});
+// ]]>
+</script>
+<?php } ?>
+
+<div class="info_line top">
+	<h3 class="fleft title">
+		<?php if(isset($this->head['icon']) && $this->head['icon']) { ?>
+		<img alt="" src="<?php echo $this->head['icon'];?>">
+		<?php } else { ?>
+		<img alt="" src="cms/admin/images/extensions.png">
+		<?php } ?>
+		<?php if(isset($this->head['title'])) { ?>
+		<?php echo $this->head['title'];?>	
+		<?php } else { ?>
+		<?php echo \Core\Html::modelName(__CLASS__);?>
+		<?php } ?>
+	</h3>
+	
+	<?php if($this->checkbox) { ?>
+	<div class="fright mtop3">
+		<form action="" method="post" id="<?php echo $this->id;?>-post">
+			<input name="<?php echo $this->id;?>" id="showcaseElements-<?php echo $this->id;?>" type="hidden" class="input-hidden" value="showcaseElements">
+		</form>
+		<?php if($this->add_new) { ?>
+		<a class="button" href="<?php echo $this->url(array('action'=>'create', 'module' => $this->getRequest()->getModule(), 'controller' => $this->getRequest()->getController()), null);?>"><?php echo $this->_('Add new');?></a>
+		<?php } ?>
+		<?php if($this->has_delete_button) { ?>
+		<a class="button" href="javascript:void(0);" onclick="deleteSelected('#<?php echo $this->id;?>');"><?php echo $this->_('Delete selected');?></a>
+		<?php } ?>
+		<?php if($this->buttonsExtend && is_callable($this->buttonsExtend)) { ?>
+		<?php echo call_user_func($this->buttonsExtend, $this);?>
+		<?php } ?>
+	</div>
+	<?php } else { ?>
+	<div class="fright mtop3">
+		<form action="" method="post" id="<?php echo $this->id;?>-post">
+			<input name="<?php echo $this->id;?>" id="showcaseElements-<?php echo $this->id;?>" type="hidden" class="input-hidden" value="showcaseElements">
+		</form>
+		<?php if($this->add_new) { ?>
+		<a class="button" href="<?php echo $this->url(array('action'=>'create', 'module' => $this->getRequest()->getModule(), 'controller' => $this->getRequest()->getController()), null);?>"><?php echo $this->_('Add new');?></a>
+		<?php } ?>
+		<?php if($this->buttonsExtend && is_callable($this->buttonsExtend)) { ?>
+		<?php echo call_user_func($this->buttonsExtend, $this);?>
+		<?php } ?>
+	</div>
+	<?php } ?>
+	<div class="clear"></div>
+</div>
+
+<?php ob_start();?>
+function deleteSelected(id) {
+	var checked = $(id + ' td input.check_list:checked');
+	if(checked.size()) {
+		var inputs='';
+		for(i in checked) {
+			if(checked[i].value) {
+				inputs += '<input type="hidden" name="delete[]" value="' + checked[i].value + '" />';
+			}
+		}
+		if(inputs) {
+			$('#<?php echo $this->id;?>-post').append(inputs).submit();
+		}
+	}
+}
+$('#<?php echo $this->id;?> .check_all_list').change(function(){
+	$('#<?php echo $this->id;?> .check_list').attr('checked', $(this).is(':checked'));
+});
+$('input.date_added,input.date_modified').datepicker({
+	'dateFormat' : 'yy-mm-dd'
+});
+<?php $document->addScript('script', ob_get_clean());?>
+
+
+<form action="" method="get" id="<?php echo $this->id;?>">
+
+
+	<table cellspacing="0" cellpadding="0"  <?php echo $this->atributes?$this->atributes:' class="display"';?>>
+		
+		<thead>
+			<tr class="nodrop nodrag">
+				<?php  foreach($this->columns_useds AS $column) { ?>
+				<th <?php echo $column['atributes'];?>>
+					<?php echo $column['sort']; ?>
+				</th>
+				<?php } ?>
+			</tr>
+			<tr class="search nodrop nodrag">
+				<?php  foreach($this->columns_useds AS $column) { ?>
+				<th <?php echo $column['atributes'];?>>
+					<?php echo $column['filter']; ?>
+				</th>
+				<?php } ?>
+			</tr>
+			
+		</thead>
+
+		<tbody>
+			<?php if($results) { ?>
+			<?php foreach($results AS $result) { ?>
+			<tr id="row_<?php echo $result[$this->info['primary'][1]];?>" class="grid_rows">
+				<?php  foreach($this->columns_useds AS $column) { ?>
+				<td <?php echo $column['atributes'];?>>
+					<?php if(is_callable($column['value'])) { echo $column['value']($result); } else { echo $column['value']; } ?>
+				</td>
+				<?php } ?>
+			</tr>
+			<?php } ?>
+			<?php } else { ?>
+			<tr class="nodrop nodrag">
+				<td colspan="<?php echo count($this->columns_useds);?>">
+					<div class="msgAlert"><span><?php echo $this->_('Attention!');?></span><?php echo $this->_('No records found ...');?></div>
+				</td>
+			</tr>
+			<?php } ?>
+		</tbody>
+	</table>
+
+</form>
+
+<div class="clear"></div>
+
+
+<div id="paginator" class="paginator clearfix">
+	<div class="fleft">
+		<?php echo $this->_('Page');?> <b><?php echo $page;?></b> <?php echo $this->_('from');?> <b><?php echo $total_pages;?></b> (<b><?php echo $total_records;?></b> <?php echo $this->_('records');?>)
+	</div>
+	<div class="pagination pages fright">
+		<?php echo $pagination;?>	 
+	</div>
+</div>
+<div class="clear"></div>

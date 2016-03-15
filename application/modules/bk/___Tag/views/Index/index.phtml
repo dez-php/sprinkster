@@ -1,0 +1,33 @@
+<?php echo $this->getController('home/layout/header_part'); ?>
+
+<div class="container container-padding-header container-padding-footer">
+
+<div class="container container-shadow-1 bg-color-1 margin-top-50 responsive-head-title">
+	<div class="container container-size-1 container-padding-tb-2 clearfix">
+		<h3 class="title-1 color-1 fleft"><?php echo $this->_('Tags');?></h3>
+		<?php if($letters) { ?>
+		<ul class="list-36 margin-top-10 clearfix fright">
+			<?php foreach($letters AS $letter) { ?>
+			<li> <a <?php if($letter_get == $letter['letter']) {?>class="active"<?php } ?> href="<?php echo $this->url(array('leter' => $letter['letter']), 'tag_leter');?>"><?php echo $letter['title'];?></a> </li>
+			<?php } ?>
+		</ul>
+		<?php } ?>
+	</div>
+</div>
+<div class="container container-size-1 margin-top-50 responsive-tags">
+	<div class="container container-padding-5 container-radius-1 container-shadow-1 bg-color-1">
+		<?php if($tags && $tags->count()) { ?>
+			<ul class="list-37 clearfix">
+			<?php foreach ($tags AS $tag) { ?>
+				<li> <a href="<?php echo $this->url(array('tag_id'=>$tag->id,'query'=>$this->urlQuery($tag->tag)),'tag_q');?>"><?php echo $tag->tag;?></a> (<?php echo $tag->pins;?>) </li>
+			<?php } ?>
+			</ul>
+		<?php } else { ?>
+			<div class="notification notification-color-3"><?php echo $this->_('No tags found!');?></div>
+		<?php } ?>
+	</div>
+</div>
+
+</div>
+
+<?php echo $this->getController('home/layout/footer_part'); ?>

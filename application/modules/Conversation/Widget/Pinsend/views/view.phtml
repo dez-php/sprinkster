@@ -1,0 +1,10 @@
+<?php
+$route = $me->id ? 'conversation_p' : 'user_c';
+$components = $me->id ? [ 'pin_id' => $pin->id, 'query' => $this->urlQuery($pin->title) ] : [ 'controller' => 'login', 'query' => '?next=' . urlencode($this->url([ 'pin_id' => $pin->id,'query' => $this->urlQuery($pin->title) ], 'pin')) ];
+?>
+
+<?php if($me->id): ?>
+<li><a href="<?php echo $this->url($components, $route, false, !!$me->id) ?>" class="icon icon-11 icon-type-5 event-tooltip event-dialog-popup" title="<?php echo $this->_('Send Private Message') ?>"></a></li>
+<?php else: ?>
+<li><a href="<?php echo $this->url($components, $route, false, !!$me->id) ?>" class="event-tooltip icon-sendconversation" title="<?php echo $this->_('Send Private Message') ?>"></a></li>
+<?php endif ?>

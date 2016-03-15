@@ -1,0 +1,8 @@
+<?php if($categories) { ?>
+<ul>
+	<?php foreach($categories AS $category) { ?>
+	<?php $childs = $category->subcategory ? $this->widget('category.widget.menu', array('parent_id' => $category->id)) : false;?>
+	<li><a href="<?php echo $this->url(array('category_id'=>$category->id,'query'=>$this->urlQuery($category->title)),'category');?>"><?php echo $category->title;?></a><?php if($childs) { ?><?php echo $childs;?><?php } ?></li>
+	<?php } ?>
+</ul>
+<?php } ?>

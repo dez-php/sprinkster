@@ -1,0 +1,135 @@
+<?php echo $this->getController('admin/layout/header_part'); ?>
+
+<?php 
+$self = $this;
+$recordTable = new \Interest\Interest();
+$categoryTable = new \Category\Category();
+$category = $recordTable->fetchRow($recordTable->makeWhere(array('id' => $this->getRequest()->getRequest('id'))));
+
+$tagTable = new \Interest\InterestTag();
+$tags = $tagTable->fetchAll($tagTable->makeWhere(array('interest_id' => $this->getRequest()->getRequest('id'))))->toArray();
+
+echo $this->widget('widget.form.phparray', array(
+	'head' => array(
+		'title' => $this->_('Pin Interests'),
+		'icon' => 'cms/admin/images/question-type-multiple-correct.png'
+	),
+	'columns' => array(
+		array(
+			'name' => 'title',
+			'label' => $this->_('Title'),
+			'type' => 'Text',
+			'required' => true,
+			'value' => isset($category->title)?$category->title:''
+		),
+		array(
+			'name' => 'tags',
+			'label' => ($this->_('Tags') . \Core\Html::tag('span',array('class'=>'help'),$this->_('whitespace separated') . \Core\Html::tag('br') . $this->_('min word length 3 letters'))),
+			'type' => 'Text',
+			'required' => true,
+			'value' => implode(', ', array_map(function($tag) { return $tag['tag']; },$tags))
+		),
+		array(
+			'name' => 'category_id',
+			'label' => $this->_('Category'),
+			'type' => 'Single',
+			'required' => true,
+			'value' => isset($category->category_id)?$category->category_id:null,
+			'list' => $categoryTable->getAllInLevels(null, -1, true, true, null, true)
+		),
+		array(
+			'name' => 'show',
+			'label' => $this->_('Show in category'),
+			'type' => 'Single',
+			'required' => true,
+			'value' => isset($category->show)?$category->show:'1',
+			'list' => array('0' => $this->_('No'), '1' => $this->_('Yes'))
+		),
+	),
+	'tabs' => array(
+		$this->_('Related Interests') => function(&$options) use($self) {
+			$options['record_id'] = isset($options['record_id'])&&$options['record_id']?$options['record_id']:$self->getRequest()->getRequest('id');
+			return $this->widget('interest.widget.tabrelated', $options);
+		}
+	),
+	'onSave' => function($values, $widget) use($self, $tagTable) {
+		$recordTable = new \Interest\Interest();
+		$category = $recordTable->fetchRow($recordTable->makeWhere(array('id' => $self->getRequest()->getRequest('id'))));
+		if(!$category) {
+			$category = $recordTable->fetchNew();
+		} else {
+			$widget->record_id = $category->id;
+		}
+
+		$category->title = trim($values['title']);
+		$category->query = $this->urlQuery($category->title);
+		$category->category_id = $values['category_id'];
+		$category->show = $values['show'];
+		$id = $category->save();
+		
+		$tagTable->delete(array('interest_id = ?' => $id));
+		$tags = array_map('trim', explode(',', $values['tags']));
+		$tags = array_filter($tags);
+		if(!$tags) {
+			throw new \Core\Db\Exception($self->_('Please fill Tags field'));
+		}
+		foreach($tags AS $tag) {
+			$tagTable->insert(array(
+				'tag' => $tag,
+				'interest_id' => $id
+			));
+		}
+		$widget->record_id = $category->id;
+		
+		return $id;
+	}
+));
+
+?>
+
+<script type="text/javascript">
+function split( val ) {
+	return val.split( /,\s*/ );
+}
+function extractLast( term ) {
+	return split( term ).pop();
+}
+  
+$('#interest_form-tags input[name=tags]')
+	.bind( "keydown", function( event ) {
+		if ( event.keyCode === $.ui.keyCode.TAB && $( this ).autocomplete( "instance" ).menu.active ) {
+			event.preventDefault();
+		}
+	}).autocomplete({
+		source: function( request, response ) {
+			$.ajax({
+				url: "<?php echo $this->url(array('module'=>'interest','action'=>'autocomplete'),'admin_module');?>",
+				dataType: "jsonp",
+				data: {
+					q: extractLast( request.term )
+				},
+				success: function( data ) {
+					response( data );
+				}
+			});
+		},
+        focus: function() {
+            // prevent value inserted on focus
+            return false;
+		},
+		minLength: 0,
+        select: function( event, ui ) {
+            var terms = split( this.value );
+            // remove the current input
+            terms.pop();
+            // add the selected item
+            terms.push( ui.item.value );
+            // add placeholder to get the comma-and-space at the end
+            terms.push( "" );
+            this.value = terms.join( ", " );
+            return false;
+		}
+	});
+</script>
+
+<?php echo $this->getController('admin/layout/footer_part'); ?>

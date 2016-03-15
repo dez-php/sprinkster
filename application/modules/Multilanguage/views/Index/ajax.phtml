@@ -1,0 +1,18 @@
+<!-- POPUP 23 // START -->
+<div id="popup-23" class="container container-size-11 container-radius-1 container-padding-5 container-shadow-1 bg-color-1 position-relative responsive-popup">
+	<h3 class="title-2 title-border-bottom-1 color-1"><?php echo $this->_('Language switch') ?></h3>
+	<form class="form-1 form-margin-20 margin-top-20" action="" method="post">
+		<div class="form-row">
+			<ul class="list-34">
+				<?php foreach($languages AS $language) { ?>
+				<li>
+					<button type="submit" name="language_switch" value="<?php echo $language->id;?>" class="icon-wrapper button-link">
+						<span class="icon icon-type-3 icon-bg-center" <?php if($language->image) { ?>style="background-image: url(cms/images/flags/<?php echo $language->image;?>);"<?php } ?>>Icon</span>
+						<span><?php echo $language->name;?></span>
+					</button>
+				</li>
+				<?php } ?>
+			</ul>
+		</div>
+	</form>
+</div>

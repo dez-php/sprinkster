@@ -1,0 +1,70 @@
+<?php echo $this->getController('admin/layout/header_part'); ?>
+
+<?php 
+$self = $this;
+$recordTable = new \Meta\Meta();
+$recordDescriptionTable = new \Meta\MetaDescription();
+$category = $recordTable->fetchRow($recordTable->makeWhere(array('id' => $this->getRequest()->getRequest('id'))));
+$description = $recordDescriptionTable->fetchDescription($recordDescriptionTable->makeWhere(array('meta_id' => $this->getRequest()->getRequest('id'))));
+echo $this->widget('widget.form.phparray', array(
+	'head' => array(
+		'title' => $this->_('Site meta tags'),
+	),
+	'descriptionValue' => $description,
+	'description' => array(
+		array(
+			'name' => 'key',
+			'label' => $this->_('System key'),
+			'type' => 'Help',
+			'value' => (isset($category->module) ? nl2br($category->module) : '')
+		),
+		array(
+			'name' => 'title',
+			'label' => $this->_('Title'),
+			'type' => 'Text',
+			'required' => true
+		),
+		array(
+			'name' => 'meta_title',
+			'label' => $this->_('Meta Title'),
+			'type' => 'Text',
+			'required' => false
+		),
+		array(
+			'name' => 'meta_description',
+			'label' => $this->_('Meta Description'),
+			'type' => 'Textarea',
+			'required' => false
+		),
+		array(
+			'name' => 'meta_keywords',
+			'label' => $this->_('Meta Keywords'),
+			'type' => 'Textarea',
+			'required' => false
+		),
+	),
+	'onSave' => function($values, $widget) use($self) {
+		$recordTable = new \Meta\Meta();
+		$recordDescriptionTable = new \Meta\MetaDescription();
+		$category = $recordTable->fetchRow($recordTable->makeWhere(array('id' => $self->getRequest()->getRequest('id'))));
+		if(!$category) {
+			$category = $recordTable->fetchNew();
+		}
+		
+		$recordTable->getAdapter()->beginTransaction();
+		try {
+			$category->save();
+			$recordDescriptionTable->insertDescription(array('meta_id' => $category->id), $values);
+			$recordTable->getAdapter()->commit();
+			return true;
+		} catch (\Core\Exception $e) {
+			$recordTable->getAdapter()->rollBack();
+			$widget->errors = $e->getMessage();
+		}
+		return false;
+	}
+));
+
+?>
+
+<?php echo $this->getController('admin/layout/footer_part'); ?>

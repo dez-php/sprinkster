@@ -1,0 +1,26 @@
+<?php echo $this->getController('home/layout/header_part'); ?>
+
+<!-- WRAPPER - FOOTER HEIGHT // START -->
+<div class="container container-padding-header container-padding-footer">
+
+	<!-- CONTENT // START -->
+	<div class="container-padding-tb-6 container-padding-lr-5 padding-bottom-0  responsive-content">
+		<?php echo $this->widget('user.widget.head', [ 'id' => $this->getRequest()->getRequest('user_id'), 'section' => 'following' ]) ?> 
+	</div>
+	<?php echo $this->widget('user.widget.followingHeader', ['user' => $user]) ?>
+	<div class="container-padding-tb-6 container-padding-lr-5 padding-top-0 responsive-content">
+		<div class="container container-boxes event-masonry margin-top-50 responsive-masonry">
+			<?php
+			echo $this->widget('interest.widget.grid', [
+				'text-empty' => sprintf($this->_('%s doesn`t follow any interests'), $user->getUserFullName()),
+				'filter' => [
+					'callback' => [ 'id' => '\Interest\InterestFollow::interestFollowing('.$this->getRequest()->getRequest('user_id').')' ]	
+				],
+				'useIndex' => [ 'PRIMARY' ]
+			])
+			?>
+		</div>
+	</div>
+	<!-- CONTENT // END -->
+</div>
+<!-- WRAPPER - FOOTER HEIGHT // END -->

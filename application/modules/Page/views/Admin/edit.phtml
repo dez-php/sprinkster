@@ -1,0 +1,87 @@
+<?php echo $this->getController('admin/layout/header_part'); ?>
+
+<?php 
+$self = $this;
+$recordTable = new \Page\Page();
+$recordDescriptionTable = new \Page\PageDescription();
+$category = $recordTable->fetchRow($recordTable->makeWhere(array('id' => $this->getRequest()->getRequest('id'))));
+$description = $recordDescriptionTable->fetchDescription($recordDescriptionTable->makeWhere(array('page_id' => $this->getRequest()->getRequest('id'))));
+echo $this->widget('widget.form.phparray', array(
+	'head' => array(
+		'title' => $this->_('Information & pages'),
+	),
+	'columns' => array(
+		array(
+			'name' => 'status',
+			'label' => $this->_('Status'),
+			'type' => 'Single',
+			'required' => true,
+			'value' => isset($category->status)?$category->status:'1',
+			'list' => array('0' => $this->_('Inactive'), '1' => $this->_('Active'))
+		),
+	),
+	'descriptionValue' => $description,
+	'description' => array(
+		array(
+			'name' => 'title',
+			'label' => $this->_('Title'),
+			'type' => 'Text',
+			'required' => true
+		),
+		array(
+			'name' => 'description',
+			'label' => $this->_('Description'),
+			'type' => 'Elrte',
+			'required' => false
+		),
+		array(
+			'name' => 'pinit_button',
+			'label' => '&nbsp;',
+			'type' => 'Help',
+			'value' => $this->_('To display the pinit button on page write: ${pinit_button}')
+		),
+		array(
+			'name' => 'meta_title',
+			'label' => $this->_('Meta Title'),
+			'type' => 'Text',
+			'required' => false
+		),
+		array(
+			'name' => 'meta_description',
+			'label' => $this->_('Meta Description'),
+			'type' => 'Textarea',
+			'required' => false
+		),
+		array(
+			'name' => 'meta_keywords',
+			'label' => $this->_('Meta Keywords'),
+			'type' => 'Textarea',
+			'required' => false
+		),
+	),
+	'onSave' => function($values, $widget) use($self) {
+		$recordTable = new \Page\Page();
+		$recordDescriptionTable = new \Page\PageDescription();
+		$category = $recordTable->fetchRow($recordTable->makeWhere(array('id' => $self->getRequest()->getRequest('id'))));
+		if(!$category) {
+			$category = $recordTable->fetchNew();
+		}
+		
+		$recordTable->getAdapter()->beginTransaction();
+		try {
+			$category->status = $values['status'];
+			$category->save();
+			$recordDescriptionTable->insertDescription(array('page_id' => $category->id), $values);
+			$recordTable->getAdapter()->commit();
+			return true;
+		} catch (\Core\Exception $e) {
+			$recordTable->getAdapter()->rollBack();
+			$widget->errors = $e->getMessage();
+		}
+		return false;
+	}
+));
+
+?>
+
+<?php echo $this->getController('admin/layout/footer_part'); ?>

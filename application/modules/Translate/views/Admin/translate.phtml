@@ -1,0 +1,88 @@
+<?php echo $this->getController('admin/layout/header_part'); ?>
+
+<div id="content">
+	<!-- Start Content-->
+	<div class="wrap">
+		<br class="mtop25">
+		<div class="info_line top">
+			<h3 class="fleft title">
+				<img alt="" src="cms/admin/images/extensions.png">
+				<a href="<?php echo $this->url(array('module' => $this->getRequest()->getModule(), 'controller' => $this->getRequest()->getController()), null);?>"><?php echo $this->_('Translation Groups');?></a> / <a href="<?php echo $this->url(array('action'=>'group', 'module' => $this->getRequest()->getModule(), 'controller' => $this->getRequest()->getController(), 'query'=>'group='.array_shift(explode('\\', $group))), null, false, false);?>"><?php echo array_shift(explode('\\', $group));?></a> / <?php echo implode(' -> ', explode('\\', $group));?>
+			</h3>
+
+			<div class="clear"></div>
+		</div>
+
+
+		<table cellspacing="0" cellpadding="0" class="display translate-grid">
+			<thead>
+				<tr class="nodrop nodrag">
+					<th class="left"><?php echo $this->_('Text');?></th>
+					<?php foreach($languages AS $language) { ?>
+					<th class="left" style="width:<?php echo (100/(count($languages)+1));?>%"><span class="language-title" style="background-image: url('assets/images/flags/<?php echo $language->image;?>')"><?php echo $language->name;?></span></th>
+					<?php } ?>
+				</tr>
+			</thead>
+			<tbody>
+				<?php foreach($namespaces AS $namespace) { ?>
+				<tr class="grid_rows">
+					<td class="left"><?php echo $namespace['message'];?></td>
+					<?php foreach($languages AS $language) { ?>
+					<td id="<?php echo $language->id;?>_<?php echo $namespace['id'];?>" class="editable_<?php echo (mb_strlen($namespace['message'],'utf-8')>100?'textarea':'input');?>" data-message="<?php echo $this->escape($namespace['text_'.$language->id]);?>"><?php echo $namespace['text_'.$language->id];?></td>
+					<?php } ?>
+				</tr>
+				<?php } ?>
+
+			</tbody>
+		</table>
+
+		<div class="clear"></div>
+
+	</div>
+	<!-- End Content/-->
+</div>
+
+<script src="cms/assets/jquery.jeditable.js" type="text/javascript" charset="utf-8"></script>
+<script type="text/javascript" charset="utf-8">
+$(".editable_input").editable("<?php echo $this->url(array('action'=>'settranslate', 'module' => $this->getRequest()->getModule(), 'controller' => $this->getRequest()->getController()), null);?>", { 
+    indicator : '<img src="cms/assets/images/prettyPhoto/facebook/loader.gif">',
+    type   : "text",
+    submit : '<?php echo $this->escape($this->_('OK'));?>',
+    cancel : '<?php echo $this->escape($this->_('Cancel'));?>',
+    loadtext   : '<?php echo $this->escape($this->_('Loading...'));?>',
+    placeholder: '<?php echo $this->escape($this->_('Click to edit'));?>',
+    callback: function(json) {
+		if(json.error) {
+			alert(json.error);
+			$(this).html($(this).data('message'));
+		} else {
+			$(this).data('message',json.message).html(json.message);
+		}
+    },
+    ajaxoptions: {
+    	dataType: 'json'
+    }
+});
+
+$(".editable_textarea").editable("<?php echo $this->url(array('action'=>'settranslate', 'module' => $this->getRequest()->getModule(), 'controller' => $this->getRequest()->getController()), null);?>", { 
+    indicator : '<img src="cms/assets/images/prettyPhoto/facebook/loader.gif">',
+    type   : "textarea",
+    submit : '<?php echo $this->escape($this->_('OK'));?>',
+    cancel : '<?php echo $this->escape($this->_('Cancel'));?>',
+    loadtext   : '<?php echo $this->escape($this->_('Loading...'));?>',
+    placeholder: '<?php echo $this->escape($this->_('Click to edit'));?>',
+    callback: function(json) {
+        if(json.error) {
+            alert(json.error);
+        	$(this).html($(this).data('message'));
+        } else {
+        	$(this).data('message',json.message).html(json.message);
+        }
+    },
+    ajaxoptions: {
+    	dataType: 'json'
+    }
+});
+</script>
+
+<?php echo $this->getController('admin/layout/footer_part'); ?>

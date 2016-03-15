@@ -1,0 +1,60 @@
+<?php
+$self_data = \User\User::getUserData();
+$empty_text = isset($this->options['text-empty']) ? $this->options['text-empty'] : $this->_('There are no Pins in the Collection.');
+$count_label = isset($this->options['label-count']) ? $this->options['label-count'] : 'Pins';
+$more_url = isset($this->options['more-url']) ? \Core\Http\Url::build($this->options['more-url']) : 'javascript:void(0)';
+$show_more = isset($this->options['show-more']) ? (bool) $this->options['show-more'] : TRUE;
+
+$user = isset($this->options['user']) && is_object($this->options['user']) ? $this->options['user'] : NULL;
+?>
+
+<div class="container margin-top-30 event-wishlist-list">
+	<?php if(0 < $wishlists->count()): ?>
+	<ul class="list-18 event-wishlist-ul">
+
+		<?php foreach($wishlists as $wishlist): $cover = NULL ?>
+		<?php 
+		try
+		{
+			if( ($pin = $wishlist->Pin()) !== null && ($pin = $pin->Pin()) !== null )
+				$cover = \Pin\Helper\Image::getImage('small', $pin)->image; 
+		}
+		catch(\Exception $e)
+		{
+		}
+		?>
+
+		<li class="clearfix">
+			<div class="fleft user-search">
+				<p class="avatar"><a href="<?php echo $this->url([ 'wishlist_id' => $wishlist->id, 'query' => $this->urlQuery($wishlist->title) ], 'wishlist') ?>"><img src="assets/images/grey.gif" data-original="<?php echo $cover ?>" alt=""></a></p>
+				<h4 class="title-10 color-4"><a href="<?php echo $this->url([ 'wishlist_id' => $wishlist->id, 'query' => $this->urlQuery($wishlist->title) ], 'wishlist') ?>" class="color-4"><?php echo $wishlist->title ?></a></h4>
+				<p class="text-3 color-2">
+					<span class="num event-pins"><?php echo $wishlist->pins; ?></span> <?php echo $this->_('Pins') ?>
+					<span class="num event-followers"><?php echo $wishlist->followers ?></span> <?php echo $this->_('Followers') ?>
+				</p>
+			</div>
+
+			<?php
+			echo $this->widget('pin.widget.roll', [
+				'label-count' => 'Items',
+				'text-empty' => $this->_('There are no items in this wishlist.'),
+				'more-url' => $this->url([ 'wishlist_id' => $wishlist->id, 'query' => $this->urlQuery($wishlist->title) ], 'wishlist'),
+				'limit' => 5,
+				'inline' => TRUE,
+				'filter' => [ 'wishlist_id' => $wishlist->id ],
+				'useIndex' => [ 'PRIMARY' ],
+				'order' => new \Core\Db\Expr('wishlist.sort_order ASC'),
+				'repins' => TRUE,
+			]);
+			?>
+		</li>
+
+		<?php endforeach ?>
+
+	</ul>
+	<?php else: ?>
+
+	<div class="notification notification-color-4"><?php echo $empty_text ?></div>
+
+	<?php endif ?>
+</div>

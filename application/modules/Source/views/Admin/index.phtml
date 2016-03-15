@@ -1,0 +1,42 @@
+<?php echo $this->getController('admin/layout/header_part'); ?>
+
+<?php 
+$self = $this;
+echo $this->widget('widget.grid.db', array(
+	'head' => array(
+		'title' => $this->_('Pin sources')
+	),
+	'atributes' => 'class="display"',
+	'dataProvider' => new \Source\Source(),
+	'checkbox' => true,
+	'columns' => array(
+		array(
+			'atributes' => 'class="left" style="width:50px;"',
+			'name' => 'id',
+			'label' => '#'
+		),
+		array(
+			'atributes' => 'class="left"',
+			'name' => 'name',
+			'label' => $this->_('Source'),
+		),
+		array(
+			'atributes' => 'class="left" style="width:50px;"',
+			'name' => 'pins',
+			'label' => $this->_('Pins'),
+			'filter' => false
+		),
+	),
+	'add_new' => false,
+	'has_edit' => false,
+	'replaceDelete' => function($items, $self) {
+		$sourceTable = new \Source\Source();
+		foreach($items AS $item) {
+			$sourceTable->extendDelete($item->id);
+		}
+	},
+));
+
+?>
+
+<?php echo $this->getController('admin/layout/footer_part'); ?>

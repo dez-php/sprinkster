@@ -1,0 +1,78 @@
+<?php echo $this->getController('admin/layout/header_part'); ?>
+
+<?php 
+$this->extend('menuCreate', function($pages, $parent_id = 0) {
+	$output = '';
+	if(isset($pages[$parent_id]) && $pages[$parent_id]) {
+		foreach($pages[$parent_id] AS $page) {
+			$output .= '<li class="sortable" data-key="id=' . $page['id'] . '">';
+			$output .= '<div class="sortable-body">';
+			$output .= '<span class="sort-page-handle"></span>';
+			$output .= '<div class="page-title">' . $page['title'] . '</div>';
+			$output .= '</div>';
+			$output .= isset($pages[$page['id']])&&$pages[$page['id']]? $this->menuCreate($pages, $page['id']) : '';
+			$output .= '</li>';
+		}
+		$output = \Core\Html::tag('ol',array(), $output);
+	}
+	return $output;
+});
+
+$group_id = $this->getRequest()->getQuery('id');
+
+?>
+
+<div id="content">
+	<div class="wrap">
+		<br class="mtop25">
+
+		<div class="info_line top">
+			<h3 class="fleft title">
+				<img alt="" src="cms/admin/images/extensions.png">
+				<?php echo sprintf($this->_('Menu order / %s'), \Core\Camel::toCamelCase(\Core\Camel::fromCamelCase($group_id), true, true));?> 
+			</h3>
+			
+			<div class="clear"></div>
+		</div>
+		
+		<div class="clear"></div>
+		
+		<div id="tab_general" class="nestedSortable event-navigation-connect">
+			
+			<?php 
+				$tmp = array();
+				foreach((new \Base\Menu())->fetchAll(['group_id = ?' => $group_id],'sort_order') AS $p) {
+					$tmp[$p->parent_id?$p->parent_id:0][] = $p->toArray();
+				}
+				$menu = $this->menuCreate( $tmp );
+				echo $menu ? $menu : \Core\Html::tag('ol');
+			?>
+			
+		</div>
+			
+		<div class="clear"></div>
+
+	</div>
+</div>
+
+<script type="text/javascript" src="cms/admin/assets/jquery-ui.nestedSortable.js"></script>
+<script type="text/javascript">
+jQuery('.event-navigation-connect ol').each(function() {
+	jQuery(this).nestedSortable({
+		connectWith: '.event-navigation-connect ol',
+		disableNesting: 'no-nest',
+		handle: '.sort-page-handle',
+		helper:	'clone',
+		items: 'li.sortable',
+		placeholder: 'placeholder',
+		attribute: 'data-key',
+		stop: function() {
+			$.post(window.location.href,jQuery('.event-navigation-connect > ol').nestedSortable('serialize'), function(r) {
+				if(r!='ok') { alert(r); }
+			})
+		}
+	});
+});
+</script>
+
+<?php echo $this->getController('admin/layout/footer_part'); ?>

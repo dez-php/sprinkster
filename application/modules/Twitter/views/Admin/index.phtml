@@ -1,0 +1,46 @@
+<?php echo $this->getController('admin/layout/header_part'); ?>
+
+<?php 
+$self = $this;
+
+$cols = \Base\Config::getGroupForm('twitter', $this->_);
+$demo_user_id = \Base\Config::get('demo_user_id');
+if($demo_user_id && $demo_user_id == \User\User::getUserData()->id) {
+	$cols = array_map(function($row) {
+		if($row['type'] == 'Text')
+			$row['value'] = '************';
+		return $row;
+	}, $cols);
+}
+
+echo $this->widget('widget.form.phparray', array(
+	'head' => array(
+		'title' => $this->_('Twitter Settings'),
+	),
+	'columns' => $cols,
+	'onSave' => function($values, $widget) use($self) {
+		$menuTable = new \Base\Menu();
+		$menuTable->getAdapter()->beginTransaction();
+		try {
+			$menu = $menuTable->fetchRow(array('widget = ?'=> 'twitter.widget.oauth'));
+			if($menu) {
+				$menu->status = $values['twitter_status'];
+				$menu->save();
+			}
+			if(\Base\Config::updateGroup('twitter', $values)) {
+				$menuTable->getAdapter()->commit();
+				return true;
+			} else {
+				$widget->errors = \Base\Config::getErrors();
+			}
+		} catch (\Core\Exception $e) {
+			$widget->errors = $e->getMessage();
+		}
+		$menuTable->getAdapter()->rollBack();
+		return false;
+	}
+));
+
+?>
+
+<?php echo $this->getController('admin/layout/footer_part'); ?>

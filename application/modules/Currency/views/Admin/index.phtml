@@ -1,0 +1,65 @@
+<?php echo $this->getController('admin/layout/header_part'); ?>
+
+<?php 
+$self = $this;
+echo $this->widget('widget.grid.db', array(
+	'head' => array(
+		'title' => $this->_('Currency'),
+	),
+	'atributes' => 'class="display"',
+	'dataProvider' => new \Currency\Currency(),
+	'checkbox' => true,
+	'columns' => array(
+		array(
+			'atributes' => 'class="left" style="width:50px;"',
+			'name' => 'id',
+			'label' => '#'
+		),
+		array(
+			'atributes' => 'class="left"',
+			'name' => 'title',
+			'label' => $this->_('Title'),
+		),
+		array(
+			'atributes' => 'class="left" style="width:50px;"',
+			'name' => 'symbol_left',
+			'label' => $this->_('Left'),
+		),
+		array(
+			'atributes' => 'class="left" style="width:50px;"',
+			'name' => 'symbol_right',
+			'label' => $this->_('Right'),
+		),
+		array(
+			'atributes' => 'class="left" style="width:50px;"',
+			'name' => 'value',
+			'label' => $this->_('Format'),
+			'value' => function($data) { return \Currency\Helper\Format::format(1, $data->code, 1); },
+			'filter' => false
+		),
+		array(
+			'atributes' => 'class="left" style="width:50px;"',
+			'name' => 'code2',
+			'label' => $this->_('Default'),
+			'value' => function($data) use($self) { return $data->code == \Base\Config::get ( 'config_currency' ) ? $self->_('Yes') : ''; },
+			'filter' => false
+		),
+	),
+	'has_delete' => function($data) {
+		$delete = true;
+		$pinTable = new \Pin\Pin();
+		if(\Base\Config::get ( 'config_currency' ) == $data->code) {
+			$delete = false;
+		} else if($pinTable->countByCurrencyCode($data->code)) {
+			$delete = false;
+		}
+		return $delete;
+	},
+	/*'replaceDelete' => function($items, $self) {
+		var_dump($items);
+	}*/
+));
+
+?>
+
+<?php echo $this->getController('admin/layout/footer_part'); ?>

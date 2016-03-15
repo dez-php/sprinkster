@@ -1,0 +1,79 @@
+<?php echo $this->getController('admin/layout/header_part'); ?>
+
+<?php 
+$self = $this;
+
+$cols = \Base\Config::getGroupForm('s3', $this->_);
+$demo_user_id = \Base\Config::get('demo_user_id');
+if($demo_user_id && $demo_user_id == \User\User::getUserData()->id) {
+	$cols = array_map(function($row) {
+		if($row['type'] == 'Text') 
+			$row['value'] = '************';
+		return $row;
+	}, $cols);
+}
+
+echo $this->widget('widget.form.phparray', array(
+	'head' => array(
+		'title' => $this->_('Amazon S3 Settings'),
+	),
+	'columns' => $cols,
+	'onSave' => function($values, $widget) use($self) {
+		try {
+			if(strtolower(\Base\Config::get('config_upload_method')) == 's3' && !$values['s3_status']) {
+				$widget->errors = $self->_('This upload method is the default one! It cannot be deactivated!');
+				return false;
+			}
+			
+			if(!$values['s3_status']) {
+				if(\Base\Config::updateGroup('s3', $values)) {
+					return true;
+				} else {
+					$widget->errors = \Base\Config::getErrors();
+					return false;
+				}
+			} else {
+				$s3 = new \Aws\S3(
+						$values['s3_access_key'],
+						$values['s3_secret_key'],
+						$values['s3_ssl'] ? true : false
+				);
+				$s3->setExceptions(true);
+				if($s3->hasAuth()) {
+					if(!$s3->getBucketLogging($values['s3_bucklet'])) {
+						$widget->errors = $self->_('Unable to connect to upload server!');
+						return false;
+					}
+					if($s3->putObjectString('test', $values['s3_bucklet'], 'upload_text.txt', \Aws\S3::ACL_PUBLIC_READ, array(), \Core\File\Ext::getMimeFromFile('upload_text.txt'))) {
+						if(@file_get_contents(trim($values['s3_bucklet_location'], '/') . '/upload_text.txt') == 'test') {
+							$s3->deleteObject($values['s3_bucklet'], 'upload_text.txt');
+							$values['s3_bucklet_location'] = trim($values['s3_bucklet_location'], '/') . '/';
+							if(\Base\Config::updateGroup('s3', $values)) {
+								return true;
+							} else {
+								$widget->errors = \Base\Config::getErrors();
+								return false;
+							}
+						} else {
+							$widget->errors = $this->_('Unable to read from the server!');
+							return false;
+						}
+					} else {
+						$widget->errors = $this->_('Unable to upload to the server!');
+						return false;
+					}
+				} else {
+					$widget->errors = $self->_('Error authentication to Aws S3 failed.');
+					return false;
+				}
+			}
+		} catch (\Core\Exception $e) {
+			$widget->errors = $e->getMessage();
+		}
+		return false;
+	}
+));
+
+?>
+
+<?php echo $this->getController('admin/layout/footer_part'); ?>

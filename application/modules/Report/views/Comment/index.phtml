@@ -1,0 +1,30 @@
+<?php echo $this->getController('admin/layout/header_part'); ?>
+
+<?php 
+$self = $this;
+echo $this->widget('widget.grid.db', array(
+	'head' => array(
+		'title' => $this->_('Comments Report Categories'),
+	),
+	'atributes' => 'class="display"',
+	'dataProvider' => new \Pin\PinCommentReportCategory(),
+	'checkbox' => true,
+	'columns' => array(
+		array(
+			'atributes' => 'class="left" style="width:50px;"',
+			'name' => 'id',
+			'label' => '#'
+		),
+		array(
+			'atributes' => 'class="left"',
+			'name' => 'id',
+			'label' => $this->_('Title'),
+			'virtual' => array('title' => 'Pin\PinCommentReportCategoryDescription'),
+			'filter' => false
+		),
+	)
+));
+
+?>
+
+<?php echo $this->getController('admin/layout/footer_part'); ?>

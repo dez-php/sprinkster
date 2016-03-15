@@ -1,0 +1,61 @@
+<?php echo $this->getController('admin/layout/header_part'); ?>
+
+<?php 
+$self = $this;
+$recordTable = new \Permission\PermissionGroup();
+$record = $recordTable->fetchRow($recordTable->makeWhere(array('id' => $this->getRequest()->getRequest('id'))));
+
+echo $this->widget('widget.form.phparray', [
+	'head' => [
+		'title' => $this->_('Manage Permission Group'),
+	],
+
+	'columns' => [
+		[
+			'name' => 'name',
+			'label' => $this->_('Name'),
+			'type' => 'Text',
+			'value' => $record ? $record->name : NULL,
+		],
+		[
+			'name' => 'active',
+			'label' => $this->_('Active'),
+			'type' => 'Boolean',
+			'value' => $record ? (bool) $record->active : FALSE,
+		],
+	],
+
+	'onSave' => function($values, $widget) use($self, $record) {
+		$id = (int) $self->getRequest()->getRequest('id');
+		$gTable = new \Permission\PermissionGroup;
+
+		$gTable->getAdapter()->beginTransaction();
+
+		try
+		{
+			if(!$record)
+				$record = $gTable->fetchNew();
+
+			$record->name = $self->getRequest()->getPost('name');
+			$record->active = $self->getRequest()->isSetPost('active');
+
+			if(!$record->save())
+				throw new Exception('Permission group save failed.');
+
+			$gTable->getAdapter()->commit();
+
+			return $self->url([ 'action' => 'group', 'module' => $self->getRequest()->getModule() ]);
+		}
+		catch(\Core\Exception $e)
+		{
+			$widget->errors = $e->getMessage();
+		}
+
+		$gTable->getAdapter()->rollback();
+
+		return FALSE;
+	},
+]);
+?>
+
+<?php echo $this->getController('admin/layout/footer_part'); ?>

@@ -1,0 +1,88 @@
+<?php echo $this->getController('admin/layout/header_part'); ?>
+
+<?php 
+$self = $this;
+$recordTable = new \Language\Language();
+$category = $recordTable->fetchRow($recordTable->makeWhere(array('id' => $this->getRequest()->getRequest('id'))));
+echo $this->widget('widget.form.phparray', array(
+	'head' => array(
+		'title' => $this->_('Language'),
+	),
+	'columns' => array(
+		array(
+			'name' => 'name',
+			'label' => $this->_('Name'),
+			'type' => 'Text',
+			'required' => true,
+			'value' => isset($category->name)?$category->name:''
+		),
+		array(
+			'name' => 'code',
+			'label' => $this->_('Code'),
+			'type' => 'Text',
+			'required' => true,
+			'value' => isset($category->code)?$category->code:'',
+			'help' => $this->_('eg: en. Do not change if this is your default language.')
+		),
+		array(
+			'name' => 'locale',
+			'label' => $this->_('Locale'),
+			'type' => 'Text',
+			'value' => isset($category->locale)?$category->locale:'',
+			'help' => $this->_('eg: en_US.UTF-8,en_US,en-gb,en_gb,english')
+		),
+		array(
+			'name' => 'image',
+			'label' => $this->_('Flag'),
+			'type' => 'Callback\Multilanguage\Helper\Flags',
+			'value' => isset($category->image)?$category->image:''
+		),
+		array(
+			'name' => 'status',
+			'label' => $this->_('Status'),
+			'type' => 'Single',
+			'required' => true,
+			'value' => isset($category->status)?$category->status:'1',
+			'list' => array('0' => $this->_('Inactive'), '1' => $this->_('Active'))
+		),
+		array(
+			'name' => 'rtl',
+			'label' => $this->_('Right to left text'),
+			'type' => 'Single',
+			'required' => true,
+			'value' => isset($category->rtl)?$category->rtl:'0',
+			'list' => array('0' => $this->_('No'), '1' => $this->_('Yes'))
+		),
+	),
+	
+	'onSave' => function($values, $widget) use($self) {
+		$recordTable = new \Language\Language();
+		$category = $recordTable->fetchRow($recordTable->makeWhere(array('id' => $self->getRequest()->getRequest('id'))));
+		if(!$category) {
+			$category = $recordTable->fetchNew();
+		}
+		
+		$recordTable->getAdapter()->beginTransaction();
+		try {
+			$category->name = $values['name'];
+			$category->code = $values['code'];
+			$category->locale = $values['locale'];
+			$category->image = $values['image'];
+			$category->status = $values['status'];
+			if(isset($category->rtl)) {
+				$category->rtl = $values['rtl'];
+			}
+			$category->save();
+			$recordTable->getAdapter()->commit();
+			return true;
+		} catch (\Core\Exception $e) {
+			$recordTable->getAdapter()->rollBack();
+			$widget->errors = $e->getMessage();
+		}
+		return false;
+	}
+));
+
+?>
+
+<?php echo $this->getController('admin/layout/footer_part'); ?>

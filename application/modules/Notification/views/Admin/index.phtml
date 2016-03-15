@@ -1,0 +1,37 @@
+<?php echo $this->getController('admin/layout/header_part'); ?>
+
+<?php 
+$self = $this;
+echo $this->widget('widget.grid.db', array(
+	'head' => array(
+		'title' => $this->_('Notifications'),
+	),
+	'atributes' => 'class="display"',
+	'dataProvider' => new \Notification\Notification(),
+	'checkbox' => true,
+	'columns' => array(
+		array(
+			'atributes' => 'class="left" style="width:50px;"',
+			'name' => 'id',
+			'label' => '#'
+		),
+		array(
+			'atributes' => 'class="left" style="width:50px;"',
+			'name' => 'key',
+			'label' => $this->_('System key')
+		),
+		array(
+			'atributes' => 'class="left"',
+			'name' => 'id',
+			'label' => $this->_('Title'),
+			'virtual' => array('title' => 'Notification\NotificationDescription'),
+			'filter' => false
+		),
+	),
+	'has_delete' => function() { return false; },
+	'add_new' => false,
+));
+
+?>
+
+<?php echo $this->getController('admin/layout/footer_part'); ?>

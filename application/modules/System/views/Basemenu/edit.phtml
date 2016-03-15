@@ -1,0 +1,213 @@
+<?php 
+$group = $this->getRequest()->getQuery('group');
+
+if(!array_key_exists($group, $this->menu_groups)) {
+	$this->redirect($this->url(['action' => 'index','controller' => 'basemenu']));
+}
+$self = $this;
+$pageMenuTable = new \Base\Menu();
+$title = \Core\Html::link($this->_($this->menu_groups[$group]), $this->url(['action' => 'index','controller' => 'basemenu']));
+$parent_id = NULL;
+$filter = ['group_id' => $group, 'parent_id' => NULL];
+if( ($pid = (int)$this->getRequest()->getQuery('id')) > 0 && !is_null($menu = $pageMenuTable->fetchRow(['id = ?' => $pid])) ) {
+	$parent_id = $pid; 
+	$title = \Core\Html::link($this->_($this->menu_groups[$group]), $this->url(['action' => 'edit','controller' => 'basemenu', 'query' => 'group=' . $group], null, false, false)) . ' / ' . $menu->title;
+	$filter = ['parent_id' => $parent_id];
+}
+$widget = $this->widget('widget.grid.db', array(
+	'head' => array(
+		'title' => $title,
+	),
+	'atributes' => 'class="display"',
+	'dataProvider' => new \Base\Menu(),
+	'checkbox' => true,
+	'columns' => array(
+		array(
+			'atributes' => 'class="left" style="width:50px;"',
+			'name' => 'id',
+			'label' => '#',
+			'filter' => false,
+			'order' => false
+		),
+		array(
+			'atributes' => 'class="left"',
+			'name' => 'title',
+			'label' => $this->_('Title'),
+			'filter' => false,
+			'order' => false
+		),
+	),
+	'filter' => $filter,
+	'has_delete' => false,
+	'has_edit' => function($data) use($pageMenuTable) {
+		return count($pageMenuTable->getMenu($data->group_id == 'AdminMenuSystem' ? 'AdminMenu' : $data->group_id, $data->id));
+	},
+	'nosearch' => true,
+	'add_new' => false,
+	'editInNewWindow' => false,
+	'has_delete_button' => false,
+	'sort' => 'sort_order',
+	'order' => 'ASC',
+	'replaceEditLink' => function($data) use($self, $group) {
+		return $self->url(['action' => 'edit','controller' => 'basemenu', 'query' => 'group=' . $group . '&id=' . $data->id], null, false, false);
+	},
+	'actionsExtend' => function($data) use($self) {
+		ob_start();
+		?>
+		<script type="text/javascript">
+			$(document).ready(function() {
+				$('.add-to-menu').click(function() {
+					$self = $(this);
+					$.post(window.location.href, {toMenu:$self.data('id')}, function(json) {
+						if(json.error) {
+							alert(json.error);
+						} else if(json.inMenu === true) {
+							$self.find('img').attr('src','cms/admin/images/ok-ico.png').attr('title','<?php echo $self->_('Remove this link from menu');?>').simpletooltip();
+						} else if(json.inMenu === false) {
+							$self.find('img').attr('src','cms/admin/images/disabled.gif').attr('title','<?php echo $self->_('Add this link to menu');?>').simpletooltip();
+						} else {
+							alert('error');
+						}
+					}, 'json');
+					return false;
+				});
+				$('.add-to-group').click(function() {
+					$self = $(this);
+					$.post(window.location.href, {toGroup:$self.data('id')}, function(json) {
+						if(json.error) {
+							alert(json.error);
+						} else if(json.toGroup === true) {
+							$self.find('img').attr('src','cms/admin/images/delete2.png').attr('title','<?php echo $self->_('Remove this top line');?>').simpletooltip();
+						} else if(json.toGroup === false) {
+							$self.find('img').attr('src','cms/admin/images/add.png').attr('title','<?php echo $self->_('Add this top line');?>').simpletooltip();
+						} else {
+							alert('error');
+						}
+					}, 'json');
+					return false;
+				});
+			});
+		</script>
+		<?php 
+		$self->placeholder('script', ob_get_clean());
+		if($data->is_group) {
+			$action = \Core\Html::link(
+				\Core\Html::image('cms/admin/images/delete2.png','',array('title'=>$self->_('Remove this top line'),'class'=>'tooltip')),
+				'javascript:void(0);',
+				array('data-id'=>$data->id,'class'=>'add-to-group')		
+			);
+		} else {
+			$action = \Core\Html::link(
+				\Core\Html::image('cms/admin/images/add.png','',array('title'=>$self->_('Add this top line'),'class'=>'tooltip')),
+				'javascript:void(0);',
+				array('data-id'=>$data->id,'class'=>'add-to-group')
+			);
+		}
+		if($data->status) {
+			$action .= \Core\Html::link(
+					\Core\Html::image('cms/admin/images/ok-ico.png','',array('title'=>$self->_('Remove this link from menu'),'class'=>'tooltip')),
+					'javascript:void(0);',
+					array('data-id'=>$data->id,'class'=>'add-to-menu')
+			);
+		} else {
+			$action .= \Core\Html::link(
+					\Core\Html::image('cms/admin/images/disabled.gif','',array('title'=>$self->_('Add this link to menu'),'class'=>'tooltip')),
+					'javascript:void(0);',
+					array('data-id'=>$data->id,'class'=>'add-to-menu')
+			);
+		}
+		return $action;
+	},
+	'onPost' => function() use($pageMenuTable, $self) {
+		$result = '';
+		if($self->getRequest()->issetPost('toMenu')) {
+			$id = $self->getRequest()->getPost('toMenu');
+			$result = array();
+			$row = $pageMenuTable->fetchRow($pageMenuTable->makeWhere(array('id' => $id)));
+			try {
+				if($row->status) {
+					$row->status = 0;
+					$row->save();
+					$result['inMenu'] = false;
+				} else {
+					$row->status = 1;
+					$row->save();
+					$result['inMenu'] = true;
+				}
+			} catch (\Core\Exception $e) {
+				$result['error'] = $e->getMessage();
+			}
+		} elseif($self->getRequest()->issetPost('toGroup')) {
+			$id = $self->getRequest()->getPost('toGroup');
+			$result = array();
+			$row = $pageMenuTable->fetchRow($pageMenuTable->makeWhere(array('id' => $id)));
+			try {
+				if($row->is_group) {
+					$row->is_group = 0;
+					$row->save();
+					$result['toGroup'] = false;
+				} else {
+					$row->is_group = 1;
+					$row->save();
+					$result['toGroup'] = true;
+				}
+			} catch (\Core\Exception $e) {
+				$result['error'] = $e->getMessage();
+			}
+		} else if($self->getRequest()->issetPost('row')) {
+			$row = $self->getRequest()->getPost('row');
+			$result = array();
+			if($row && is_array($row)) {
+				$pageMenuTable->getAdapter()->beginTransaction();
+				try {
+					foreach($row AS $sort_order => $page_id) {
+						$pageMenuTable->update(array('sort_order'=>$sort_order), array('id = ?' => $page_id));
+					}
+					$pageMenuTable->getAdapter()->commit();
+					$result['ok'] = true;
+				} catch (\Core\Exception $e) {
+					$pageMenuTable->getAdapter()->rollBack();
+					$result['error'] = $e->getMessage();
+				}
+			} else {
+				$result['error'] = $self->_('Missing post data!');
+			}
+		}
+		
+		
+		return $result;
+	}
+));
+
+?>
+
+<?php echo $this->getController('admin/layout/header_part'); 
+
+echo $widget;
+
+?>
+
+<script>
+  $(function() {
+    $( "#menu-grid table tbody" ).sortable({
+    	items: '> tr',
+    	cursor:'move',
+    	stop: function() {
+			$.post(window.location.href, $( "#menu-grid table tbody" ).sortable('serialize'), function(result) {
+				if(result.ok) {
+					$( "#menu-grid table tbody td[data-column=\"sort_order\"]" ).each(function(i, item) {
+						$(item).html(i);
+					});
+				} else if(result.error) {
+					alert(result.error);
+				}
+			});
+        }
+    });
+    $( "#menu-grid table tbody" ).disableSelection();
+  });
+</script>
+
+
+
+<?php echo $this->getController('admin/layout/footer_part'); ?>

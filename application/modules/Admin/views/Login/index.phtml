@@ -1,0 +1,54 @@
+<?php
+use Core\Http\Url;
+$this->noLayout(true);
+?>
+<!DOCTYPE HTML>
+<html xmlns="http://www.w3.org/1999/xhtml">
+    <head>
+        <meta content="text/html; charset=us-ascii" http-equiv="Content-Type" />
+        <title>
+            <?php echo $this->_('Administration');?>
+        </title>
+        <base href="<?php echo $this->getRequest()->getBaseUrl();?>" />
+        <?php if(NULL !== ($favicon = \Base\Config::get('favicon'))): ?>
+            <link rel="icon" href="<?php echo Url::to(\Home\Helper\Ico::generate('uploads/data/' . $favicon, [[16,16],[32,32]])) ?>" type="image/x-icon" >
+            <link href="<?php echo Url::to(\Home\Helper\Ico::generate('uploads/data/' . $favicon, [[16,16],[32,32]])) ?>" rel="SHORTCUT ICON"/>
+        <?php endif ?>
+        <link href='//fonts.googleapis.com/css?family=Open+Sans:400,700,300&subset=latin,cyrillic' rel='stylesheet' type='text/css'>
+        <link href="cms/admin/assets/style.css" rel="stylesheet" type="text/css" />
+        <link href="cms/admin/assets/themes/custom-theme/jquery-ui-1.8.11.custom.css" rel="stylesheet" type="text/css" />
+
+        <link href="cms/admin/assets/login.css" rel="stylesheet" type="text/css" />
+        <script src="cms/assets/jquery.js" type="text/javascript"></script>
+        <script src="cms/admin/assets/main.js" type="text/javascript"></script>
+        <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1" />
+    </head>
+    <body class="bg-welcome">
+        <div class="login-wrapper">
+            <div class="login-wrapper-cell">
+                <h1><?php echo $this->_('Welcome to <span class="color-2">Pintastic</span>');?></h1>
+                <h2><?php echo $this->_('Administration');?></h2>
+                <div class="box">
+                    <form action="<?php echo $this->url(array(),'admin_login');?>" method="post" autocomplete="off">
+                        <input type="hidden" name="X-form-cmd" value="<?php echo $this->x_form_cmd;?>">
+                        <?php if($this->redirect) { ?>
+    					<input type="hidden" name="redirect" value="<?php echo $this->redirect;?>">
+    					<?php } ?>
+                        <?php if($errors) { ?>
+                        <div class="row">
+                            <div class="notification">
+                                <?php echo $this->_('Error!');?></span><br /><?php echo implode('<br />', $errors);?>
+                            </div>
+                        </div>
+                        <?php } ?>
+                        <div class="row"><input name="email" type="text" class="field" id="user" placeholder="<?php echo $this->_('Username');?>"></div>
+                        <div class="row"><input name="password" type="password" class="field" id="password" placeholder="<?php echo $this->_('Password');?>"></div>
+                        <div class="row"><input name="submit" type="submit" class="button" value="<?php echo $this->_('Login');?>" id="submit"></div>
+                    </form>
+                </div>
+                <p><small><?php echo $this->_('Enter your username and password to login.');?></small></p>
+                <p><small><a href="./"><?php echo $this->_('Go to the site');?></a></small></p>
+            </div>
+        </div>
+    </body>
+</html>

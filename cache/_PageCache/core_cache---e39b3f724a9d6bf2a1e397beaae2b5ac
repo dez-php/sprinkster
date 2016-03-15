@@ -1,0 +1,55 @@
+a:2:{s:4:"data";s:2476:"<!doctype html>
+<html>
+<head>
+	<meta charset="utf-8" />
+	<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1.0, user-scalable=no" />
+
+	<link rel="stylesheet" type="text/css" href="http://sprinkster.com/assets/css/main.css" />
+<script type="text/javascript" src="http://sprinkster.com/assets/js/jquery-1.11.1.min.js"></script>
+<script type="text/javascript" src="http://sprinkster.com/assets/js/jquery.magnific-popup.min.js"></script>
+<script type="text/javascript" src="http://sprinkster.com/assets/js/jquery.history.js"></script>
+<script type="text/javascript" src="http://sprinkster.com/assets/js/Model.js"></script>
+<script type="text/javascript" src="http://sprinkster.com/cache/assets/ac664249/js/welcome.main.js"></script>
+<title>Pintastic meta title</title>
+</head>
+
+<body class="welcome-cover" style="background-image: url('http://sprinkster.com/uploads/data/../../assets/images/welcome/bg-1.jpg')">
+
+
+<!-- CONTENT // START -->
+<div class="container container-padding-tb-9 responsive-content">
+	<div class="container container-size-1 tcenter responsive-welcome">
+		<p class="margin-top-50">
+			<a href="http://sprinkster.com/home/">
+				<img src="http://sprinkster.com/uploads/data/../../assets/images/logo-2.png" alt="Logo" class="desktop-logo">
+				<img src="http://sprinkster.com/uploads/data/../../assets/images/logo-3.png" alt="Logo" class="hide responsive-logo">
+			</a>
+		</p>
+		<p class="text-5 color-12 margin-top-40">Organize and share things you love.</p>
+		<p class="text-11 color-12 margin-top-30">Pintastic Demo. Pinterest Clone is an online pinboard.</p>
+		<div class="container container-size-12 container-padding-7 container-radius-1 bg-color-8 margin-top-35 responsive-welcome-form">
+			<div class="form-1 form-margin-20">
+				<div class="form-row">
+					<div class="table-grid">
+						<div class="table-grid-cell"><a class="button button-type-1 button-color-2 button-size-4 fill event-popup" href="http://sprinkster.com/user/login/0/?popup=true">Sign In</a></div>
+					</div>
+				</div>
+
+				<div class="form-row">
+				
+<div class="table-grid table-grid-cols-2 table-grid-padding-20">
+
+
+</div>				</div>
+
+				<div class="form-row">
+					<p class="text-1 color-1">or, sign up new <a href="http://sprinkster.com/user/register/0/?popup=true" class="color-5 event-popup">account</a></p>
+				</div>
+			</div>
+		</div>	
+	</div>
+</div>
+<!-- CONTENT // END -->
+
+</body>
+</html>";s:7:"headers";a:0:{}}

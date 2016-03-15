@@ -1,0 +1,8 @@
+<?php if($languages && count($languages) > 1) { ?>
+<li>
+	<a href="<?php echo $this->url('multilanguage');?>" class="icon-wrapper event-popup">
+		<span class="icon icon-type-4 icon-bg-center" <?php if($language->image) { ?>style="background-image: url(cms/images/flags/<?php echo $language->image;?>);"<?php } ?>>Icon</span>
+		<span><?php echo $language->name;?></span>
+	</a>
+</li>
+<?php } ?>

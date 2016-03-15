@@ -1,0 +1,48 @@
+<?php 
+$self = $this;
+echo $this->widget('widget.grid.db', array(
+	'head' => array(
+		'title' => $this->_('Waiting for invitation'),
+		'icon' => 'cms/admin/images/gallery-sml.png'
+	),
+	'atributes' => 'class="display"',
+	'dataProvider' => new \Invite\Invite(),
+	'checkbox' => true,
+	'columns' => array(
+		array(
+			'atributes' => 'class="left" style="width:50px;"',
+			'name' => 'id',
+			'label' => '#',
+			'order' => false
+		),
+		array(
+			'atributes' => 'class="left"',
+			'name' => 'email',
+			'label' => $this->_('Email'),
+			'order' => false
+		),
+		array(
+			'atributes' => 'class="left" style="width:130px;"',
+			'name' => 'date_added',
+			'label' => $this->_('Date'),
+			'order' => false
+		),
+	),
+	'filter' => array(
+		'user_id' => null,
+		'send' => 0
+	),
+	'has_edit' => false,
+	'add_new' => false,
+	'checkbox' => false,
+	'nosearch' => true,	
+	'nopagination' => true,
+	'actionsExtend' => function($invite, $grid) use($self) {
+		return '<a href="' . $self->url(array('action'=>'send', 'module' => 'invite', 'controller' => 'admin', 'query'=>'id='.$invite->id.'&form='.$grid->id), 'admin_module', false, false) . '" class="email" href="javascript:void(0);">
+					<img title="'.$self->_('Invite').'" alt="" class="tooltip" src="cms/admin/images/mail.png">
+				</a>';
+	},
+	'limit' => 5
+));
+
+?>

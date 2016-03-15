@@ -1,0 +1,39 @@
+<?php 
+	if(!$this->pin) return;	
+	
+	$me = \User\User::getUserData();
+	
+	try {
+		$avatar = \User\Helper\Avatar::getImage('small', $this->pin);
+	} catch (Exception $e) {
+		$avatar = NULL;
+	}
+?>
+<li class="dropdown-show">
+	<?php if ($avatar): ?>
+		<p class="avatar">
+			<a href="<?php echo $this->url([ 'user_id' => $this->pin->user_id, 'query' => $this->urlQuery($this->pin->username)], 'user') ?>"><img src="assets/images/grey.gif" data-original="<?php echo $avatar->image ?>" class="event-load-lazy-load" alt="<?php echo $this->_('Avatar') ?>" /></a>
+		</p>
+	<?php endif ?>
+	<div class="dropdown arrow-top-left">
+		<div class="dropdown-wrapper">
+			<p class="text-9 color-5 padding-left-15 padding-top-5 padding-top-10 padding-right-15"><a href="<?php echo $this->url([ 'user_id' => $this->pin->user_id, 'query' => $this->urlQuery($this->pin->username)], 'user') ?>" class="color-5"><?php echo $this->pin->getUserFullName() ?></a></p>
+			<div class="list-items-wrapper">
+				<ul>
+					<li class="group-top"><a href="<?php echo $this->url([ 'user_id' => $this->pin->user_id, 'query' => $this->urlQuery($this->pin->username)], 'user') ?>"><span class="fright"><?php echo $this->pin->pins; ?></span> <?php echo $this->_('View all Pins') ?></a></li>
+					<li><a href="<?php echo $this->url([ 'controller' => 'collection', 'user_id' => $this->pin->user_id, 'query' => $this->urlQuery($this->pin->username)], 'user_c') ?>"><span class="fright"><?php echo $this->pin->wishlists; ?></span> <?php echo $this->_('View all Collections') ?></a></li>
+					<li><a href="<?php echo $this->url([ 'controller' => 'like', 'user_id' => $this->pin->user_id, 'query' => $this->urlQuery($this->pin->username)], 'user_c') ?>"><span class="fright"><?php echo $this->pin->likes; ?></span> <?php echo $this->_('View all Likes') ?></a></li>
+					<li><a href="<?php echo $this->url([ 'controller' => 'followers', 'user_id' => $this->pin->user_id, 'query' => $this->urlQuery($this->pin->username)], 'user_c') ?>"><span class="fright"><?php echo $this->pin->followers; ?></span> <?php echo $this->_('View all Followers') ?></a></li>
+				</ul>
+			</div>
+
+			<p class="tcenter padding-top-5 padding-bottom-15">
+				<?php echo $this->widget('user.widget.followbutton', [
+					'user_id' => $this->pin->user_id,
+					'following' => $this->pin->user_is_follow,
+					'username' => $this->pin->username
+				]);?>
+			</p>
+		</div>
+	</div>
+</li>

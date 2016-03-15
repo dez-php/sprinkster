@@ -1,0 +1,64 @@
+<table cellspacing="0" cellpadding="0" class="formtable">
+	<tbody>
+		<tr>
+			<td width="150">
+				<?php echo $this->_('Related Interests:');?>
+				<span class="help"><?php echo $this->_('(Autocomplete)');?></span>
+			</td>
+			<td class="form-row">
+				<input name="related" type="text">
+			</td>
+		</tr>
+		<tr>
+			<td width="150">&nbsp;</td>
+			<td class="form-row">
+				<div id="product-related" class="scrollbox">
+					<?php foreach($related_interest AS $i) { ?>
+					<div id="product-related<?php echo $i['id'];?>"><?php echo $i['title'];?><img src="cms/admin/images/delete2.png" alt="" style="float:right" /><input type="hidden" name="related_interest[]" value="<?php echo $i['id'];?>" /><br style="clear:both" /></div>
+					<?php } ?>
+				</div>
+			</td>
+		</tr>
+	</tbody>
+</table>
+
+<script type="text/javascript">
+//Related
+$('input[name=\'related\']').autocomplete({
+	source: function( request, response ) {
+		$.ajax({
+			url: "?widget=interest.widget.tabrelated&waction=autocomplete&category_id=" + $('#interest_form-category_id select').val() + "&item_id=<?php echo $this->record_id?>",
+			dataType: "jsonp",
+			data: {
+				q: extractLast( request.term )
+			},
+			success: function( data ) {
+				response( data );
+			}
+		});
+	},
+    focus: function() {
+        // prevent value inserted on focus
+        return false;
+	},
+	minLength: 0,
+	select: function(event, ui) {
+		$('#product-related' + ui.item.id).remove();
+		
+		$('#product-related').append('<div id="product-related' + ui.item.id + '">' + ui.item.label + '<img src="cms/admin/images/delete2.png" alt="" style="float:right" /><input type="hidden" name="related_interest[]" value="' + ui.item.id + '" /><br style="clear:both" /></div>');
+
+		$('#product-related div:odd').attr('class', 'odd');
+		$('#product-related div:even').attr('class', 'even');
+		$('input[name=\'related\']').val('');
+		return false;
+	}
+});
+
+$('#product-related div img').live('click', function() {
+	$(this).parent().remove();
+	
+	$('#product-related div:odd').attr('class', 'odd');
+	$('#product-related div:even').attr('class', 'even');	
+});
+
+</script>

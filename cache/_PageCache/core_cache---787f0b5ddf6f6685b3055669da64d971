@@ -1,0 +1,14 @@
+a:2:{s:4:"data";s:394:"window.pin18n = (function(data) {
+	return new function() {
+		this.data = {};
+		this.get = function(name) {
+			return this.data && this.data[name] ? this.data[name] : name;
+		};
+		this.set = function(data) {
+			this.data = data;
+			return this;
+		};
+		this.set(data);
+		return this;
+	}
+})({"Paragraph":"Paragraph","Header 1":"Header 1","Header 2":"Header 2","Header 3":"Header 3"});";s:7:"headers";a:0:{}}
